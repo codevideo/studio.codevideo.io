@@ -1,0 +1,47 @@
+{
+    "compilerOptions": {
+        // Modern Target and Module Settings
+        "target": "ES2022",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "lib": [
+            "ES2023",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        // React Settings
+        "jsx": "react-jsx",
+        "jsxImportSource": "react",
+        // Strict Type Checking
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitOverride": true,
+        "noFallthroughCasesInSwitch": true,
+        "useUnknownInCatchVariables": true,
+        // Module Resolution
+        "allowJs": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "allowImportingTsExtensions": true,
+        // Emit Configuration
+        "noEmit": true,
+        "skipLibCheck": true,
+        "removeComments": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.tsx",
+        "src/**/*.mts",
+        "src/**/*.js",
+        "src/**/*.jsx",
+        "src/**/*.mjs"
+    ],
+    "exclude": [
+        "node_modules",
+        "build",
+        "dist",
+        "coverage"
+    ]
+}
