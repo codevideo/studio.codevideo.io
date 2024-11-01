@@ -3,10 +3,12 @@ import { combineReducers, configureStore } from '@reduxjs/toolkit'
 import { FLUSH, PAUSE, PERSIST, PURGE, REGISTER, REHYDRATE, persistReducer } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import editorSlice, { editorInitialState } from './editorSlice'
+import userSlice, { userInitialState } from './userSlice'
 
 
 export const initialState = {
     editor: editorInitialState,
+    user: userInitialState
 }
 
 const persistConfig = {
@@ -17,6 +19,7 @@ const persistConfig = {
 
 export const rootReducer = combineReducers({
     editor: editorSlice,
+    user: userSlice
 })
 
 export const persistedReducer = persistReducer(persistConfig, rootReducer)

@@ -1,7 +1,7 @@
 import * as React from "react"
-import {HomePage} from "../components/pages/home/HomePage"
+import { StudioPage } from "../components/pages/studio/StudioPage"
 import { Layout } from "../components/layout/Layout"
 
-export default function Home() {
-  return <Layout withHeader={false}><HomePage/></Layout>
+export default function Studio() {
+  return <Layout withHeader={true}><StudioPage initialActions={[]} tokenizerCode="" /></Layout>
 }

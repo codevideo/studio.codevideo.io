@@ -45,7 +45,7 @@ export function StudioPage(props: StudioPageProps) {
 
     return (
         <div className="min-h-screen bg-slate-50 p-4">
-            <ExampleSelector/>
+            <ExampleSelector />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] mx-auto">
                 {/* Left/Top Editor */}
                 <div className="w-full">
@@ -99,16 +99,18 @@ export function StudioPage(props: StudioPageProps) {
 
                         {/* Advanced Editor */}
                         <div className="h-[500px]">
-                            <AdvancedEditor
-                                currentProject={currentProject ?? defaultExampleProject}
-                                currentCode={currentCode}
-                                readOnly={true}
-                                onFileSelect={(filePath) => {
-                                    console.log('Selected file:', filePath);
-                                    // Handle file selection if needed
-                                }}
-                                captionText={captionText}
-                            />
+                            <>
+                                {(typeof window !== 'undefined') && <AdvancedEditor
+                                    currentProject={currentProject ?? defaultExampleProject}
+                                    currentCode={currentCode}
+                                    readOnly={true}
+                                    onFileSelect={(filePath) => {
+                                        console.log('Selected file:', filePath);
+                                        // Handle file selection if needed
+                                    }}
+                                    captionText={captionText}
+                                />}
+                            </>
                         </div>
                     </div>
                 </div>

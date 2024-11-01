@@ -47,20 +47,22 @@ export function ToggleEditor(props: IToggleEditorProps) {
             {editorMode ? (
                 <ActionEditor />
             ) : (
-                <SimpleEditor
-                    path="json/"
-                    value={stepsJson}
-                    actions={[]}
-                    language="json"
-                    tokenizerCode={tokenizerCode}
-                    onChangeCode={(code) => {
-                        if (code) {
-                            setStepsJson(code);
-                        }
-                    }}
-                    focus={false}
-                    withCard={false}
-                />
+                <>
+                    {(typeof window !== 'undefined') && <SimpleEditor
+                        path="json/"
+                        value={stepsJson}
+                        actions={[]}
+                        language="json"
+                        tokenizerCode={tokenizerCode}
+                        onChangeCode={(code) => {
+                            if (code) {
+                                setStepsJson(code);
+                            }
+                        }}
+                        focus={false}
+                        withCard={false}
+                    />}
+                </>
             )}
         </div>
     );

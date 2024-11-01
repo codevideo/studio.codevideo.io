@@ -1,6 +1,23 @@
 import { IEditorProject } from '../../../../interfaces/IEditorProject';
 import { javaScriptExampleSteps, pythonExampleSteps, cSharpExampleSteps, goLangExampleSteps } from './stepsExamples';
 
+// Blank Example
+const blankJavaScriptExample: IEditorProject = {
+  id: 'blank-javascript',
+  name: 'Blank JavaScript Project',
+  description: 'Start with a blank JavaScript project',
+  language: 'javascript',
+  steps: [],
+  fileStructure: {
+    'index.js': {
+      type: 'file',
+      content: '',
+      language: 'javascript'
+    }
+  },
+  mainFile: 'index.js'
+};
+
 // JavaScript Example
 const javascriptExampleProject: IEditorProject = {
   id: 'javascript',
@@ -95,6 +112,7 @@ const goExample: IEditorProject = {
 
 // Export all examples
 export const projectExamples: IEditorProject[] = [
+  blankJavaScriptExample,
   javascriptExampleProject,
   pythonExample,
   csharpExample,
