@@ -5,6 +5,7 @@ import ToggleEditor from '../../utils/ToggleEditor';
 import AdvancedEditor from '../../utils/AdvancedEditor';
 import { defaultExampleProject } from './examples/projectExamples';
 import { useAppSelector } from '../../../hooks/useAppSelector';
+import { ExampleSelector } from './ExampleSelector';
 
 interface StudioPageProps {
     initialActions: IAction[];
@@ -44,7 +45,7 @@ export function StudioPage(props: StudioPageProps) {
 
     return (
         <div className="min-h-screen bg-slate-50 p-4">
-
+            <ExampleSelector/>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] mx-auto">
                 {/* Left/Top Editor */}
                 <div className="w-full">

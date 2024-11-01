@@ -12,7 +12,7 @@ export function HomePage(props: IHomePageProps) {
                     CodeVideo Studio
                 </h1>
                 <h2 className="mt-6 text-2xl sm:text-2xl text-white dark:text-white max-w-2xl mx-auto leading-relaxed">
-                    Create educational software videos in minutes, not weeks
+                    Create educational software videos in <span className='font-bold text-teal-400'>minutes</span>, not weeks
                 </h2>
                 <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto sm:max-w-none">
                     <Auth provider="github" />

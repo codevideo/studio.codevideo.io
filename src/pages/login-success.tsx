@@ -1,12 +1,12 @@
 import * as React from 'react';
-
+import {Layout} from '../components/layout/Layout';
 export interface ILoginSuccessProps {
 }
 
-export function LoginSuccess (props: ILoginSuccessProps) {
+export default function LoginSuccess (props: ILoginSuccessProps) {
   return (
-    <div>
-      
-    </div>
+    <Layout>
+      <h1>Login Success</h1>
+    </Layout>
   );
 }
