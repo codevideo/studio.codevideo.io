@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { IEditorProject } from '../../../interfaces/IEditorProject';
-import { setCurrentProject, setActions, setCodeIndex } from '../../../store/editorSlice';
+import { setCurrentProject, setActions, setCodeIndex, setActionsString } from '../../../store/editorSlice';
 
 export interface IExampleSelectorProps {
 }
@@ -18,6 +18,7 @@ export function ExampleSelector(props: IExampleSelectorProps) {
             // set the actions from the example's steps
             try {
                 dispatch(setActions(matchingProject.steps));
+                dispatch(setActionsString(JSON.stringify(matchingProject.steps, null, 2)));
                 dispatch(setCodeIndex(0));
             } catch (error) {
                 console.error('Failed to parse example steps:', error);

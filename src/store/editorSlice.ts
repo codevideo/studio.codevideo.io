@@ -7,6 +7,7 @@ import { defaultExampleProject, projectExamples } from "../components/pages/stud
 
 export interface EditorState {
     actions: Array<IAction>;
+    actionsString: string;
     codeIndex: number;
     currentProject: IEditorProject | null;
     allProjects: IEditorProject[];
@@ -14,6 +15,7 @@ export interface EditorState {
 
 export const editorInitialState: EditorState = {
     actions: javaScriptExampleSteps,
+    actionsString: JSON.stringify(javaScriptExampleSteps, null, 2),
     codeIndex: 0,
     currentProject: defaultExampleProject,
     allProjects: projectExamples,
@@ -25,6 +27,9 @@ const editorSlice = createSlice({
     reducers: {
         setActions(state, action) {
             state.actions = action.payload;
+        },
+        setActionsString(state, action) {
+            state.actionsString = action.payload
         },
         setCodeIndex(state, action) {
             state.codeIndex = action.payload;
@@ -38,6 +43,6 @@ const editorSlice = createSlice({
     }
 });
 
-export const { setActions, setCodeIndex, setCurrentProject, setAllProjects } = editorSlice.actions;
+export const { setActions, setActionsString, setCodeIndex, setCurrentProject, setAllProjects } = editorSlice.actions;
 
 export default editorSlice.reducer;

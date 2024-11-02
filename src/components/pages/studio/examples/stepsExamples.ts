@@ -1,5 +1,8 @@
 import { IAction } from "@fullstackcraftllc/codevideo-types";
 
+export const blankJavaScriptExampleSteps: Array<IAction> = [
+];
+
 export const javaScriptExampleSteps: Array<IAction> = [
     {
       "name": "speak-before",
@@ -50,12 +53,8 @@ export const javaScriptExampleSteps: Array<IAction> = [
       "value": "Now, when I run this code, I would expect the value of 'myVariable' to be printed to the console. Something like:"
     },
     {
-      "name": "enter",
-      "value": "1"
-    },
-    {
       "name": "type-editor",
-      "value": "// 5"
+      "value": " // should log out '5'"
     },
     {
       "name": "speak-before",
