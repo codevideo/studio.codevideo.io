@@ -1,0 +1,17 @@
+{
+    "name": "functions",
+    "version": "1.0.0",
+    "description": "Netlify serverless functions for studio.codevideo.io",
+    "repository": "Netlify serverless functions for studio.codevideo.io",
+    "scripts": {
+      "build": "tsc",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "https://princefishthrower@bitbucket.org/princefishthrower/kurynt.com.git",
+    "license": "ISC",
+    "dependencies": {
+      "@netlify/functions": "^1.0.0"
+    }
+  }
+  

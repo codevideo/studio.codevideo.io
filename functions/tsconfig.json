@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+      "strict": true,
+      "isolatedModules": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "removeComments": false,
+      "preserveConstEnums": true,
+      "resolveJsonModule": true,
+      "outDir": "./dist"
+    },
+    "include": ["./src/**/*"]
+  }
+  

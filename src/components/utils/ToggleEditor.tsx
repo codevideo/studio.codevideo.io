@@ -1,17 +1,19 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { ActionEditor } from './ActionEditor';
+import { ActionEditor } from './ActionEditor/ActionEditor';
 import { SimpleEditor } from './SimpleEditor';
-import { IAction } from '@fullstackcraftllc/codevideo-types';
+import { useAppSelector } from '../../hooks/useAppSelector';
+import { setActions, setActionsString } from '../../store/editorSlice';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
 
 export interface IToggleEditorProps {
-    stepsJson: string;
-    setStepsJson: (stepsJson: string) => void;
     tokenizerCode: string;
 }
 
 export function ToggleEditor(props: IToggleEditorProps) {
-    const { stepsJson, setStepsJson, tokenizerCode } = props;
+    const { tokenizerCode } = props;
+    const { actionsString } = useAppSelector((state) => state.editor);
+    const dispatch = useAppDispatch();
     const [editorMode, setEditorMode] = useState(true);
 
     return (
@@ -47,22 +49,30 @@ export function ToggleEditor(props: IToggleEditorProps) {
             {editorMode ? (
                 <ActionEditor />
             ) : (
-                <>
-                    {(typeof window !== 'undefined') && <SimpleEditor
-                        path="json/"
-                        value={stepsJson}
-                        actions={[]}
-                        language="json"
-                        tokenizerCode={tokenizerCode}
-                        onChangeCode={(code) => {
-                            if (code) {
-                                setStepsJson(code);
+                <SimpleEditor
+                    path="json/"
+                    value={actionsString}
+                    language="json"
+                    tokenizerCode={tokenizerCode}
+                    onChangeCode={(code) => {
+                        if (code) {
+                            dispatch(setActionsString(code));
+                            try {
+                                const parsedActions = JSON.parse(code);
+                                if (Array.isArray(parsedActions)) {
+                                    dispatch(setActions(parsedActions));
+                                }
+                            } catch (e) {
+                                // try to fix the error
+                                const fixedJson = code.replace(/\\/g, "\\\\");
+                                dispatch(setActionsString(fixedJson));
+                                dispatch(setActions(fixedJson));
                             }
-                        }}
-                        focus={false}
-                        withCard={false}
-                    />}
-                </>
+                        }
+                    }}
+                    focus={false}
+                    withCard={false}
+                />
             )}
         </div>
     );

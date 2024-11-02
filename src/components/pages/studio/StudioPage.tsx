@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { VirtualCodeBlock } from '@fullstackcraftllc/virtual-code-block';
 import { IAction, isSpeakAction } from '@fullstackcraftllc/codevideo-types';
 import ToggleEditor from '../../utils/ToggleEditor';
-import AdvancedEditor from '../../utils/AdvancedEditor';
+
 import { defaultExampleProject } from './examples/projectExamples';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { ExampleSelector } from './ExampleSelector';
+import AdvancedEditor from '../../utils/AdvancedEditor/AdvancedEditor';
+import { setCodeIndex } from '../../../store/editorSlice';
+import { useAppDispatch } from '../../../hooks/useAppDispatch';
 
 interface StudioPageProps {
     initialActions: IAction[];
@@ -14,50 +17,49 @@ interface StudioPageProps {
 
 export function StudioPage(props: StudioPageProps) {
     const { tokenizerCode } = props;
-    const { currentProject, actions } = useAppSelector(state => state.editor);
-    const [stepsJson, setStepsJson] = useState('');
-    const [codeIndex, setCodeIndex] = useState(0);
+    const { currentProject, actions, codeIndex } = useAppSelector(state => state.editor);
+    const dispatch = useAppDispatch();
 
     // Get code states for navigation
     const virtualCodeBlock = new VirtualCodeBlock([]);
-    console.log(actions)
-    virtualCodeBlock.applyActions(actions);
+    if (actions && Array.isArray(actions)) {
+        // type guard to validate each action is truly an IAction before applying
+        const filteredActions = actions.filter((action): action is IAction => !!action);
+        virtualCodeBlock.applyActions(filteredActions);
+    }
     const dataAtEachFrame = virtualCodeBlock.getDataForAnnotatedFrames();
-    const currentCode = dataAtEachFrame[codeIndex]?.code || '';
-    console.log(dataAtEachFrame[codeIndex]?.speechCaptions)
-    const captionText = dataAtEachFrame[codeIndex]?.speechCaptions.map((speechCaption) => speechCaption.speechValue).join(' ');
+    const currentCode = dataAtEachFrame.length >= codeIndex && dataAtEachFrame[codeIndex]?.code || '';
+    const captionText = dataAtEachFrame.length >= codeIndex && dataAtEachFrame[codeIndex]?.speechCaptions.map((speechCaption) => speechCaption.speechValue).join(' ');
 
     const handleFirst = () => {
-        setCodeIndex(0);
+        dispatch(setCodeIndex(0));
     }
 
     const handlePrevious = () => {
-        setCodeIndex(prev => Math.max(0, prev - 1));
+        dispatch(setCodeIndex(Math.max(0, codeIndex - 1)));
     };
 
     const handleNext = () => {
-        setCodeIndex(prev => Math.min(dataAtEachFrame.length - 1, prev + 1));
+        dispatch(setCodeIndex(Math.min(dataAtEachFrame.length - 1, codeIndex + 1)));
     };
 
     const handleLast = () => {
-        setCodeIndex(dataAtEachFrame.length - 1)
+        dispatch(setCodeIndex(dataAtEachFrame.length - 1));
     }
 
     return (
         <div className="min-h-screen bg-slate-50 p-4">
             <ExampleSelector />
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-[1800px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1800px] mx-auto">
                 {/* Left/Top Editor */}
-                <div className="w-full">
+                <div className="w-full col-span-1">
                     <ToggleEditor
-                        stepsJson={stepsJson}
-                        setStepsJson={setStepsJson}
                         tokenizerCode={tokenizerCode}
                     />
                 </div>
 
                 {/* Right/Bottom Editor */}
-                <div className="w-full">
+                <div className="w-full col-span-2">
                     <div className="rounded-lg bg-slate-800 shadow-sm border border-slate-700">
                         {/* Navigation Controls */}
                         <div className="border-b border-slate-700 p-4 flex items-center justify-between bg-slate-800">
@@ -99,18 +101,16 @@ export function StudioPage(props: StudioPageProps) {
 
                         {/* Advanced Editor */}
                         <div className="h-[500px]">
-                            <>
-                                {(typeof window !== 'undefined') && <AdvancedEditor
-                                    currentProject={currentProject ?? defaultExampleProject}
-                                    currentCode={currentCode}
-                                    readOnly={true}
-                                    onFileSelect={(filePath) => {
-                                        console.log('Selected file:', filePath);
-                                        // Handle file selection if needed
-                                    }}
-                                    captionText={captionText}
-                                />}
-                            </>
+                            <AdvancedEditor
+                                currentProject={currentProject ?? defaultExampleProject}
+                                currentCode={currentCode}
+                                readOnly={true}
+                                onFileSelect={(filePath) => {
+                                    console.log('Selected file:', filePath);
+                                    // Handle file selection if needed
+                                }}
+                                captionText={captionText || ''}
+                            />
                         </div>
                     </div>
                 </div>
@@ -118,3 +118,5 @@ export function StudioPage(props: StudioPageProps) {
         </div>
     );
 }
+
+export default StudioPage;

@@ -1,5 +1,5 @@
 import { IEditorProject } from '../../../../interfaces/IEditorProject';
-import { javaScriptExampleSteps, pythonExampleSteps, cSharpExampleSteps, goLangExampleSteps } from './stepsExamples';
+import { javaScriptExampleSteps, pythonExampleSteps, cSharpExampleSteps, goLangExampleSteps, blankJavaScriptExampleSteps } from './stepsExamples';
 
 // Blank Example
 const blankJavaScriptExample: IEditorProject = {
@@ -7,7 +7,7 @@ const blankJavaScriptExample: IEditorProject = {
   name: 'Blank JavaScript Project',
   description: 'Start with a blank JavaScript project',
   language: 'javascript',
-  steps: [],
+  steps: blankJavaScriptExampleSteps,
   fileStructure: {
     'index.js': {
       type: 'file',

@@ -85,7 +85,6 @@ export const executeActionsWithMonacoEditor = async (
 export interface ISimpleEditorProps {
   path: string;
   language: string;
-  actions: Array<IAction>;
   tokenizerCode: string;
   focus: boolean;
   onChangeCode?: (code: string | undefined) => void;
@@ -93,10 +92,10 @@ export interface ISimpleEditorProps {
   withCard?: boolean;
 }
 
+// use local static files
 loader.config({ paths: { vs: "/vs" } });
-
 export function SimpleEditor(props: ISimpleEditorProps) {
-  const { path, language, actions, value, tokenizerCode, focus, onChangeCode, withCard } =
+  const { path, language, value, tokenizerCode, focus, onChangeCode, withCard } =
     props;
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
 
@@ -105,14 +104,6 @@ export function SimpleEditor(props: ISimpleEditorProps) {
       editorRef.current.focus();
     }
   }, [focus]);
-
-  useEffect(() => {
-    if (actions.length > 0 && editorRef.current) {
-      console.log("executing actions");
-      editorRef.current.focus();
-      executeActionsWithMonacoEditor(editorRef, actions);
-    }
-  }, [actions]);
 
   const handleOnMount = (
     _editor: monaco.editor.IStandaloneCodeEditor,
@@ -136,7 +127,6 @@ export function SimpleEditor(props: ISimpleEditorProps) {
   const editor = (
     <Editor
       path={path}
-      width="700px"
       height="500px"
       defaultLanguage={language}
       language={language}
@@ -167,5 +157,3 @@ export function SimpleEditor(props: ISimpleEditorProps) {
 
   return editor;
 }
-
-export default SimpleEditor;
