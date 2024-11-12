@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { loader } from '@monaco-editor/react';
 import { Resizable } from 're-resizable';
@@ -6,15 +6,18 @@ import * as monaco from 'monaco-editor';
 import { IEditorProject } from '../../../interfaces/IEditorProject';
 import { IFileStructure } from '../../../interfaces/IFileStructure';
 import { getFileIcon } from './FileIcons/FileIcons';
-import { FileSystemService } from './FileSystemService/FileSystemService';
 import { Terminal } from './Terminal/Terminal';
+import Monokai from "monaco-themes/themes/Monokai.json";
 
 interface AdvancedEditorProps {
   currentProject: IEditorProject;
   currentCode: string;
+  caretPosition: { row: number; col: number };
   readOnly?: boolean;
-  onFileSelect?: (filePath: string) => void;
   captionText?: string;
+  currentTerminalCommand?: string;
+  openFiles: string[];
+  selectedFile: string;
 }
 
 // use local static files
@@ -22,28 +25,21 @@ loader.config({ paths: { vs: "/vs" } });
 export function AdvancedEditor({
   currentProject,
   currentCode,
+  caretPosition,
   readOnly = true,
-  onFileSelect,
-  captionText
+  captionText,
+  currentTerminalCommand,
+  openFiles,
+  selectedFile,
 }: AdvancedEditorProps) {
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  const [selectedFile, setSelectedFile] = useState<string>(currentProject.mainFile);
+  const monacoEditorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const [sidebarWidth, setSidebarWidth] = useState(250);
-  const [openFiles, setOpenFiles] = useState<string[]>([currentProject.mainFile]);
-  const fileSystemRef = useRef<FileSystemService>(
-    new FileSystemService(currentProject.fileStructure)
-  );
-
-  const handleTerminalCommand = (command: string) => {
-    const output = fileSystemRef.current.executeCommand(command);
-    return output;
-  };
 
   const handleEditorDidMount = (
     editor: monaco.editor.IStandaloneCodeEditor,
     monaco: Monaco
   ) => {
-    editorRef.current = editor;
+    monacoEditorRef.current = editor;
 
     // Set the model with the current code and language
     const model = monaco.editor.createModel(
@@ -51,24 +47,31 @@ export function AdvancedEditor({
       currentProject.language
     );
     editor.setModel(model);
+
+    // Ensure theme is applied after a short delay
+    monaco.editor.defineTheme(
+      "Monokai",
+      Monokai as monaco.editor.IStandaloneThemeData
+    );
+    setTimeout(() => {
+      monaco.editor.setTheme('Monokai');
+    }, 1);
   };
 
-  const handleFileSelect = (filePath: string) => {
-    setSelectedFile(filePath);
-    if (!openFiles.includes(filePath)) {
-      setOpenFiles([...openFiles, filePath]);
-    }
-    onFileSelect?.(filePath);
-  };
+  useEffect(() => {
+    if (monacoEditorRef.current) {
+      monacoEditorRef.current.setPosition({
+        lineNumber: caretPosition.row + 1,
+        column: caretPosition.col + 1
+      });
 
-  const handleCloseFile = (filePath: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const newOpenFiles = openFiles.filter(f => f !== filePath);
-    setOpenFiles(newOpenFiles);
-    if (selectedFile === filePath) {
-      setSelectedFile(newOpenFiles[0] || currentProject.mainFile);
+      monacoEditorRef.current.revealPositionInCenter({
+        lineNumber: caretPosition.row + 1,
+        column: caretPosition.col + 1
+      });
     }
-  };
+  }, [caretPosition]);
+
 
   const renderFileTree = (structure: IFileStructure, path: string = ''): JSX.Element[] => {
     return Object.entries(structure).map(([name, item]) => {
@@ -80,7 +83,6 @@ export function AdvancedEditor({
           <div
             className={`flex items-center gap-2 p-1 rounded hover:bg-slate-700 cursor-pointer ${selectedFile === fullPath ? 'bg-slate-700' : ''
               }`}
-            onClick={() => !isDirectory && handleFileSelect(fullPath)}
           >
             <span className="text-slate-400">
               {isDirectory ? '📁' : getFileIcon(name)}
@@ -102,12 +104,12 @@ export function AdvancedEditor({
             key={file}
             className={`flex items-center px-4 py-2 border-r border-slate-700 cursor-pointer ${selectedFile === file ? 'bg-slate-800' : 'bg-slate-900'
               }`}
-            onClick={() => handleFileSelect(file)}
+
           >
             <span className="text-slate-300">{file.split('/').pop()}</span>
             <button
               className="ml-2 text-slate-500 hover:text-slate-300"
-              onClick={(e) => handleCloseFile(file, e)}
+
             >
               ×
             </button>
@@ -118,30 +120,31 @@ export function AdvancedEditor({
       <div className="flex flex-1 flex-col">
         <div className='flex flex-1'>
           {/* File Tree Sidebar */}
-          <Resizable
-            size={{ width: sidebarWidth, height: '100%' }}
-            onResizeStop={(e, direction, ref, d) => {
-              setSidebarWidth(sidebarWidth + d.width);
-            }}
-            minWidth={200}
-            maxWidth={400}
-            enable={{ right: true }}
-          >
-            <div className="h-full border-r border-slate-600">
-              <div className="p-4 border-b border-slate-600">
-                <h3 className="text-slate-200 font-semibold">Explorer</h3>
+          <div>
+            <Resizable
+              size={{ width: sidebarWidth, height: '100%' }}
+              onResizeStop={(e, direction, ref, d) => {
+                setSidebarWidth(sidebarWidth + d.width);
+              }}
+              minWidth={200}
+              maxWidth={400}
+              enable={{ right: true }}
+            >
+              <div className="h-full border-r border-slate-600">
+                <div className="p-4 border-b border-slate-600">
+                  <h3 className="text-slate-200 font-semibold">Explorer</h3>
+                </div>
+                <div className="p-2">{renderFileTree(currentProject.fileStructure)}</div>
               </div>
-              <div className="p-2">{renderFileTree(currentProject.fileStructure)}</div>
-            </div>
-          </Resizable>
+            </Resizable>
+          </div>
 
           {/* Editor */}
           <div className="flex-1 relative">
             <Editor
-              value={currentCode}
+              value={readOnly ? currentCode : undefined}
               defaultLanguage={currentProject.language}
               options={{
-                theme: 'vs-dark',
                 automaticLayout: true,
                 minimap: { enabled: true },
                 scrollBeyondLastLine: false,
@@ -152,6 +155,7 @@ export function AdvancedEditor({
                 lineNumbers: 'on',
                 renderWhitespace: 'selection',
                 bracketPairColorization: { enabled: true },
+                matchBrackets: 'never',
                 formatOnPaste: true,
                 formatOnType: true
               }}
@@ -175,8 +179,7 @@ export function AdvancedEditor({
         </div>
         <Terminal
           className="h-full"
-          onCommand={handleTerminalCommand}
-          initialCommand=""
+          currentTerminalCommand={currentTerminalCommand}
         />
       </div>
     </div>

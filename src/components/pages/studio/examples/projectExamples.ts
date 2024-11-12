@@ -1,5 +1,5 @@
 import { IEditorProject } from '../../../../interfaces/IEditorProject';
-import { javaScriptExampleSteps, pythonExampleSteps, cSharpExampleSteps, goLangExampleSteps, blankJavaScriptExampleSteps } from './stepsExamples';
+import { javaScriptExampleSteps, pythonExampleSteps, cSharpExampleSteps, goLangExampleSteps, blankJavaScriptExampleSteps, javascriptCreateRenameDeleteFileExampleSteps } from './stepsExamples';
 
 // Blank Example
 const blankJavaScriptExample: IEditorProject = {
@@ -15,7 +15,8 @@ const blankJavaScriptExample: IEditorProject = {
       language: 'javascript'
     }
   },
-  mainFile: 'index.js'
+  selectedFile: 'index.js',
+  openFiles: ['index.js']
 };
 
 // JavaScript Example
@@ -38,7 +39,32 @@ const javascriptExampleProject: IEditorProject = {
       }
     },
   },
-  mainFile: 'src/index.js'
+  selectedFile: 'src/index.js',
+  openFiles: ['src/index.js']
+};
+
+// JavaScript Create, Rename, and Delete File Example
+const javascriptCreateRenameDeleteFileExample: IEditorProject = {
+  id: 'javascript-create-rename-delete-file',
+  name: 'JavaScript Create, Rename, and Delete File Example',
+  description: 'Learn how to create, rename, and delete files in JavaScript',
+  language: 'javascript',
+  steps: javascriptCreateRenameDeleteFileExampleSteps,
+  fileStructure: {
+    'src': {
+      type: 'directory',
+      content: '',
+      children: {
+        'index.js': {
+          type: 'file',
+          content: '// index.js\n',
+          language: 'javascript'
+        },
+      }
+    },
+  },
+  selectedFile: 'src/index.js',
+  openFiles: ['src/index.js']
 };
 
 // Python Example
@@ -61,7 +87,8 @@ const pythonExample: IEditorProject = {
       }
     },
   },
-  mainFile: 'src/main.py'
+  selectedFile: 'src/main.py',
+  openFiles: ['src/main.py']
 };
 
 // C# Example
@@ -84,7 +111,8 @@ const csharpExample: IEditorProject = {
       }
     },
   },
-  mainFile: 'src/Program.cs'
+  selectedFile: 'src/Program.cs',
+  openFiles: ['src/Program.cs']
 };
 
 // Go Example
@@ -107,13 +135,15 @@ const goExample: IEditorProject = {
       }
     },
   },
-  mainFile: 'src/main.go'
+  selectedFile: 'src/main.go',
+  openFiles: ['src/main.go']
 };
 
 // Export all examples
 export const projectExamples: IEditorProject[] = [
   blankJavaScriptExample,
   javascriptExampleProject,
+  javascriptCreateRenameDeleteFileExample,
   pythonExample,
   csharpExample,
   goExample
