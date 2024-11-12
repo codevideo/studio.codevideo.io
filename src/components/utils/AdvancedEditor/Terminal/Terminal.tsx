@@ -4,14 +4,13 @@ import 'xterm/css/xterm.css';
 
 interface TerminalProps {
     className?: string;
-    onCommand?: (command: string) => void;
-    initialCommand?: string;
+    currentTerminalCommand?: string;
 }
 
 const defaultPrompt = '[codevideo.studio] /> ';
 
 export function Terminal(props: TerminalProps) {
-    const { className, onCommand, initialCommand } = props;
+    const { className, currentTerminalCommand } = props;
     const terminalRef = useRef<HTMLDivElement>(null);
     const xtermRef = useRef<XTerm | null>(null);
     const currentLineRef = useRef<string>('');
@@ -50,34 +49,10 @@ export function Terminal(props: TerminalProps) {
         term.write(`\r\n${defaultPrompt}`);
 
         // Handle initial command if provided
-        if (initialCommand) {
-            term.write(initialCommand);
-            currentLineRef.current = initialCommand;
+        if (currentTerminalCommand) {
+            term.write(currentTerminalCommand);
+            currentLineRef.current = currentTerminalCommand;
         }
-
-        // Handle input
-        term.onKey(({ key, domEvent }) => {
-            const ev = domEvent;
-            const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey;
-
-            if (ev.keyCode === 13) { // Enter
-                // Process command
-                const command = currentLineRef.current;
-                onCommand?.(command);
-
-                // Reset current line and show new prompt
-                currentLineRef.current = '';
-                term.write(`\r\n${defaultPrompt}`);
-            } else if (ev.keyCode === 8) { // Backspace
-                if (currentLineRef.current.length > 0) {
-                    currentLineRef.current = currentLineRef.current.slice(0, -1);
-                    term.write('\b \b');
-                }
-            } else if (printable) {
-                currentLineRef.current += key;
-                term.write(key);
-            }
-        });
 
         // Handle window resize
         const handleResize = () => {
@@ -91,7 +66,7 @@ export function Terminal(props: TerminalProps) {
             window.removeEventListener('resize', handleResize);
             term.dispose();
         };
-    }, [initialCommand, onCommand]);
+    }, [currentTerminalCommand]);
 
     return (
         <div

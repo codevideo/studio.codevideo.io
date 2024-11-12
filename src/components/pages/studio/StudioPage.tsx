@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { VirtualCodeBlock } from '@fullstackcraftllc/virtual-code-block';
 import { IAction, isSpeakAction } from '@fullstackcraftllc/codevideo-types';
 import ToggleEditor from '../../utils/ToggleEditor';
@@ -7,8 +7,9 @@ import { defaultExampleProject } from './examples/projectExamples';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { ExampleSelector } from './ExampleSelector';
 import AdvancedEditor from '../../utils/AdvancedEditor/AdvancedEditor';
-import { setCodeIndex } from '../../../store/editorSlice';
+import { setActions, setCodeIndex } from '../../../store/editorSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import { useRecordUserInput } from '../../../hooks/useRecordUserInput';
 
 interface StudioPageProps {
     initialActions: IAction[];
@@ -19,6 +20,18 @@ export function StudioPage(props: StudioPageProps) {
     const { tokenizerCode } = props;
     const { currentProject, actions, codeIndex } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
+    const [isRecording, setIsRecording] = useState(false);
+
+    const editorRef = useRef<HTMLDivElement>(null);
+    const terminalRef = useRef<HTMLDivElement>(null);
+    const fileSidebarRef = useRef<HTMLDivElement>(null);
+
+    // TODO: finish some day, would need to insert a draft and extend the current actions without exploding infinite looping of rendering
+    // const { recordedActions, detailedActions } = useRecordUserInput(isRecording, {
+    //     editorRef,
+    //     terminalRef,
+    //     fileSidebarRef,
+    // });
 
     // Get code states for navigation
     const virtualCodeBlock = new VirtualCodeBlock([]);
@@ -30,6 +43,7 @@ export function StudioPage(props: StudioPageProps) {
     const dataAtEachFrame = virtualCodeBlock.getDataForAnnotatedFrames();
     const currentCode = dataAtEachFrame.length >= codeIndex && dataAtEachFrame[codeIndex]?.code || '';
     const captionText = dataAtEachFrame.length >= codeIndex && dataAtEachFrame[codeIndex]?.speechCaptions.map((speechCaption) => speechCaption.speechValue).join(' ');
+    const caretPosition = dataAtEachFrame.length >= codeIndex && dataAtEachFrame[codeIndex]?.caretPosition || { row: 0, col: 0};
 
     const handleFirst = () => {
         dispatch(setCodeIndex(0));
@@ -47,6 +61,11 @@ export function StudioPage(props: StudioPageProps) {
         dispatch(setCodeIndex(dataAtEachFrame.length - 1));
     }
 
+    const handleRecord = () => {
+        setIsRecording(!isRecording);
+    }
+
+    // const recordButtonText = isRecording ? 'Stop Recording' : `Start Recording from Step ${codeIndex + 1}`;
     return (
         <div className="min-h-screen bg-slate-50 p-4">
             <ExampleSelector />
@@ -94,6 +113,12 @@ export function StudioPage(props: StudioPageProps) {
                                 </button>
 
                             </div>
+                            {/* <button
+                            onClick={handleRecord}
+                            className="px-3 py-2 rounded-lg bg-red-700 ml-auto mr-2 text-slate-200 hover"
+                            >
+                                {recordButtonText}
+                            </button> */}
                             <span className="text-sm text-slate-400">
                                 Step {codeIndex + 1} of {Math.max(1, dataAtEachFrame.length)}
                             </span>
@@ -104,17 +129,27 @@ export function StudioPage(props: StudioPageProps) {
                             <AdvancedEditor
                                 currentProject={currentProject ?? defaultExampleProject}
                                 currentCode={currentCode}
-                                readOnly={true}
-                                onFileSelect={(filePath) => {
-                                    console.log('Selected file:', filePath);
-                                    // Handle file selection if needed
-                                }}
+                                readOnly={!isRecording}
                                 captionText={captionText || ''}
+                                caretPosition={caretPosition}
+                                openFiles={currentProject?.openFiles || []}
+                                selectedFile={currentProject?.selectedFile || ''}
                             />
                         </div>
                     </div>
                 </div>
             </div>
+            {/* for debugging recording */}
+            {/* <div className='flex flex-row gap-4 mt-4 justify-center'>
+            <pre>
+                Detailed:
+                {JSON.stringify(detailedActions, null, 2)}
+            </pre>
+            <pre>
+                Collapsed (simplified):
+                {JSON.stringify(recordedActions, null, 2)}
+            </pre>
+            </div> */}
         </div>
     );
 }

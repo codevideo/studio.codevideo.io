@@ -62,6 +62,25 @@ export const javaScriptExampleSteps: Array<IAction> = [
     }
 ];
 
+export const javascriptCreateRenameDeleteFileExampleSteps: Array<IAction> = [
+  {
+    "name": "speak-before",
+    "value": "Let's test CodeVideo's ability to create, rename, and delete files in JavaScript!"
+  },
+  {
+    "name": "create-file",
+    "value": "src/my-new-file.js"
+  },
+  {
+    "name": "open-file",
+    "value": "src/my-new-file.js"
+  },
+  {
+    "name": "delete-file",
+    "value": "src/my-new-file.js"
+  }
+];
+
 export const pythonExampleSteps: Array<IAction> = [
     {
       "name": "speak-before",

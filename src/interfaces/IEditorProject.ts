@@ -10,5 +10,6 @@ export interface IEditorProject {
     language: string;
     steps: Array<IAction>;
     fileStructure: IFileStructure;
-    mainFile: string;
+    selectedFile: string;
+    openFiles: string[];
 }
