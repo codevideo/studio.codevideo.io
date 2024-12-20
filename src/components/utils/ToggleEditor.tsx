@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ActionEditor } from './ActionEditor/ActionEditor';
 import { SimpleEditor } from './SimpleEditor';
 import { useAppSelector } from '../../hooks/useAppSelector';
-import { setActions, setActionsString } from '../../store/editorSlice';
+import { setActions, setActionsString, setJumpFlag } from '../../store/editorSlice';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 
 export interface IToggleEditorProps {
@@ -12,12 +12,16 @@ export interface IToggleEditorProps {
 
 export function ToggleEditor(props: IToggleEditorProps) {
     const { tokenizerCode } = props;
-    const { actionsString } = useAppSelector((state) => state.editor);
+    const { actions, actionsString, jumpFlag } = useAppSelector((state) => state.editor);
     const dispatch = useAppDispatch();
     const [editorMode, setEditorMode] = useState(true);
 
+    const onClickJumpToCurrent = () => {
+        dispatch(setJumpFlag(!jumpFlag));
+    }
+
     return (
-        <div className="rounded-lg bg-white shadow-sm p-6 border border-gray-200">
+        <div>
             <div className="flex gap-6 mb-4 flex-row justify-center items-center">
                 <div className="flex items-center">
                     <input
@@ -45,6 +49,13 @@ export function ToggleEditor(props: IToggleEditorProps) {
                         JSON Mode
                     </label>
                 </div>
+                <button
+                    onClick={onClickJumpToCurrent}
+                    disabled={actions.length === 0}
+                    className="px-3 py-2 rounded-lg bg-green-700 text-green-50 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    Jump to Current
+                </button>
             </div>
             {editorMode ? (
                 <ActionEditor />

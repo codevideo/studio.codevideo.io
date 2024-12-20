@@ -10,6 +10,8 @@ import AdvancedEditor from '../../utils/AdvancedEditor/AdvancedEditor';
 import { setActions, setCodeIndex } from '../../../store/editorSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useRecordUserInput } from '../../../hooks/useRecordUserInput';
+import { estimateVideoDurationInSeconds } from '../../../utils/estimateVideoDurationInSeconds';
+import { formatDuration } from '../../../utils/formatDuration';
 
 interface StudioPageProps {
     initialActions: IAction[];
@@ -49,6 +51,10 @@ export function StudioPage(props: StudioPageProps) {
         dispatch(setCodeIndex(0));
     }
 
+    const handleJumpBackward = () => {
+        dispatch(setCodeIndex(Math.max(0, codeIndex - 10)));
+    }
+
     const handlePrevious = () => {
         dispatch(setCodeIndex(Math.max(0, codeIndex - 1)));
     };
@@ -57,6 +63,10 @@ export function StudioPage(props: StudioPageProps) {
         dispatch(setCodeIndex(Math.min(dataAtEachFrame.length - 1, codeIndex + 1)));
     };
 
+    const handleJumpForward = () => {
+        dispatch(setCodeIndex(Math.min(dataAtEachFrame.length - 1, codeIndex + 10)));
+    }
+
     const handleLast = () => {
         dispatch(setCodeIndex(dataAtEachFrame.length - 1));
     }
@@ -64,6 +74,8 @@ export function StudioPage(props: StudioPageProps) {
     const handleRecord = () => {
         setIsRecording(!isRecording);
     }
+
+    const durationInSeconds = estimateVideoDurationInSeconds(actions);
 
     // const recordButtonText = isRecording ? 'Stop Recording' : `Start Recording from Step ${codeIndex + 1}`;
     return (
@@ -88,7 +100,14 @@ export function StudioPage(props: StudioPageProps) {
                                     disabled={codeIndex === 0}
                                     className="px-3 py-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    {'<<'} First
+                                    {'<<<'} First
+                                </button>
+                                <button
+                                    onClick={handleJumpBackward}
+                                    disabled={codeIndex === dataAtEachFrame.length - 1}
+                                    className="px-3 py-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    -10 {'<<'}
                                 </button>
                                 <button
                                     onClick={handlePrevious}
@@ -105,13 +124,19 @@ export function StudioPage(props: StudioPageProps) {
                                     Next {'>'}
                                 </button>
                                 <button
+                                    onClick={handleJumpForward}
+                                    disabled={codeIndex === dataAtEachFrame.length - 1}
+                                    className="px-3 py-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    +10 {'>>'}
+                                </button>
+                                <button
                                     onClick={handleLast}
                                     disabled={codeIndex === dataAtEachFrame.length - 1}
                                     className="px-3 py-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
-                                    Last {'>>'}
+                                    Last {'>>>'}
                                 </button>
-
                             </div>
                             {/* <button
                             onClick={handleRecord}
@@ -150,6 +175,9 @@ export function StudioPage(props: StudioPageProps) {
                 {JSON.stringify(recordedActions, null, 2)}
             </pre>
             </div> */}
+            <div>
+                <i className='text-slate-700'>Estimated Video Length: <b>{formatDuration(durationInSeconds)}</b></i>
+            </div>
         </div>
     );
 }

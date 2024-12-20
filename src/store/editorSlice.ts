@@ -11,6 +11,7 @@ export interface EditorState {
     codeIndex: number;
     currentProject: IEditorProject | null;
     allProjects: IEditorProject[];
+    jumpFlag: boolean;
 }
 
 export const editorInitialState: EditorState = {
@@ -19,6 +20,7 @@ export const editorInitialState: EditorState = {
     codeIndex: 0,
     currentProject: defaultExampleProject,
     allProjects: projectExamples,
+    jumpFlag: false
 };
 
 const editorSlice = createSlice({
@@ -39,10 +41,13 @@ const editorSlice = createSlice({
         },
         setAllProjects(state, action) {
             state.allProjects = action.payload;
+        },
+        setJumpFlag(state, action) {
+            state.jumpFlag = action.payload;
         }
     }
 });
 
-export const { setActions, setActionsString, setCodeIndex, setCurrentProject, setAllProjects } = editorSlice.actions;
+export const { setActions, setActionsString, setCodeIndex, setCurrentProject, setAllProjects, setJumpFlag } = editorSlice.actions;
 
 export default editorSlice.reducer;
