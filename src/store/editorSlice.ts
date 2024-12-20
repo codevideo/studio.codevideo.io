@@ -12,6 +12,8 @@ export interface EditorState {
     currentProject: IEditorProject | null;
     allProjects: IEditorProject[];
     jumpFlag: boolean;
+    mousePosition: { x: number; y: number };
+    mouseVisible: boolean;
 }
 
 export const editorInitialState: EditorState = {
@@ -20,7 +22,9 @@ export const editorInitialState: EditorState = {
     codeIndex: 0,
     currentProject: defaultExampleProject,
     allProjects: projectExamples,
-    jumpFlag: false
+    jumpFlag: false,
+    mousePosition: { x: 0, y: 0 },
+    mouseVisible: true
 };
 
 const editorSlice = createSlice({
@@ -44,10 +48,25 @@ const editorSlice = createSlice({
         },
         setJumpFlag(state, action) {
             state.jumpFlag = action.payload;
+        },
+        setMousePosition(state, action) {
+            state.mousePosition = action.payload;
+        },
+        setMouseVisible(state, action) {
+            state.mouseVisible = action.payload;
         }
     }
 });
 
-export const { setActions, setActionsString, setCodeIndex, setCurrentProject, setAllProjects, setJumpFlag } = editorSlice.actions;
+export const { 
+    setActions, 
+    setActionsString, 
+    setCodeIndex, 
+    setCurrentProject, 
+    setAllProjects, 
+    setJumpFlag,
+    setMousePosition,
+    setMouseVisible
+} = editorSlice.actions;
 
 export default editorSlice.reducer;
