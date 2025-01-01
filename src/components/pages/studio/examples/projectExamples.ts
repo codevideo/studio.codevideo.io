@@ -19,6 +19,78 @@ const blankJavaScriptExample: IEditorProject = {
   openFiles: ['index.js']
 };
 
+// Blank Go Example
+const blankGoExample: IEditorProject = {
+  id: 'blank-go',
+  name: 'Blank Go Project',
+  description: 'Start with a blank Go project',
+  language: 'go',
+  steps: [],
+  fileStructure: {
+    'main.go': {
+      type: 'file',
+      content: '',
+      language: 'go'
+    }
+  },
+  selectedFile: 'main.go',
+  openFiles: ['main.go']
+};
+
+// Blank C# Example
+const blankCSharpExample: IEditorProject = {
+  id: 'blank-csharp',
+  name: 'Blank C# Project',
+  description: 'Start with a blank C# project',
+  language: 'csharp',
+  steps: [],
+  fileStructure: {
+    'Program.cs': {
+      type: 'file',
+      content: '',
+      language: 'csharp'
+    }
+  },
+  selectedFile: 'Program.cs',
+  openFiles: ['Program.cs']
+};
+
+// Blank Rust Example
+const blankRustExample: IEditorProject = {
+  id: 'blank-rust',
+  name: 'Blank Rust Project',
+  description: 'Start with a blank Rust project',
+  language: 'rust',
+  steps: [],
+  fileStructure: {
+    'main.rs': {
+      type: 'file',
+      content: '',
+      language: 'rust'
+    }
+  },
+  selectedFile: 'main.rs',
+  openFiles: ['main.rs']
+};
+
+// Blank Python Example
+const blankPythonExample: IEditorProject = {
+  id: 'blank-python',
+  name: 'Blank Python Project',
+  description: 'Start with a blank Python project',
+  language: 'python',
+  steps: [],
+  fileStructure: {
+    'main.py': {
+      type: 'file',
+      content: '',
+      language: 'python'
+    }
+  },
+  selectedFile: 'main.py',
+  openFiles: ['main.py']
+};
+
 // JavaScript Example
 const javascriptExampleProject: IEditorProject = {
   id: 'javascript',
@@ -142,6 +214,10 @@ const goExample: IEditorProject = {
 // Export all examples
 export const projectExamples: IEditorProject[] = [
   blankJavaScriptExample,
+  blankGoExample,
+  blankCSharpExample,
+  blankRustExample,
+  blankPythonExample,
   javascriptExampleProject,
   javascriptCreateRenameDeleteFileExample,
   pythonExample,

@@ -1,16 +1,35 @@
 import React, { useEffect, useRef } from 'react';
 import { Terminal as XTerm } from '@xterm/xterm';
 import 'xterm/css/xterm.css';
+import { useAppSelector } from '../../../../hooks/useAppSelector';
 
 interface TerminalProps {
     className?: string;
-    currentTerminalCommand?: string;
 }
 
 const defaultPrompt = '[codevideo.studio] /> ';
 
+// TODO: API should simply be virtualIDE.getFrames() - gives you everything you need at every action index
+// for now we do a bit of manual work with the actions and such
+
 export function Terminal(props: TerminalProps) {
-    const { className, currentTerminalCommand } = props;
+    const { className } = props;
+    const { codeIndex, actions } = useAppSelector(state => state.editor)
+
+    const getCurrentTerminalCommand = () => {
+        const currentAction = actions[codeIndex]
+        console.log(currentAction)
+        if (!currentAction) {
+            return ""
+        }
+        if (currentAction.name === 'type-terminal') {
+            return currentAction.value
+        }
+        return ""
+    }
+
+    const currentTerminalCommand = getCurrentTerminalCommand();
+    console.log('currentTemrinalcommand is:', currentTerminalCommand)
     const terminalRef = useRef<HTMLDivElement>(null);
     const xtermRef = useRef<XTerm | null>(null);
     const currentLineRef = useRef<string>('');

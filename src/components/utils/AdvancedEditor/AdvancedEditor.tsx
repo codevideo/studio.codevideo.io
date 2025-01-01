@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { MouseOverlay } from './MouseOverlay/MouseOverlay';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { loader } from '@monaco-editor/react';
 import { Resizable } from 're-resizable';
@@ -15,7 +16,6 @@ interface AdvancedEditorProps {
   caretPosition: { row: number; col: number };
   readOnly?: boolean;
   captionText?: string;
-  currentTerminalCommand?: string;
   openFiles: string[];
   selectedFile: string;
 }
@@ -28,7 +28,6 @@ export function AdvancedEditor({
   caretPosition,
   readOnly = true,
   captionText,
-  currentTerminalCommand,
   openFiles,
   selectedFile,
 }: AdvancedEditorProps) {
@@ -96,7 +95,8 @@ export function AdvancedEditor({
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-800 rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-slate-800 rounded-lg overflow-hidden relative">
+      <MouseOverlay />
       {/* Tabs */}
       <div className="flex border-b border-slate-700 bg-slate-900">
         {openFiles.map(file => (
@@ -179,7 +179,6 @@ export function AdvancedEditor({
         </div>
         <Terminal
           className="h-full"
-          currentTerminalCommand={currentTerminalCommand}
         />
       </div>
     </div>

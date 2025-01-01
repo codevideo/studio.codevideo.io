@@ -4,17 +4,38 @@ import {
   IAction,
   allActionStrings,
   isCodeAction,
+  isSpeakAction,
 } from "@fullstackcraftllc/codevideo-types";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
 import { setActions, setActionsString, setCodeIndex } from "../../../store/editorSlice";
 import { InsertStepButton } from "./InsertStepButton";
 
+import { useEffect, useRef } from "react";
+
 export interface IActionEditorProps { }
 
 export function ActionEditor(props: IActionEditorProps) {
-  const { actions } = useAppSelector((state) => state.editor);
+  const { actions, codeIndex, jumpFlag } = useAppSelector((state) => state.editor);
   const dispatch = useAppDispatch();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const snapToStep = (index: number) => {
+    if (containerRef.current) {
+      const activeStep = containerRef.current.querySelector(`[data-index="${codeIndex}"]`);
+      if (activeStep) {
+        const container = containerRef.current;
+        const containerRect = container.getBoundingClientRect();
+        const stepRect = activeStep.getBoundingClientRect();
+        container.scrollTop = container.scrollTop + (stepRect.top - containerRect.top);
+      }
+    }
+  }
+
+  // Scroll the active step into view when codeIndex changes, or when the jumpFlag changes
+  useEffect(() => {
+    snapToStep(codeIndex);
+  }, [codeIndex, jumpFlag]);
 
   const isRepeatableAction = (actionName: AllActions): boolean => {
     return ["enter", "space", "backspace", "tab"].includes(actionName as string);
@@ -33,6 +54,20 @@ export function ActionEditor(props: IActionEditorProps) {
       })
     ));
   };
+
+  const handleTextAreaChange = (
+    index: number,
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    dispatch(setActions(
+      actions.map((action, i) => {
+        if (i === index) {
+          return { ...action, value: event.target.value };
+        }
+        return action;
+      })
+    ));
+  }
 
   const handleSelectChange = (
     index: number,
@@ -56,15 +91,26 @@ export function ActionEditor(props: IActionEditorProps) {
     dispatch(setCodeIndex(index));
   };
 
+  const handleOnClickToCurrent = () => {
+    snapToStep(codeIndex);
+  }
+
+  const stepBackgroundColor = (index: number) => {
+    return index === codeIndex ? "bg-green-200" : "bg-slate-200";
+  }
+
   return (
-    <div className="h-[500px] overflow-y-auto px-4">
+    <div className="h-[500px] overflow-y-auto px-4" ref={containerRef}>
       <div className="max-w-2xl mx-auto flex flex-col gap-3">
         {actions.length === 0 && (
           <InsertStepButton actions={actions} index={0} />
         )}
         {actions.map((action, index) => (
-          <div key={index} className="relative my-1">
-            <div className="bg-slate-200 rounded-lg p-3 shadow-sm">
+          <div 
+          key={index} 
+          className="relative my-1"
+          data-index={index}>
+            <div className={`${stepBackgroundColor(index)} rounded-lg p-3 shadow-sm`}>
               <div className="flex items-center gap-2 mb-2">
                 <span className="font-medium">{index + 1}.</span>
                 <div className="flex gap-1">
@@ -121,13 +167,23 @@ export function ActionEditor(props: IActionEditorProps) {
                   <label className="block text-xs text-gray-600 font-medium">
                     Value
                   </label>
-                  <input
-                    className={`w-full px-2 py-1.5 text-sm border rounded ${isCodeAction(action) ? "font-mono" : "font-sans"
-                      } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
-                    type={isRepeatableAction(action.name) ? "number" : "text"}
-                    value={action.value}
-                    onChange={(e) => handleInputChange(index, e)}
-                  />
+                  {/* if it's a speach action, use a multiline text */}
+                  {isSpeakAction(action) ? (
+                    <textarea
+                      className="w-full h-20 px-2 py-1.5 text-sm border rounded font-sans focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                      value={action.value}
+                      onChange={(e) => handleTextAreaChange(index, e)}
+                    />
+                  ) : (
+                    // otherwise, use a single line text
+                    <input
+                      className={`w-full px-2 py-1.5 text-sm border rounded ${isCodeAction(action) ? "font-mono" : "font-sans"
+                        } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
+                      type={isRepeatableAction(action.name) ? "number" : "text"}
+                      value={action.value}
+                      onChange={(e) => handleInputChange(index, e)}
+                    />
+                  )}
                 </div>
               </div>
             </div>
