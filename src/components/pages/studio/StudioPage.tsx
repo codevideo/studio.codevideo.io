@@ -104,7 +104,7 @@ export function StudioPage(props: StudioPageProps) {
                                 </button>
                                 <button
                                     onClick={handleJumpBackward}
-                                    disabled={codeIndex === dataAtEachFrame.length - 1}
+                                    disabled={codeIndex === 0}
                                     className="px-3 py-2 rounded-lg bg-slate-700 text-slate-200 hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     -10 {'<<'}

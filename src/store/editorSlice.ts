@@ -23,7 +23,7 @@ export const editorInitialState: EditorState = {
     currentProject: defaultExampleProject,
     allProjects: projectExamples,
     jumpFlag: false,
-    mousePosition: { x: 0, y: 0 },
+    mousePosition: { x: 20, y: 20 },
     mouseVisible: true
 };
 

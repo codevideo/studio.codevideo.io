@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { EditorState, setMousePosition } from '../../store/editorSlice';
+import { EditorState, setMousePosition } from '../../../../store/editorSlice';
 
 interface MouseOverlayProps {
   className?: string;
@@ -8,7 +8,8 @@ interface MouseOverlayProps {
 
 export const MouseOverlay: React.FC<MouseOverlayProps> = ({ className }) => {
   const dispatch = useDispatch();
-  const { mousePosition, mouseVisible, actions, codeIndex } = useSelector((state: { editor: EditorState }) => state.editor);
+  const { mousePosition, mouseVisible, actions, codeIndex, currentProject } = useSelector((state: { editor: EditorState }) => state.editor);
+  const fileStructure = currentProject?.fileStructure;
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -17,14 +18,20 @@ export const MouseOverlay: React.FC<MouseOverlayProps> = ({ className }) => {
 
     let newPosition = { x: mousePosition.x, y: mousePosition.y };
 
+    // TODO: think maybe from a different way - we should be able to retrieve the x and y coordinates directly from state from the editor!
     switch (currentAction.name) {
       case 'click-terminal':
+        case 'type-terminal':
         newPosition = { x: window.innerWidth / 2, y: window.innerHeight - 75 };
         break;
-      case 'click-file':
-        // Assuming the file tree is on the left side
-        newPosition = { x: 125, y: 200 };
+      case 'click-editor':
+      case 'type-editor':
+        // Get middle of editor div
+        newPosition = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
         break;
+      // case 'click-file':
+      // use the file structure to get the middle x and y position of the file
+
       // Add more cases as needed
     }
 
@@ -42,18 +49,13 @@ export const MouseOverlay: React.FC<MouseOverlayProps> = ({ className }) => {
         transition: 'transform 0.3s ease-out'
       }}
     >
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
+      <svg width="24" height="24" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg">
         <path
-          d="M5 3L19 17L12 17L5 3Z"
-          fill="white"
-          stroke="black"
-          strokeWidth="2"
+          d="M 0,0 L 0,20 L 4.5,15.5 L 8.75,23 L 11,22 L 6.75,15 L 13.75,15 Z"
+          fill="black"
+          stroke="white"
+          stroke-width="1.5"
+          stroke-linejoin="rounded"
         />
       </svg>
     </div>
