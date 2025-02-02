@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
-import { IEditorProject } from '../../../interfaces/IEditorProject';
 import { setCurrentProject, setActions, setCodeIndex, setActionsString } from '../../../store/editorSlice';
+import { ICourse } from '@fullstackcraftllc/codevideo-types';
 
 export interface IExampleSelectorProps {
 }
@@ -12,13 +12,21 @@ export function ExampleSelector(props: IExampleSelectorProps) {
     const dispatch = useAppDispatch();
 
     const handleExampleChange = (exampleId: string) => {
-        const matchingProject = allProjects?.find((ex: IEditorProject) => ex.id === exampleId);
+        const matchingProject = allProjects?.find((ex: ICourse) => ex.id === exampleId);
         if (matchingProject) {
             dispatch(setCurrentProject(matchingProject));
-            // set the actions from the example's steps
+            // set the actions from the example's steps - for now, use the first lesson's actions
+            if (!matchingProject.lessons) {
+                console.error('No lessons found in example:', matchingProject);
+                return;
+            }
+            if (!matchingProject.lessons[0]) {
+                console.error('No actions found in example lesson:', matchingProject.lessons[0]);
+                return;
+            }
             try {
-                dispatch(setActions(matchingProject.steps));
-                dispatch(setActionsString(JSON.stringify(matchingProject.steps, null, 2)));
+                dispatch(setActions(matchingProject.lessons[0].actions));
+                dispatch(setActionsString(JSON.stringify(matchingProject.lessons[0].actions, null, 2)));
                 dispatch(setCodeIndex(0));
             } catch (error) {
                 console.error('Failed to parse example steps:', error);
@@ -36,9 +44,9 @@ export function ExampleSelector(props: IExampleSelectorProps) {
                         value={currentProject?.id}
                         onChange={(e) => handleExampleChange(e.target.value)}
                     >
-                        {allProjects.map((example: IEditorProject) => (
-                            <option key={example.id} value={example.id}>
-                                {example.name}
+                        {allProjects.map((project: ICourse) => (
+                            <option key={project.id} value={project.id}>
+                                {project.name}
                             </option>
                         ))}
                     </select>

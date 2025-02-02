@@ -1,27 +1,27 @@
 
-import { IAction } from "@fullstackcraftllc/codevideo-types";
+import { IAction, ICourse } from "@fullstackcraftllc/codevideo-types";
 import { createSlice } from "@reduxjs/toolkit";
-import { IEditorProject } from "../interfaces/IEditorProject";
-import { javaScriptExampleSteps } from "../components/pages/studio/examples/stepsExamples";
-import { defaultExampleProject, projectExamples } from "../components/pages/studio/examples/projectExamples";
+import { javaScriptExampleActions } from "../components/pages/studio/examples/actionsExamples";
+import { allProjects } from "../components/pages/studio/examples/allProjects";
+import { defaultExampleProject } from "../components/pages/studio/examples/defaultExampleProject";
 
 export interface EditorState {
     actions: Array<IAction>;
     actionsString: string;
     codeIndex: number;
-    currentProject: IEditorProject | null;
-    allProjects: IEditorProject[];
+    currentProject: ICourse | null;
+    allProjects: ICourse[];
     jumpFlag: boolean;
     mousePosition: { x: number; y: number };
     mouseVisible: boolean;
 }
 
 export const editorInitialState: EditorState = {
-    actions: javaScriptExampleSteps,
-    actionsString: JSON.stringify(javaScriptExampleSteps, null, 2),
+    actions: javaScriptExampleActions,
+    actionsString: JSON.stringify(javaScriptExampleActions, null, 2),
     codeIndex: 0,
     currentProject: defaultExampleProject,
-    allProjects: projectExamples,
+    allProjects,
     jumpFlag: false,
     mousePosition: { x: 20, y: 20 },
     mouseVisible: true

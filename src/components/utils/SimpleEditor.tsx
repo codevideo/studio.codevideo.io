@@ -26,50 +26,50 @@ export const executeActionsWithMonacoEditor = async (
       continue;
     }
     switch (action.name) {
-      case "type-editor":
+      case "editor-type":
         const text = action.value;
         for (let i = 0; i < text.length; i++) {
           editorInstance.trigger("keyboard", "type", { text: text[i] });
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         break;
-      case "backspace":
+      case "editor-backspace":
         const count = parseInt(action.value);
         for (let i = 0; i < count; i++) {
           editorInstance.trigger("1", "deleteLeft", null);
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         break;
-      case "speak-before":
+      case "author-speak-before":
         await speakText(action.value);
         break;
-      case "speak-after":
+      case "author-speak-after":
         await speakText(action.value);
         break;
-      case "speak-during":
+      case "author-speak-during":
         await speakText(action.value);
         break;
-      case "arrow-up":
+      case "editor-arrow-up":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(38),
         });
         break;
-      case "arrow-down":
+      case "editor-arrow-down":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(40),
         });
         break;
-      case "arrow-left":
+      case "editor-arrow-left":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(37),
         });
         break;
-      case "arrow-right":
+      case "editor-arrow-right":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(39),
         });
         break;
-      case "enter":
+      case "editor-enter":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(13),
         });
@@ -94,6 +94,7 @@ export interface ISimpleEditorProps {
 
 // use local static files
 loader.config({ paths: { vs: "/vs" } });
+
 export function SimpleEditor(props: ISimpleEditorProps) {
   const { path, language, value, tokenizerCode, focus, onChangeCode, withCard } =
     props;

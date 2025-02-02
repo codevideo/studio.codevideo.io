@@ -1,10 +1,9 @@
 import * as React from "react";
 import {
   AllActions,
-  IAction,
-  allActionStrings,
-  isCodeAction,
-  isSpeakAction,
+  AllActionStrings,
+  isAuthorAction,
+  isEditorAction,
 } from "@fullstackcraftllc/codevideo-types";
 import { useAppDispatch } from "../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../hooks/useAppSelector";
@@ -155,7 +154,7 @@ export function ActionEditor(props: IActionEditorProps) {
                     value={action.name as string}
                     onChange={(e) => handleSelectChange(index, e)}
                   >
-                    {allActionStrings.map((actionType) => (
+                    {AllActionStrings.map((actionType) => (
                       <option key={actionType} value={actionType}>
                         {actionType}
                       </option>
@@ -168,7 +167,7 @@ export function ActionEditor(props: IActionEditorProps) {
                     Value
                   </label>
                   {/* if it's a speach action, use a multiline text */}
-                  {isSpeakAction(action) ? (
+                  {isAuthorAction(action) ? (
                     <textarea
                       className="w-full h-20 px-2 py-1.5 text-sm border rounded font-sans focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                       value={action.value}
@@ -177,7 +176,7 @@ export function ActionEditor(props: IActionEditorProps) {
                   ) : (
                     // otherwise, use a single line text
                     <input
-                      className={`w-full px-2 py-1.5 text-sm border rounded ${isCodeAction(action) ? "font-mono" : "font-sans"
+                      className={`w-full px-2 py-1.5 text-sm border rounded ${isEditorAction(action) ? "font-mono" : "font-sans"
                         } focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500`}
                       type={isRepeatableAction(action.name) ? "number" : "text"}
                       value={action.value}
