@@ -53,7 +53,6 @@ const userSlice = createSlice({
   name: 'user',
   initialState: userInitialState,
   reducers: {
-    // You can add synchronous reducers here if needed
     resetUserState: (state) => {
       Object.assign(state, userInitialState);
     }

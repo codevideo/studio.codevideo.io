@@ -3,5 +3,5 @@ import { StudioPage } from "../components/pages/studio/StudioPage"
 import { Layout } from "../components/layout/Layout"
 
 export default function Studio() {
-  return <Layout withHeader={true}><StudioPage initialActions={[]} tokenizerCode="" /></Layout>
+  return <Layout withHeader={true}><StudioPage /></Layout>
 }

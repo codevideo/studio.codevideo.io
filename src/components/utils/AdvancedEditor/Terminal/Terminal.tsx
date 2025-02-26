@@ -1,97 +1,52 @@
-import React, { useEffect, useRef } from 'react';
-import { Terminal as XTerm } from '@xterm/xterm';
-import 'xterm/css/xterm.css';
-import { useAppSelector } from '../../../../hooks/useAppSelector';
+import React, { useEffect, useState } from 'react';
+import { IAction } from '@fullstackcraftllc/codevideo-types';
 
 interface TerminalProps {
+    actions: Array<IAction>;
+    actionIndex?: number;
     className?: string;
 }
 
 const defaultPrompt = '[codevideo.studio] /> ';
 
-// TODO: API should simply be virtualIDE.getFrames() - gives you everything you need at every action index
-// for now we do a bit of manual work with the actions and such
-
 export function Terminal(props: TerminalProps) {
-    const { className } = props;
-    const { codeIndex, actions } = useAppSelector(state => state.editor)
+    const { actions, actionIndex = 0, className = '' } = props;
+    const [displayText, setDisplayText] = useState(defaultPrompt);
 
     const getCurrentTerminalCommand = () => {
-        const currentAction = actions[codeIndex]
-        console.log(currentAction)
+        if (!actionIndex) {
+            return "";
+        }
+        const currentAction = actions[actionIndex];
         if (!currentAction) {
-            return ""
+            return "";
         }
-        if (currentAction.name === 'type-terminal') {
-            return currentAction.value
+        if (currentAction.name === 'terminal-type') {
+            return currentAction.value;
         }
-        return ""
-    }
-
-    const currentTerminalCommand = getCurrentTerminalCommand();
-    console.log('currentTemrinalcommand is:', currentTerminalCommand)
-    const terminalRef = useRef<HTMLDivElement>(null);
-    const xtermRef = useRef<XTerm | null>(null);
-    const currentLineRef = useRef<string>('');
+        return "";
+    };
 
     useEffect(() => {
-        if (!terminalRef.current) return;
-
-        // Initialize xterm.js
-        const term = new XTerm({
-            cursorBlink: true,
-            fontSize: 14,
-            fontFamily: 'Fira Code, monospace',
-            theme: {
-                background: '#1e1e1e',
-                foreground: '#d4d4d4',
-                cursor: '#d4d4d4',
-                black: '#1e1e1e',
-                red: '#f44747',
-                green: '#6a9955',
-                yellow: '#d7ba7d',
-                blue: '#569cd6',
-                magenta: '#c586c0',
-                cyan: '#4dc9b0',
-                white: '#d4d4d4',
-            },
-            allowTransparency: true,
-        });
-
-        // Store refs
-        xtermRef.current = term;
-
-        // Open terminal in the container
-        term.open(terminalRef.current);
-
-        // Write initial prompt
-        term.write(`\r\n${defaultPrompt}`);
-
-        // Handle initial command if provided
-        if (currentTerminalCommand) {
-            term.write(currentTerminalCommand);
-            currentLineRef.current = currentTerminalCommand;
+        const currentCommand = getCurrentTerminalCommand();
+        if (currentCommand) {
+            setDisplayText(defaultPrompt + currentCommand);
+        } else {
+            setDisplayText(defaultPrompt);
         }
-
-        // Handle window resize
-        const handleResize = () => {
-            // TODO: Resize xterm.js
-        };
-
-        window.addEventListener('resize', handleResize);
-
-        // Cleanup
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            term.dispose();
-        };
-    }, [currentTerminalCommand]);
+    }, [actionIndex, actions]);
 
     return (
         <div
-            ref={terminalRef}
-            className={`min-h-[200px] bg-[#1e1e1e] ${className}`}
-            style={{ padding: '8px' }}
-        />
+            data-codevideo-id="terminal"
+            className={`min-h-[200px] bg-zinc-900 text-zinc-300 font-mono p-2 
+                       relative overflow-hidden rounded ${className}`}
+        >
+            <div className="whitespace-pre-wrap break-words">
+                {displayText}
+                <span className="animate-pulse inline-block w-2 h-4 bg-zinc-300 ml-1">
+                </span>
+            </div>
+        </div>
     );
-};
+}

@@ -3,8 +3,12 @@ import Editor, { Monaco, loader } from "@monaco-editor/react";
 import Monokai from "monaco-themes/themes/Monokai.json";
 import * as monaco from "monaco-editor";
 import { useEffect, useRef } from "react";
+import { speakText } from "../../../../utils/speakText";
 import { IAction } from "@fullstackcraftllc/codevideo-types";
-import { speakText } from "../../utils/speakText";
+import { ActionValidationStats } from "../ActionValidationStats";
+import { useAppSelector } from "../../../../hooks/useAppSelector";
+import { useAppDispatch } from "../../../../hooks/useAppDispatch";
+import { setDraftActionsString } from "../../../../store/editorSlice";
 
 export const executeActionsWithMonacoEditor = async (
   editor: React.MutableRefObject<
@@ -26,50 +30,50 @@ export const executeActionsWithMonacoEditor = async (
       continue;
     }
     switch (action.name) {
-      case "type-editor":
+      case "editor-type":
         const text = action.value;
         for (let i = 0; i < text.length; i++) {
           editorInstance.trigger("keyboard", "type", { text: text[i] });
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         break;
-      case "backspace":
+      case "editor-backspace":
         const count = parseInt(action.value);
         for (let i = 0; i < count; i++) {
           editorInstance.trigger("1", "deleteLeft", null);
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
         break;
-      case "speak-before":
+      case "author-speak-before":
         await speakText(action.value);
         break;
-      case "speak-after":
+      case "author-speak-after":
         await speakText(action.value);
         break;
-      case "speak-during":
+      case "author-speak-during":
         await speakText(action.value);
         break;
-      case "arrow-up":
+      case "editor-arrow-up":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(38),
         });
         break;
-      case "arrow-down":
+      case "editor-arrow-down":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(40),
         });
         break;
-      case "arrow-left":
+      case "editor-arrow-left":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(37),
         });
         break;
-      case "arrow-right":
+      case "editor-arrow-right":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(39),
         });
         break;
-      case "enter":
+      case "editor-enter":
         editorInstance.trigger("keyboard", "type", {
           text: String.fromCharCode(13),
         });
@@ -82,28 +86,53 @@ export const executeActionsWithMonacoEditor = async (
   }
 };
 
-export interface ISimpleEditorProps {
-  path: string;
-  language: string;
-  tokenizerCode: string;
-  focus: boolean;
-  onChangeCode?: (code: string | undefined) => void;
-  value?: string;
-  withCard?: boolean;
-}
-
 // use local static files
 loader.config({ paths: { vs: "/vs" } });
-export function SimpleEditor(props: ISimpleEditorProps) {
-  const { path, language, value, tokenizerCode, focus, onChangeCode, withCard } =
-    props;
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  useEffect(() => {
-    if (focus && editorRef.current) {
-      editorRef.current.focus();
+
+// to get proper tokenizing, we need to feed monaco an initial code snippet - we do this based on the language and throw if we don't support that language
+const resolveTokenizerCodeSnippet = (language: string) => {
+  switch (language) {
+    case "javascript":
+      return "const code = 'Hello, World!';";
+    case "typescript":
+      return "const code: string = 'Hello, World!';";
+    case "json":
+      return `{
+  "code": "Hello, World!"
+}`;
+    case "rust":
+      return `fn main() {
+    println!("Hello, World!");
+
+}`;
+    case "python":
+      return `print("Hello, World!")`;
+
+    case "go":
+      return `package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}`;
+    case "java":
+      return `public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
     }
-  }, [focus]);
+}`;
+    default:
+      throw new Error(`Language ${language} not supported`);
+  }
+}
+
+export function ActionJsonEditor() {
+  const { actionsString } = useAppSelector((state) => state.editor);
+  const dispatch = useAppDispatch();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const tokenizerCode = resolveTokenizerCodeSnippet("json");
 
   const handleOnMount = (
     _editor: monaco.editor.IStandaloneCodeEditor,
@@ -119,41 +148,38 @@ export function SimpleEditor(props: ISimpleEditorProps) {
 
     if (typeof window !== "undefined") {
       setTimeout(() => {
-        (window as any).monaco.editor.tokenize(tokenizerCode, language);
+        (window as any).monaco.editor.tokenize(tokenizerCode, "json");
       }, 1000);
     }
   };
 
   const editor = (
-    <Editor
-      path={path}
-      height="500px"
-      defaultLanguage={language}
-      language={language}
-      value={value}
-      options={{
-        minimap: { enabled: false },
-        scrollBeyondLastLine: false,
-        fontFamily: "Fira Code",
-        fontSize: 13,
-        fontLigatures: true,
-        lineNumbers: "off",
-        folding: true,
-        automaticLayout: true,
-        autoIndent: "full",
-      }}
-      onMount={handleOnMount}
-      onChange={onChangeCode}
-    />
+    <div className="flex flex-col">
+      <Editor
+        path={"json/"}
+        height="500px"
+        defaultLanguage={"json"}
+        language={"json"}
+        value={actionsString}
+        options={{
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          fontFamily: "Fira Code",
+          fontSize: 13,
+          fontLigatures: true,
+          lineNumbers: "off",
+          folding: true,
+          automaticLayout: true,
+          autoIndent: "full",
+        }}
+        onMount={handleOnMount}
+        onChange={(newValue) => {
+          // Always update the editor value, but validation happens in the effect
+          dispatch(setDraftActionsString(newValue));
+        }}
+      />
+    </div>
   );
-
-  if (withCard) {
-    return (
-      <div className="rounded-lg bg-white shadow-sm p-4 border border-gray-200">
-        {editor}
-      </div>
-    );
-  }
 
   return editor;
 }
