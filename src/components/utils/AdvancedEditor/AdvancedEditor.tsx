@@ -59,17 +59,17 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
     currentActions[currentActionIndex].value : null;
 
   const handleEditorDidMount = (
-    editor: monaco.editor.IStandaloneCodeEditor,
+    monacoEditor: monaco.editor.IStandaloneCodeEditor,
     monaco: Monaco
   ) => {
-    monacoEditorRef.current = editor;
+    monacoEditorRef.current = monacoEditor;
 
     // Set the model with the current code and language
     const model = monaco.editor.createModel(
       currentCode,
       primaryLanguage
     );
-    editor.setModel(model);
+    monacoEditor.setModel(model);
 
     // Ensure theme is applied after a short delay
     monaco.editor.defineTheme(
@@ -101,25 +101,27 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
 
   // highlight effect (only when not recording)
   useEffect(() => {
-    if (!isRecording && monacoEditorRef.current && currentHighlightCoordinates) {
-      monacoEditorRef.current.createDecorationsCollection([
-        {
-          range: new monaco.Range(
-            currentHighlightCoordinates.start.row,
-            currentHighlightCoordinates.start.col,
-            currentHighlightCoordinates.end.row,
-            currentHighlightCoordinates.end.col
-          ),
-          options: { inlineClassName: 'highlighted-code' }
-        }
-      ]);
+    // if (typeof window !== "undefined" && !isRecording && monacoEditorRef.current && currentHighlightCoordinates) {
+    // TODO: this line breaks SSR:
+    // maybe we can hack our own highlight functionality...
+    //   monacoEditorRef.current.createDecorationsCollection([
+    //     {
+    //       range: new monaco.Range(
+    //         currentHighlightCoordinates.start.row,
+    //         currentHighlightCoordinates.start.col,
+    //         currentHighlightCoordinates.end.row,
+    //         currentHighlightCoordinates.end.col
+    //       ),
+    //       options: { inlineClassName: 'highlighted-code' }
+    //     }
+    //   ]);
 
-      // log out decorations for debugging
-      // console.log(monacoEditorRef.current.getVisibleRanges());
+    //   // log out decorations for debugging
+    //   // console.log(monacoEditorRef.current.getVisibleRanges());
 
-      // trigger a focus to actually highlight where the highlight is
-      // monacoEditorRef.current.focus();
-    }
+    //   // trigger a focus to actually highlight where the highlight is
+    //   // monacoEditorRef.current.focus();
+    // }
   }, [currentHighlightCoordinates]);
 
   return (
