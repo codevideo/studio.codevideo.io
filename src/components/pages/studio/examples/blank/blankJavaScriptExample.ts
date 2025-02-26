@@ -13,21 +13,39 @@ export const blankJavaScriptExample: ICourse = {
         name: 'Blank JavaScript Project',
         description: 'Start with a blank JavaScript project',
         initialSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'index.js': {
-                type: 'file',
-                language: 'javascript',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'index.js': {
+                    type: 'file',
+                    language: 'javascript',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'index.js',
-            openFiles: ['index.js'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/index.js',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -45,25 +63,45 @@ export const blankJavaScriptExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         finalSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'index.js': {
-                type: 'file',
-                language: 'javascript',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'index.js': {
+                    type: 'file',
+                    language: 'javascript',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'index.js',
-            openFiles: ['index.js'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/index.js',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -81,7 +119,9 @@ export const blankJavaScriptExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         actions: blankJavaScriptExampleActions

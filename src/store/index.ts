@@ -1,13 +1,17 @@
 
 import { configureStore } from '@reduxjs/toolkit'
 import editorSlice from './editorSlice'
+import recordingSlice from './recordingSlice'
 import userSlice from './userSlice'
+import modalSlice from './modalSlice'
 
 const createStore = () =>
     configureStore({
         reducer: {
             editor: editorSlice,
-            user: userSlice
+            recording: recordingSlice,
+            user: userSlice,
+            modal: modalSlice,
         }
     })
 

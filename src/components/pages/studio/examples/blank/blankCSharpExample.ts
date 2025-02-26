@@ -11,21 +11,39 @@ export const blankCSharpExample: ICourse = {
         name: 'Blank C# Project',
         description: 'Start with a blank C# project',
         initialSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'Program.cs': {
-                type: 'file',
-                language: 'csharp',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'Program.cs': {
+                    type: 'file',
+                    language: 'csharp',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'Program.cs',
-            openFiles: ['Program.cs'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/Program.cs',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -43,25 +61,45 @@ export const blankCSharpExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         finalSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'Program.cs': {
-                type: 'file',
-                language: 'csharp',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'Program.cs': {
+                    type: 'file',
+                    language: 'csharp',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'Program.cs',
-            openFiles: ['Program.cs'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/Program.cs',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -79,7 +117,9 @@ export const blankCSharpExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         actions: []

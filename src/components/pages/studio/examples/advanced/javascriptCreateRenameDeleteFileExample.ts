@@ -3,7 +3,7 @@ import { javascriptCreateRenameDeleteFileExampleActions } from "../actionsExampl
 
 export const javascriptCreateRenameDeleteFileExample: ICourse = {
     id: 'javascript-create-rename-delete-file',
-    name: 'JavaScript Create, Rename, and Delete File Example',
+    name: 'JavaScript File Operations Example',
     description: 'Learn how to create, rename, and delete files in JavaScript',
     primaryLanguage: 'javascript',
     lessons: [
@@ -12,7 +12,7 @@ export const javascriptCreateRenameDeleteFileExample: ICourse = {
         name: 'JavaScript Create, Rename, and Delete File Example',
         description: 'Learn how to create, rename, and delete files in JavaScript',
         initialSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -24,16 +24,26 @@ export const javascriptCreateRenameDeleteFileExample: ICourse = {
                     language: 'javascript',
                     content: '// index.js\n',
                     caretPosition: { row: 0, col: 0 },
-                    cursorPosition: { x: 0, y: 0 }
                   }
                 }
               }
             },
-            currentFile: 'src/index.js',
-            openFiles: ['src/index.js'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/index.js',
+              content: '// index.js\n',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+          }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''}
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -51,50 +61,9 @@ export const javascriptCreateRenameDeleteFileExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
-          }
-        },
-        finalSnapshot: {
-          editorSnapshot: {
-            fileStructure: {
-              'src': {
-                type: 'directory',
-                content: '',
-                collapsed: false,
-                children: {
-                  'index.js': {
-                    type: 'file',
-                    language: 'javascript',
-                    content: '// index.js\n',
-                    caretPosition: { row: 0, col: 0 },
-                    cursorPosition: { x: 0, y: 0 }
-                  }
-                }
-              }
-            },
-            currentFile: 'src/index.js',
-            openFiles: ['src/index.js'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
-          },
-          mouseSnapshot: {
-            x: 0,
-            y: 0,
-            timestamp: 0,
-            type: 'move',
-            buttonStates: {
-              left: false,
-              right: false,
-              middle: false,
-            },
-            scrollPosition: {
-              x: 0,
-              y: 0
-            },
-          },
-          authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         actions: javascriptCreateRenameDeleteFileExampleActions

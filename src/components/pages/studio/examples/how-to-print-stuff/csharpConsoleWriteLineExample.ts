@@ -12,7 +12,7 @@ export const csharpConsoleWriteLineExample: ICourse = {
         name: 'C# Console.WriteLine Example',
         description: 'Learn how to use Console.WriteLine in C#',
         initialSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -24,16 +24,27 @@ export const csharpConsoleWriteLineExample: ICourse = {
                     language: 'csharp',
                     content: '// Program.cs\n',
                     caretPosition: { row: 0, col: 0 },
-                    cursorPosition: { x: 0, y: 0 }
                   }
                 }
               }
             },
-            currentFile: 'src/Program.cs',
-            openFiles: ['src/Program.cs'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/Program.cs',
+              content: '// Program.cs\n',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -51,11 +62,13 @@ export const csharpConsoleWriteLineExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         finalSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -67,16 +80,27 @@ export const csharpConsoleWriteLineExample: ICourse = {
                     language: 'csharp',
                     content: '// Program.cs\n',
                     caretPosition: { row: 0, col: 0 },
-                    cursorPosition: { x: 0, y: 0 }
                   }
                 }
               }
             },
-            currentFile: 'src/Program.cs',
-            openFiles: ['src/Program.cs'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/Program.cs',
+              content: '// Program.cs\n',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -94,7 +118,9 @@ export const csharpConsoleWriteLineExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         actions: cSharpExampleActions

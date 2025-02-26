@@ -1,18 +1,14 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { ActionEditor } from './ActionEditor/ActionEditor';
-import { SimpleEditor } from './SimpleEditor';
-import { useAppSelector } from '../../hooks/useAppSelector';
-import { setActions, setActionsString, setJumpFlag } from '../../store/editorSlice';
-import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { ActionJsonEditor } from './ActionJsonEditor/ActionJsonEditor';
+import { useAppSelector } from '../../../hooks/useAppSelector';
+import { setJumpFlag } from '../../../store/editorSlice';
+import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import ActionGUIEditor from './ActionGUIEditor/ActionGUIEditor';
+import { ActionValidationStats } from './ActionValidationStats';
 
-export interface IToggleEditorProps {
-    tokenizerCode: string;
-}
-
-export function ToggleEditor(props: IToggleEditorProps) {
-    const { tokenizerCode } = props;
-    const { actions, actionsString, jumpFlag } = useAppSelector((state) => state.editor);
+export function ToggleEditor() {
+    const { currentActions, jumpFlag } = useAppSelector((state) => state.editor);
     const dispatch = useAppDispatch();
     const [editorMode, setEditorMode] = useState(true);
 
@@ -51,40 +47,18 @@ export function ToggleEditor(props: IToggleEditorProps) {
                 </div>
                 <button
                     onClick={onClickJumpToCurrent}
-                    disabled={actions.length === 0}
+                    disabled={currentActions.length === 0}
                     className="px-3 py-2 rounded-lg bg-green-700 text-green-50 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Jump to Current
+                    Jump to Current Action
                 </button>
             </div>
             {editorMode ? (
-                <ActionEditor />
+                <ActionGUIEditor />
             ) : (
-                <SimpleEditor
-                    path="json/"
-                    value={actionsString}
-                    language="json"
-                    tokenizerCode={tokenizerCode}
-                    onChangeCode={(code) => {
-                        if (code) {
-                            dispatch(setActionsString(code));
-                            try {
-                                const parsedActions = JSON.parse(code);
-                                if (Array.isArray(parsedActions)) {
-                                    dispatch(setActions(parsedActions));
-                                }
-                            } catch (e) {
-                                // try to fix the error
-                                const fixedJson = code.replace(/\\/g, "\\\\");
-                                dispatch(setActionsString(fixedJson));
-                                dispatch(setActions(fixedJson));
-                            }
-                        }
-                    }}
-                    focus={false}
-                    withCard={false}
-                />
+                <ActionJsonEditor />
             )}
+            <ActionValidationStats editorMode={editorMode} />
         </div>
     );
 }

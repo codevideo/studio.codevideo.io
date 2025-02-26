@@ -11,21 +11,39 @@ export const blankGoExample: ICourse = {
         name: 'Blank Go Project',
         description: 'Start with a blank Go project',
         initialSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'main.go': {
-                type: 'file',
-                language: 'go',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'main.go': {
+                    type: 'file',
+                    language: 'go',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'main.go',
-            openFiles: ['main.go'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/main.go',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -43,25 +61,45 @@ export const blankGoExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         finalSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'main.go': {
-                type: 'file',
-                language: 'go',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'main.go': {
+                    type: 'file',
+                    language: 'go',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'main.go',
-            openFiles: ['main.go'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/main.go',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -79,7 +117,9 @@ export const blankGoExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         actions: []

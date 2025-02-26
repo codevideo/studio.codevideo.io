@@ -10,7 +10,23 @@ export const javaScriptExampleActions: Array<IAction> = [
     },
     {
         "name": "author-speak-before",
-        "value": "First, to make it clear that this is a JavaScript file, I'll just put a comment here"
+        "value": "First, let's make our JavaScript file."
+    },
+    {
+        "name": "file-explorer-create-file",
+        "value": "src/index.js"
+    },
+    {
+        "name": "file-explorer-open-file",
+        "value": "src/index.js"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "And let's get right into the editor."
+    },
+    {
+        "name": "mouse-click-editor",
+        "value": "1"
     },
     {
         "name": "editor-type",
@@ -433,15 +449,31 @@ export const advancedRustExampleActions: Array<IAction> = [
     },
     {
         "name": "author-speak-before",
-        "value": "Let's start by looking at the problem. We need to simulate some strange stones that change every time we blink..."
+        "value": "To get started, let's make a main.rs file in the src directory."
     },
     {
-        "name": "editor-type",
-        "value": "// First, let's implement a naive solution for Part 1"
+        "name": "file-explorer-create-folder",
+        "value": "src"
     },
     {
-        "name": "editor-enter",
-        "value": "1"
+        "name": "file-explorer-create-file",
+        "value": "src/main.rs"
+    },
+    {
+        "name": "file-explorer-open-file",
+        "value": "src/main.rs"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Let's take a look at the problem now, titled 'Plutonian Pebbles'. We need to simulate some strange stones that change every time we blink..."
+    },
+    {
+        "name": "external-browser",
+        "value": "https://adventofcode.com/2024/day/11"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "We can also see there are three rules for how the stones change. Let's start by implementing a naive solution for Part 1..."
     },
     {
         "name": "editor-type",

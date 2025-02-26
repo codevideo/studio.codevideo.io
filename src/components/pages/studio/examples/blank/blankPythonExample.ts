@@ -11,21 +11,39 @@ export const blankPythonExample: ICourse = {
             name: 'Blank Python Project',
             description: 'Start with a blank Python project',
             initialSnapshot: {
-                editorSnapshot: {
+                fileExplorerSnapshot: {
                     fileStructure: {
-                        'main.py': {
-                            type: 'file',
-                            language: 'python',
+                        'src': {
+                            type: 'directory',
                             content: '',
-                            caretPosition: { row: 0, col: 0 },
-                            cursorPosition: { x: 0, y: 0 }
+                            collapsed: false,
+                            children: {
+                                'main.py': {
+                                    type: 'file',
+                                    language: 'python',
+                                    content: '',
+                                    caretPosition: { row: 0, col: 0 },
+                                }
+                            }
                         }
                     },
-                    currentFile: 'main.py',
-                    openFiles: ['main.py'],
-                    terminalContents: null,
-                    currentCaretPosition: { row: 0, col: 0 },
-                    currentHighlightCoordinates: null
+                },
+                editorSnapshot: {
+                    editors: [{
+                        isActive: true,
+                        isSaved: true,
+                        filename: 'src/main.py',
+                        content: '',
+                        caretPosition: { row: 0, col: 0 },
+                        highlightCoordinates: null
+                    }]
+                },
+                terminalSnapshot: {
+                    terminals: [
+                        {
+                            content: ''
+                        }
+                    ]
                 },
                 mouseSnapshot: {
                     x: 0,
@@ -43,25 +61,45 @@ export const blankPythonExample: ICourse = {
                     },
                 },
                 authorSnapshot: {
-                    currentSpeechCaption: ''
+                    authors: [
+                        {currentSpeechCaption: ''}
+                    ]
                 }
             },
             finalSnapshot: {
-                editorSnapshot: {
+                fileExplorerSnapshot: {
                     fileStructure: {
-                        'main.py': {
-                            type: 'file',
-                            language: 'python',
+                        'src': {
+                            type: 'directory',
                             content: '',
-                            caretPosition: { row: 0, col: 0 },
-                            cursorPosition: { x: 0, y: 0 }
+                            collapsed: false,
+                            children: {
+                                'main.py': {
+                                    type: 'file',
+                                    language: 'python',
+                                    content: '',
+                                    caretPosition: { row: 0, col: 0 },
+                                }
+                            }
                         }
                     },
-                    currentFile: 'main.py',
-                    openFiles: ['main.py'],
-                    terminalContents: null,
-                    currentCaretPosition: { row: 0, col: 0 },
-                    currentHighlightCoordinates: null
+                },
+                editorSnapshot: {
+                    editors: [{
+                        isActive: true,
+                        isSaved: true,
+                        filename: 'src/main.py',
+                        content: '',
+                        caretPosition: { row: 0, col: 0 },
+                        highlightCoordinates: null
+                    }]
+                },
+                terminalSnapshot: {
+                    terminals: [
+                        {
+                            content: ''
+                        }
+                    ]
                 },
                 mouseSnapshot: {
                     x: 0,
@@ -79,7 +117,9 @@ export const blankPythonExample: ICourse = {
                     },
                 },
                 authorSnapshot: {
-                    currentSpeechCaption: ''
+                    authors: [
+                        {currentSpeechCaption: ''}
+                    ]
                 }
             },
             actions: []

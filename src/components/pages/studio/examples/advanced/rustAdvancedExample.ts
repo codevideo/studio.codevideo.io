@@ -12,21 +12,39 @@ export const rustAdvancedExample: ICourse = {
         name: 'Advanced Rust Lesson',
         description: 'Explore an advanced Rust lesson',
         initialSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'main.rs': {
-                type: 'file',
-                language: 'rust',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'main.rs': {
+                    type: 'file',
+                    language: 'rust',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'main.rs',
-            openFiles: ['main.rs'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/main.rs',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -44,25 +62,45 @@ export const rustAdvancedExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         finalSnapshot: {
-          editorSnapshot: {
+          fileExplorerSnapshot: {
             fileStructure: {
-              'main.rs': {
-                type: 'file',
-                language: 'rust',
+              'src': {
+                type: 'directory',
                 content: '',
-                caretPosition: { row: 0, col: 0 },
-                cursorPosition: { x: 0, y: 0 }
+                collapsed: false,
+                children: {
+                  'main.rs': {
+                    type: 'file',
+                    language: 'rust',
+                    content: '',
+                    caretPosition: { row: 0, col: 0 },
+                  }
+                }
               }
             },
-            currentFile: 'main.rs',
-            openFiles: ['main.rs'],
-            terminalContents: null,
-            currentCaretPosition: { row: 0, col: 0 },
-            currentHighlightCoordinates: null
+          },
+          editorSnapshot: {
+            editors: [{
+              isActive: true,
+              isSaved: true,
+              filename: 'src/main.rs',
+              content: '',
+              caretPosition: { row: 0, col: 0 },
+              highlightCoordinates: null
+            }]
+          },
+          terminalSnapshot: {
+            terminals: [
+              {
+                content: ''
+              }
+            ]
           },
           mouseSnapshot: {
             x: 0,
@@ -80,7 +118,9 @@ export const rustAdvancedExample: ICourse = {
             },
           },
           authorSnapshot: {
-            currentSpeechCaption: ''
+            authors: [
+              {currentSpeechCaption: ''}
+            ]
           }
         },
         actions: advancedRustExampleActions
