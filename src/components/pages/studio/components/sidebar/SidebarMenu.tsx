@@ -1,5 +1,16 @@
 import * as React from 'react';
-import { useState } from 'react';
+import {
+    Box,
+    Flex,
+    Heading,
+    Text,
+    Button,
+    Code,
+    ScrollArea,
+    Dialog
+} from '@radix-ui/themes';
+import { Cross2Icon } from '@radix-ui/react-icons';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { ProjectTypeConverter } from './ProjectTypeConverter';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
@@ -13,87 +24,119 @@ import { firstCharacterUppercase } from '../../../../../utils/firstCharacterUppe
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
+
     const onCreateNewProject = () => {
         dispatch(createNewProject());
         dispatch(setIsSidebarOpen(false));
     }
 
     if (!currentProject) {
-        return <></>
+        return null;
     }
 
-    let currentProjectTitle = ''
+    let currentProjectTitle = '';
     if (isCourse(currentProject?.project)) {
         currentProjectTitle = currentProject.project.name;
-    }
-    if (isLesson(currentProject?.project)) {
-        currentProjectTitle = currentProject.project.name
-    }
-    if (isActions(currentProject?.project)) {
-        currentProjectTitle = '<no name>'
+    } else if (isLesson(currentProject?.project)) {
+        currentProjectTitle = currentProject.project.name;
+    } else if (isActions(currentProject?.project)) {
+        currentProjectTitle = '<no name>';
     }
 
     return (
-        <div className="relative">
+        <Dialog.Root open={isSidebarOpen} onOpenChange={(open) => dispatch(setIsSidebarOpen(open))}>
 
-            {/* Sidebar */}
-            <div
-                className={`fixed top-0 left-0 h-full w-96 bg-slate-900 transform transition-transform duration-200 ease-in-out z-40 ${
-                    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                }`}
-            >
-                <div className="p-6 pt-20 space-y-6">
-                    {/* Project Type Section */}
-                    <div className="space-y-2">
-                        <h3 className="text-white text-lg font-semibold mb-3">Project Info</h3>
-                        <div className="text-slate-300 mb-2">Current Project: <code>{currentProjectTitle}</code></div>
-                        <div className="text-slate-300 mb-2">Project type: <code>{currentProject?.projectType}</code></div>
-                    </div>
+            {/* Sidebar content */}
+            <Dialog.Content style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                height: '100%',
+                width: '320px',
+                backgroundColor: 'var(--gray-1)',
+                zIndex: 40,
+                boxShadow: 'var(--shadow-5)'
+            }}>
+                <Dialog.Title >
+                    <VisuallyHidden>Project Sidebar</VisuallyHidden>
+                </Dialog.Title>
 
-                    {/* Metadata Section */}
-                    {currentProject.projectType !== 'actions' &&
-                    <div className="space-y-2">
-                        <h3 className="text-white text-lg font-semibold mb-3">Edit {firstCharacterUppercase(currentProject.projectType)} Metadata</h3>
-                        <MetadataEditor />
-                    </div>}
-
-                    {/* Export Section */}
-                    <div className="space-y-2">
-                        <h3 className="text-white text-lg font-semibold mb-3">Export Project</h3>
-                        <ExportDropdown />
-                    </div>
-
-                    {/* Convert Section */}
-                    <div className="space-y-2">
-                        <h3 className="text-white text-lg font-semibold mb-3">Convert Project</h3>
-                        <ProjectTypeConverter />
-                    </div>
-
-                    {/* Select Other Project */}
-                    <div className="space-y-2">
-                        <h3 className="text-white text-lg font-semibold mb-3">Your Projects</h3>
-                        <ProjectSelector />
-                    </div>
-
-                    {/* Other Actions */}
-                    <div className="space-y-2">
-                        <button
-                            onClick={onCreateNewProject}
-                            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                <Box position="relative" height="100%">
+                    {/* Close button */}
+                    <Dialog.Close>
+                        <Button
+                            onClick={() => dispatch(setIsSidebarOpen(false))}
+                            variant="ghost"
+                            style={{
+                                position: 'absolute',
+                                top: '16px',
+                                right: '16px',
+                                cursor: 'pointer'
+                            }}
                         >
-                            Create New Project
-                        </button>
-                    </div>
-                </div>
-            </div>
+                            <Cross2Icon />
+                        </Button>
+                    </Dialog.Close>
 
-            {/* Overlay */}
-            {isSidebarOpen && (
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-30"
-                    onClick={() => dispatch(setIsSidebarOpen(false))}
-                />
-            )}
-        </div>
+                    <ScrollArea style={{ height: '100%' }}>
+                        <Flex
+                            direction="column"
+                            gap="6"
+                            style={{ paddingTop: '5rem' }}
+                        >
+                            {/* Project Type Section */}
+                            <Flex direction="column" gap="2">
+                                <Heading size="4" mb="3">Project Info</Heading>
+                                <Text mb="2">
+                                    Current Project: 
+                                </Text>
+                                <Code>{currentProjectTitle}</Code>
+                                <Text mb="2">
+                                    Project type: 
+                                </Text>
+                                <Code>{currentProject?.projectType}</Code>
+                            </Flex>
+
+                            {/* Metadata Section */}
+                            {currentProject.projectType !== 'actions' && (
+                                <Flex direction="column" gap="2">
+                                    <Heading size="4" mb="3">
+                                        Edit {firstCharacterUppercase(currentProject.projectType)} Metadata
+                                    </Heading>
+                                    <MetadataEditor />
+                                </Flex>
+                            )}
+
+                            {/* Export Section */}
+                            <Flex direction="column" gap="2">
+                                <Heading size="4" mb="3">Export Project</Heading>
+                                <ExportDropdown />
+                            </Flex>
+
+                            {/* Convert Section */}
+                            <Flex direction="column" gap="2">
+                                <Heading size="4" mb="3">Convert Project</Heading>
+                                <ProjectTypeConverter />
+                            </Flex>
+
+                            {/* Select Other Project */}
+                            <Flex direction="column" gap="2">
+                                <Heading size="4" mb="3">Your Projects</Heading>
+                                <ProjectSelector />
+                            </Flex>
+
+                            {/* Other Actions */}
+                            <Box>
+                                <Button
+                                    onClick={onCreateNewProject}
+                                                                >
+                                    Create New Project
+                                </Button>
+                            </Box>
+                        </Flex>
+                    </ScrollArea>
+                </Box>
+            </Dialog.Content>
+        </Dialog.Root>
     );
 }

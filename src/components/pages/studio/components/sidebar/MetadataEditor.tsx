@@ -3,6 +3,14 @@ import { useState } from "react";
 import { useAppSelector } from "../../../../../hooks/useAppSelector";
 import { CourseMetadataForm } from "./CourseMetadataForm";
 import { LessonMetadataForm } from "./LessonMetadataForm";
+import { 
+  Box,
+  Button,
+  Dialog,
+  Flex,
+  Text,
+  Card
+} from '@radix-ui/themes';
 
 export const MetadataEditor: React.FC = () => {
     const { currentProject } = useAppSelector(state => state.editor);
@@ -13,41 +21,44 @@ export const MetadataEditor: React.FC = () => {
     }
 
     return (
-        <div>
+        <Box>
             {/* Edit Metadata Button */}
-            <button
+            <Button
                 onClick={() => setIsOpen(true)}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                variant="solid"
+                color="mint"
             >
                 Edit Metadata
-            </button>
+            </Button>
 
             {/* Metadata Form Modal */}
-            {isOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-                    <div className="relative w-full max-w-2xl">
+            <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+                <Dialog.Content >
+                    <Box>
                         {currentProject?.projectType === 'lesson' ? (
                             <LessonMetadataForm forCourse={false} onClickCancel={onClickCancel} />
                         ) : currentProject?.projectType === 'course' ? (
                             <CourseMetadataForm onClickCancel={onClickCancel} />
                         ) : (
-                            <div className="bg-white dark:bg-slate-800 rounded-lg p-6">
-                                <div className="text-center text-slate-600 dark:text-slate-300">
-                                    Switch to "Lesson" or "Course" mode to edit metadata
-                                </div>
-                                <div className="flex justify-end mt-4">
-                                    <button
-                                        onClick={onClickCancel}
-                                        className="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-md"
-                                    >
-                                        Close
-                                    </button>
-                                </div>
-                            </div>
+                            <Card >
+                                <Flex direction="column" gap="4">
+                                    <Text align="center" >
+                                        Switch to "Lesson" or "Course" mode to edit metadata
+                                    </Text>
+                                    <Flex justify="end" mt="4">
+                                        <Button
+                                            onClick={onClickCancel}
+                                            variant="surface"
+                                        >
+                                            Close
+                                        </Button>
+                                    </Flex>
+                                </Flex>
+                            </Card>
                         )}
-                    </div>
-                </div>
-            )}
-        </div>
+                    </Box>
+                </Dialog.Content>
+            </Dialog.Root>
+        </Box>
     );
 };

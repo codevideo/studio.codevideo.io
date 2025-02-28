@@ -1,42 +1,66 @@
 import * as React from 'react';
-import { IAction } from '@fullstackcraftllc/codevideo-types';
 import { useAppDispatch } from '../../../../hooks/useAppDispatch';
 import { setActions, setCurrentActionIndex, setDraftActionsString } from '../../../../store/editorSlice';
+import { Flex, Button, Box } from '@radix-ui/themes';
+import { useAppSelector } from '../../../../hooks/useAppSelector';
 
 export interface IInsertStepButtonProps {
-    actions: IAction[];
-    index: number;
+    buttonIndex: number;
 }
 
 export function InsertStepButton(props: IInsertStepButtonProps) {
-    const { actions, index } = props;
+    const { buttonIndex } = props;
+    const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
 
     const handleInsertStep = () => {
-        const newActions = actions
-            .slice(0, index + 1)
+        const currentAction = currentActions[currentActionIndex];
+        const newIndex = currentActions.length === 0 ? 0 : currentActionIndex + 1;
+        const newActions = currentActions
+            .slice(0, newIndex)
             .concat([
-                { name: "author-speak-before", value: "My new speaking action" },
-                ...actions.slice(index + 1),
+                { name: currentAction?.name || 'author-speak-before', value: currentAction?.value || 'My new speak action' },
+                ...currentActions.slice(newIndex),
             ]);
         dispatch(setActions(newActions));
-        dispatch(setCurrentActionIndex(index));
+        dispatch(setCurrentActionIndex(newIndex));
         // even though we don't deal directly with the draftActionsString in this component, we still need to update it so it triggers the stats component
         dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
     };
 
+    const getButtonText = () => {
+        // at the first or last index, we want to add a new action
+        if (currentActions.length === 0 || buttonIndex === currentActions.length - 1) {
+            return '+ Add Action';
+        }
+        // otherwise, we want to insert a new action inbetween
+        return '+ Insert Action';
+    }
+
+    const buttonText = getButtonText();
+
     return (
         <>
-            {actions.length === 0 && <div className="flex justify-center items-center">Add your first step!</div>}
-            <div className="flex justify-center items-center gap-1 -mb-2 -mt-2 relative z-10">
-                <button
-                    title="Insert step"
-                    className="w-6 h-6 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors flex items-center justify-center text-lg leading-none"
-                    onClick={handleInsertStep}
-                >
-                    +
-                </button>
-            </div>
+            {currentActions.length === 0 && (
+                <Flex justify="center" align="center">
+                    Add your first step!
+                </Flex>
+            )}
+            <Flex
+                justify="center"
+                align="center"
+                gap="1"
+            >
+                <Box my="1">
+                    <Button
+                        variant="soft"
+                        color="mint"
+                        onClick={handleInsertStep}
+                    >
+                        {buttonText}
+                    </Button>
+                </Box>
+            </Flex>
         </>
     );
 }

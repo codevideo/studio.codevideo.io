@@ -1,3 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes highlightCard {
+    0% {
+        background-color: var(--mint-6);
+    }
+
+    50% {
+        background-color: var(--mint-5);
+    }
+
+    100% {
+        background-color: var(--mint-2);
+    }
+}
+
+.highlight-animation {
+    animation: highlightCard 1.5s ease;
+}

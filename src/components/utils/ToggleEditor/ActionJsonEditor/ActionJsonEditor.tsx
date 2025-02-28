@@ -2,131 +2,14 @@ import * as React from "react";
 import Editor, { Monaco, loader } from "@monaco-editor/react";
 import Monokai from "monaco-themes/themes/Monokai.json";
 import * as monaco from "monaco-editor";
-import { useEffect, useRef } from "react";
-import { speakText } from "../../../../utils/speakText";
-import { IAction } from "@fullstackcraftllc/codevideo-types";
-import { ActionValidationStats } from "../ActionValidationStats";
+import { useRef } from "react";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { setDraftActionsString } from "../../../../store/editorSlice";
-
-export const executeActionsWithMonacoEditor = async (
-  editor: React.MutableRefObject<
-    monaco.editor.IStandaloneCodeEditor | undefined
-  >,
-  actions: Array<IAction>
-) => {
-  if (!editor) {
-    return;
-  }
-  const editorInstance = editor.current;
-  if (!editorInstance) {
-    return;
-  }
-
-  for (let i = 0; i < actions.length; i++) {
-    const action = actions[i];
-    if (!action) {
-      continue;
-    }
-    switch (action.name) {
-      case "editor-type":
-        const text = action.value;
-        for (let i = 0; i < text.length; i++) {
-          editorInstance.trigger("keyboard", "type", { text: text[i] });
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        break;
-      case "editor-backspace":
-        const count = parseInt(action.value);
-        for (let i = 0; i < count; i++) {
-          editorInstance.trigger("1", "deleteLeft", null);
-          await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        break;
-      case "author-speak-before":
-        await speakText(action.value);
-        break;
-      case "author-speak-after":
-        await speakText(action.value);
-        break;
-      case "author-speak-during":
-        await speakText(action.value);
-        break;
-      case "editor-arrow-up":
-        editorInstance.trigger("keyboard", "type", {
-          text: String.fromCharCode(38),
-        });
-        break;
-      case "editor-arrow-down":
-        editorInstance.trigger("keyboard", "type", {
-          text: String.fromCharCode(40),
-        });
-        break;
-      case "editor-arrow-left":
-        editorInstance.trigger("keyboard", "type", {
-          text: String.fromCharCode(37),
-        });
-        break;
-      case "editor-arrow-right":
-        editorInstance.trigger("keyboard", "type", {
-          text: String.fromCharCode(39),
-        });
-        break;
-      case "editor-enter":
-        editorInstance.trigger("keyboard", "type", {
-          text: String.fromCharCode(13),
-        });
-        break;
-      default:
-        console.log("action not found");
-        break;
-    }
-    await new Promise((resolve) => setTimeout(resolve, 100));
-  }
-};
+import { Flex } from '@radix-ui/themes';
 
 // use local static files
 loader.config({ paths: { vs: "/vs" } });
-
-
-// to get proper tokenizing, we need to feed monaco an initial code snippet - we do this based on the language and throw if we don't support that language
-const resolveTokenizerCodeSnippet = (language: string) => {
-  switch (language) {
-    case "javascript":
-      return "const code = 'Hello, World!';";
-    case "typescript":
-      return "const code: string = 'Hello, World!';";
-    case "json":
-      return `{
-  "code": "Hello, World!"
-}`;
-    case "rust":
-      return `fn main() {
-    println!("Hello, World!");
-
-}`;
-    case "python":
-      return `print("Hello, World!")`;
-
-    case "go":
-      return `package main
-
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, World!")
-}`;
-    case "java":
-      return `public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, World!");
-    }
-}`;
-    default:
-      throw new Error(`Language ${language} not supported`);
-  }
-}
 
 export function ActionJsonEditor() {
   const { actionsString } = useAppSelector((state) => state.editor);
@@ -156,10 +39,10 @@ export function ActionJsonEditor() {
   };
 
   const editor = (
-    <div className="flex flex-col">
+    <Flex direction="column" style={{ height: "640px"}}>
       <Editor
         path={"json/"}
-        height="500px"
+        height="100%"
         defaultLanguage={"json"}
         language={"json"}
         value={actionsString}
@@ -173,6 +56,9 @@ export function ActionJsonEditor() {
           folding: true,
           automaticLayout: true,
           autoIndent: "full",
+          wordWrap: "on",
+          wrappingIndent: "same",
+          wrappingStrategy: "advanced",
         }}
         onMount={handleOnMount}
         onChange={(newValue) => {
@@ -180,7 +66,7 @@ export function ActionJsonEditor() {
           dispatch(setDraftActionsString(newValue));
         }}
       />
-    </div>
+    </Flex>
   );
 
   return editor;

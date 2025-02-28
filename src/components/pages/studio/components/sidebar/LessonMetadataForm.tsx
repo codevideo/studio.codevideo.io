@@ -1,13 +1,21 @@
-import React, { act } from 'react';
+import React from 'react';
 import { ILesson } from '@fullstackcraftllc/codevideo-types';
 import { useEffect, useState } from "react";
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { addLessonToCourse, addNewLessonToProjects } from '../../../../../store/editorSlice';
 import { formatNameToSafeId } from '../../../../../utils/formatNameToSafeId';
-import { InputField } from '../../../../utils/InputField';
 import { openModal } from '../../../../../store/modalSlice';
 import { ModalTypes } from '../../../../../types/modal';
+import {
+  Text,
+  Flex,
+  Button,
+  Heading,
+  Card,
+  TextField,
+  TextArea
+} from '@radix-ui/themes';
 
 interface ILessonMetadataFormProps {
   forCourse: boolean;
@@ -32,7 +40,7 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
   useEffect(() => {
     if (lesson) {
       setLocalLesson({
-        id: `${currentLessonIndex+1}-${formatNameToSafeId(lesson.name)}`,
+        id: `${currentLessonIndex + 1}-${formatNameToSafeId(lesson.name)}`,
         name: lesson.name || '',
         description: lesson.description || '',
         actions: lesson.actions || []
@@ -65,7 +73,6 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
       return;
     }
 
-
     // Persist changes to Redux
     dispatch(addNewLessonToProjects({
       id: localLesson.id,
@@ -76,48 +83,51 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
   };
 
   return (
-    <div className='flex flex-row justify-center items-center gap-4 p-4 text-white'>
-      <div className="bg-white dark:bg-slate-800 rounded-lg p-6 max-w-lg w-full">
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-6">
+      <Card>
+        <Heading mb="3" size="4">
           Lesson Info
-        </h2>
+        </Heading>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+        <Text mb="3" as="label" htmlFor='lesson-name'>Name</Text>
+        <TextField.Root
+        mb="3"
+          id="lesson-name"
+          value={localLesson.name}
+          onChange={(e) => handleChange('name', e.target.value)}
+          placeholder="Introduction to React Hooks"
+          required
+        />
 
-          <InputField
-            label="Lesson Name"
-            id="lesson-name"
-            value={localLesson.name}
-            onChange={(value) => handleChange('name', value)}
-            placeholder="Introduction to React Hooks"
-            required
-          />
+        <Text mb="3" as="label" htmlFor="lesson-description">Description</Text>
+        <TextArea
+        mb="3"
+          id="lesson-description"
+          value={localLesson.description}
+          onChange={(e) => handleChange('description', e.target.value)}
+          placeholder="A comprehensive overview of React Hooks and their usage..."
+        />
 
-          <InputField
-            label="Description"
-            id="lesson-description"
-            value={localLesson.description}
-            onChange={(value) => handleChange('description', value)}
-            placeholder="A comprehensive overview of React Hooks and their usage..."
-            isTextarea
-          />
+        <Flex justify="end" gap="3" mt="6">
+          <Button
+            type="button"
+            onClick={onClickCancel}
+            variant="solid"
+            color="red"
+            size="2"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleSave}
+            variant="solid"
+            color="mint"
+            size="2"
+          >
+            {forCourse ? "Add Lesson to Course" : "Save Lesson"}
+          </Button>
+        </Flex>
+      </Card>
 
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              onClick={onClickCancel}
-              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {forCourse ? "Add to Course" : "Save Lesson"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
   );
 };

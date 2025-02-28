@@ -1,6 +1,7 @@
 
 import { IAction, ICourse, ILesson, isActions, isCourse, isLesson, Project, ProjectType } from "@fullstackcraftllc/codevideo-types";
 import { createSlice } from "@reduxjs/toolkit";
+import { pythonPrintExample } from "../components/pages/studio/examples/how-to-print-stuff/pythonPrintExample";
 
 export interface UserProject {
     projectType: ProjectType
@@ -22,17 +23,28 @@ export interface EditorState {
     mousePosition: { x: number; y: number };
     mouseVisible: boolean;
     isSidebarOpen: boolean;
-    
 }
 
+const now = new Date().toISOString();
+
 export const editorInitialState: EditorState = {
-    projects: [],
-    currentProjectIndex: -1,
-    currentProject: null,
+    projects: [{
+        projectType: 'course',
+        project: pythonPrintExample,
+        created: now,
+        modified: now,
+    }],
+    currentProjectIndex: 0,
+    currentProject: {
+        projectType: 'course',
+        project: pythonPrintExample,
+        created: now,
+        modified: now,
+    },
     currentLessonIndex: -1,
-    currentActions: [],
+    currentActions: pythonPrintExample?.lessons[0]?.actions || [],
     draftActionsString: JSON.stringify([], null, 2),
-    actionsString: JSON.stringify([], null, 2),
+    actionsString: JSON.stringify(pythonPrintExample?.lessons[0]?.actions, null, 2),
     currentActionIndex: 0,
     jumpFlag: false,
     mousePosition: { x: 20, y: 20 },

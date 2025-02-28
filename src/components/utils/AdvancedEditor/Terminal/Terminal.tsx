@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { IAction } from '@fullstackcraftllc/codevideo-types';
+import { Box } from '@radix-ui/themes';
 
 interface TerminalProps {
     actions: Array<IAction>;
@@ -37,16 +38,32 @@ export function Terminal(props: TerminalProps) {
     }, [actionIndex, actions]);
 
     return (
-        <div
+        <Box
             data-codevideo-id="terminal"
-            className={`min-h-[200px] bg-zinc-900 text-zinc-300 font-mono p-2 
-                       relative overflow-hidden rounded ${className}`}
+            className={className}
+            style={{
+                borderTop: '1px solid var(--gray-7)',
+                minHeight: '500px',
+                backgroundColor: '#272822',
+                fontFamily: 'Fira Code, monospace',
+                padding: '8px',
+                position: 'relative',
+                overflow: 'hidden',
+            }}
         >
-            <div className="whitespace-pre-wrap break-words">
+            <Box style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 'bold' }}>
                 {displayText}
-                <span className="animate-pulse inline-block w-2 h-4 bg-zinc-300 ml-1">
-                </span>
-            </div>
-        </div>
+                <Box
+                    style={{
+                        display: 'inline-block',
+                        width: '8px',
+                        height: '16px',
+                        backgroundColor: 'var(--gray-5)',
+                        marginLeft: '4px',
+                        animation: 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    }}
+                />
+            </Box>
+        </Box>
     );
 }

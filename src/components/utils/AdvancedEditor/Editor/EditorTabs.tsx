@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { IEditor } from '@fullstackcraftllc/codevideo-types';
+import { Flex, Text, Button, Box } from '@radix-ui/themes';
 
 export interface IEditorTabsProps {
     currentFile?: IEditor;
@@ -7,27 +8,64 @@ export interface IEditorTabsProps {
 }
 
 export function EditorTabs(props: IEditorTabsProps) {
-    const { currentFile, editors } = props;
+    const { editors } = props;
+
+    console.log(editors);
+
+    // if editors are empty, render fixed height to prevent layout shift
+    if (editors.length === 0) {
+        return <Box style={{
+            backgroundColor: '#272822',
+            height: '30px',
+            borderBottom: '1px solid var(--gray-7)',
+        }} />;
+    }
+
     return (
-        <div className="flex border-b border-slate-700 bg-slate-900">
+        <Flex
+            style={{
+                backgroundColor: '#272822',
+                height: '30px',
+                borderBottom: '1px solid var(--gray-7)',
+                pointerEvents: 'none',
+                userSelect: 'none',
+            }}
+        >
             {editors.map(editor => (
-                <div
+                <Flex
                     key={editor.filename}
-                    className={`flex items-center px-4 py-2 border-r border-slate-700 cursor-pointer ${currentFile?.filename === editor.filename ? 'bg-slate-800' : 'bg-slate-900'
-                        }`}
-
+                    align="center"
+                    style={{ borderRight: '1px solid var(--gray-7)', padding: '0 10px' }}
                 >
-                    <span className="text-slate-300">{editor.filename.split('/').pop()}</span>
-                    {editor.isSaved ? <button
-                        className="ml-2 text-slate-500 hover:text-slate-300"
+                    <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>
+                        {editor.filename.split('/').pop()}
+                    </Text>
 
-                    >
-                        ×
-                    </button> : <div className="ml-2 w-2 h-2 bg-gray-500 rounded-full"></div>
-
-                    }
-                </div>
+                    {editor.isSaved ? (
+                        <Box
+                            ml="2"
+                            style={{
+                                color: 'var(--gray-8)',
+                                padding: 0,
+                                lineHeight: 1,
+                                minWidth: 'auto',
+                            }}
+                        >
+                            ×
+                        </Box>
+                    ) : (
+                        <Box
+                            ml="2"
+                            style={{
+                                width: '8px',
+                                height: '8px',
+                                backgroundColor: 'var(--gray-8)',
+                                borderRadius: '9999px'
+                            }}
+                        />
+                    )}
+                </Flex>
             ))}
-        </div>
+        </Flex>
     );
 }

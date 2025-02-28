@@ -3,6 +3,7 @@ import { IFileStructure } from '@fullstackcraftllc/codevideo-types';
 import { getFileIcon } from './FileIcons/FileIcons';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { setIsFileExplorerFocused } from '../../../store/recordingSlice';
+import { Box, Flex, Text } from '@radix-ui/themes';
 
 export interface IFileExplorerProps {
     currentFileName?: string
@@ -13,34 +14,48 @@ export function FileExplorer(props: IFileExplorerProps) {
     const { currentFileName, fileStructure } = props;
     const dispatch = useAppDispatch();
 
-    const renderFileTree = (structure: IFileStructure, path: string = ''): JSX.Element[] => {
+    const renderFileTree = (structure: IFileStructure, path: string = '', level: number): JSX.Element[] => {
         return Object.entries(structure).map(([name, item]) => {
             const fullPath = path ? `${path}/${name}` : name;
             const isDirectory = item.type === 'directory';
-
+            const leftMargin = level === 0 ? "0" : "4";
+            const nextLevel = level + 1;
             return (
-                <div key={fullPath} className="ml-4">
-                    <div
+                <Box key={fullPath} ml={leftMargin}>
+                    <Flex
                         data-codevideo-id={`file-explorer-${fullPath}`}
-                        className={`flex items-center gap-2 p-1 rounded hover:bg-slate-700 cursor-pointer ${currentFileName === fullPath ? 'bg-slate-700' : ''
-                            }`}
+                        align="center"
+                        gap="2"
+                        p="1"
+                        style={{
+                            borderRadius: 'var(--radius-2)',
+                            backgroundColor: currentFileName === fullPath ? 'var(--mint-8)' : 'transparent',
+                            cursor: 'pointer',
+                        }}
                     >
-                        <span className="text-slate-400">
+                        <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>
                             {isDirectory ? '📁' : getFileIcon(name)}
-                        </span>
-                        <span className="text-slate-200">{name}</span>
-                    </div>
-                    {isDirectory && item.children && renderFileTree(item.children, fullPath)}
-                </div>
+                        </Text>
+                        <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>{name}</Text>
+                    </Flex>
+                    {isDirectory && item.children && renderFileTree(item.children, fullPath, nextLevel)}
+                </Box>
             );
         });
     };
 
     return (
-        <div onClick={() => dispatch(setIsFileExplorerFocused(true))}>
-            <div className="h-full border-r border-slate-600">
-                <div className="p-2">{renderFileTree(fileStructure)}</div>
-            </div>
-        </div>
+        <Box
+            onClick={() => dispatch(setIsFileExplorerFocused(true))}
+            style={{
+                height: '100%',
+                minWidth: '200px',
+                borderRight: '1px solid var(--gray-7)',
+                backgroundColor: '#272822',
+                pointerEvents: 'none',
+        userSelect: 'none',
+            }}>
+            <Box p="2">{renderFileTree(fileStructure, '', 0)}</Box>
+        </Box>
     );
 }

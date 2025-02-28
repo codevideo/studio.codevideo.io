@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppSelector } from '../../../hooks/useAppSelector';
-import { StartOverlay } from './components/start/StartOverlay';
+import { CreateNewOverlay } from './components/start/CreateNewOverlay';
 import { CourseMetadataForm } from './components/sidebar/CourseMetadataForm';
 import { MainStudio } from './components/main/MainStudio';
 import { ProjectType } from '@fullstackcraftllc/codevideo-types';
@@ -20,7 +20,7 @@ export function StudioPage() {
 
     // currently in unselected mode, show start overlay
     if (currentProjectIndex === -1) {
-        return <StartOverlay setSelectedProjectType={setSelectedProjectType}/>
+        return <CreateNewOverlay setSelectedProjectType={setSelectedProjectType}/>
     }
 
     if (selectedProjectType === 'course') {
