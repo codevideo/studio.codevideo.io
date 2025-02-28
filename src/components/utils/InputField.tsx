@@ -15,7 +15,7 @@ export const InputField: React.FC<InputFieldProps> = (props: InputFieldProps) =>
     const { label, id, value, onChange, placeholder = '', isTextarea = false, required = false } = props;
   return (
     <div className="mb-4">
-      <label htmlFor={id} className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-emerald-700 dark:text-emerald-300 mb-1">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       {isTextarea ? (
@@ -25,7 +25,7 @@ export const InputField: React.FC<InputFieldProps> = (props: InputFieldProps) =>
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 bg-white dark:bg-emerald-800 border border-emerald-300 dark:border-emerald-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           rows={3}
         />
       ) : (
@@ -36,7 +36,7 @@ export const InputField: React.FC<InputFieldProps> = (props: InputFieldProps) =>
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           required={required}
-          className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 bg-white dark:bg-emerald-800 border border-emerald-300 dark:border-emerald-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       )}
     </div>

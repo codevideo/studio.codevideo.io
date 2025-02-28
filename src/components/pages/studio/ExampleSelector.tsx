@@ -1,9 +1,16 @@
 import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { 
+  Flex, 
+  Box, 
+  Button, 
+  Text, 
+  Select 
+} from '@radix-ui/themes';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { addNewCourseToProjects } from '../../../store/editorSlice';
 import { ICourse, isCourse } from '@fullstackcraftllc/codevideo-types';
-import { useEffect, useState } from 'react';
 import { allProjects } from './examples/allProjects';
 
 export function ExampleSelector() {
@@ -51,36 +58,46 @@ export function ExampleSelector() {
         : null;
 
     return (
-        <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-                <select
-                    className="flex-1 px-4 py-2 rounded-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200"
+        <Flex direction="column" gap="2">
+            <Flex gap="2" align="center" justify="center" >
+                <Select.Root 
                     value={selectedId || DEFAULT_VALUE}
-                    onChange={(e) => handleExampleChange(e.target.value)}
+                    onValueChange={handleExampleChange}
+                    size="3"
+                    
                 >
-                    <option value={DEFAULT_VALUE} disabled>Select an example...</option>
-                    {allProjects.map((project: ICourse) => (
-                        <option key={project.id} value={project.id}>
-                            {project.name}
-                        </option>
-                    ))}
-                </select>
+                    <Select.Trigger />
+                    <Select.Content>
+                        <Select.Group>
+                            <Select.Label>Examples</Select.Label>
+                            <Select.Item value={DEFAULT_VALUE} disabled>
+                                Select an example...
+                            </Select.Item>
+                            {allProjects.map((project: ICourse) => (
+                                <Select.Item key={project.id} value={project.id}>
+                                    {project.name}
+                                </Select.Item>
+                            ))}
+                        </Select.Group>
+                    </Select.Content>
+                </Select.Root>
                 
                 {selectedId !== DEFAULT_VALUE && selectedId !== '' && (
-                    <button 
+                    <Button 
                         onClick={loadSelectedExample}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md transition-colors text-white"
+                        size="3"
+                        color="mint"
                     >
                         Go!
-                    </button>
+                    </Button>
                 )}
-            </div>
+            </Flex>
             
             {selectedProject?.description && (
-                <span className="text-center text-sm text-slate-500 dark:text-slate-400 mt-1">
+                <Text size="1" color="mint" align="center" mt="1">
                     {selectedProject.description}
-                </span>
+                </Text>
             )}
-        </div>
+        </Flex>
     );
 }

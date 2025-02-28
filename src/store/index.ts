@@ -4,10 +4,12 @@ import editorSlice from './editorSlice'
 import recordingSlice from './recordingSlice'
 import userSlice from './userSlice'
 import modalSlice from './modalSlice'
+import themeSlice from './themeSlice'
 
 const createStore = () =>
     configureStore({
         reducer: {
+            theme: themeSlice,
             editor: editorSlice,
             recording: recordingSlice,
             user: userSlice,

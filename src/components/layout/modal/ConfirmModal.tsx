@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { closeModal } from '../../../store/modalSlice';
+import { Box, Button, Text } from '@radix-ui/themes';
 
 export interface IConfirmModalProps {
     onConfirm: () => void;
@@ -12,12 +13,12 @@ export const ConfirmModal = (props: IConfirmModalProps) => {
     const dispatch = useAppDispatch();
     
     return (
-        <div className="modal-content">
-            <p>{message}</p>
-            <div className="modal-actions">
-                <button onClick={onConfirm}>Confirm</button>
-                <button onClick={() => dispatch(closeModal())}>Cancel</button>
-            </div>
-        </div>
+        <Box className="modal-content">
+            <Text>{message}</Text>
+            <Box className="modal-actions">
+                <Button onClick={onConfirm}>Confirm</Button>
+                <Button onClick={() => dispatch(closeModal())}>Cancel</Button>
+            </Box>
+        </Box>
     );
 };

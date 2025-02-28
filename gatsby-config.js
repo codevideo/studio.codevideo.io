@@ -18,6 +18,18 @@ module.exports = {
     author: `Chris Frewin <hi@fullstackcraft.com>`,
   },
   plugins: [
-    'gatsby-plugin-postcss'
+    'gatsby-plugin-postcss',
+    {
+      resolve: `gatsby-plugin-manifest`,
+      options: {
+        name: `CodeVideo Studio`,
+        short_name: `CodeVideo`,
+        start_url: `/`,
+        background_color: `#23ffb2`,
+        theme_color: `#23ffb2`,
+        display: `minimal-ui`,
+        icon: `src/images/favicon.svg`,
+      },
+    },
   ],
 }

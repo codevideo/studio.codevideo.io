@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useEffect } from 'react';
+import { Dialog, Flex, Text, Button, Box } from '@radix-ui/themes';
 
 export interface IProjectConversionModalProps {
     currentType: 'course' | 'lesson' | 'actions' | '';
@@ -9,7 +10,8 @@ export interface IProjectConversionModalProps {
 }
 
 export function ProjectConversionModal(props: IProjectConversionModalProps) {
-    const { currentType, targetType, onCancel, onConfirm } = props
+    const { currentType, targetType, onCancel, onConfirm } = props;
+    
     // Determine message based on conversion type
     const getMessage = () => {
         // Upgrades
@@ -50,29 +52,39 @@ export function ProjectConversionModal(props: IProjectConversionModalProps) {
     }, []);
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-white dark:bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 mx-4">
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white mb-2">
-                    Confirm Conversion
-                </h3>
-                <p className="text-slate-600 dark:text-slate-300 mb-6">
-                    {getMessage()}
-                </p>
-                <div className="flex justify-end gap-3">
-                    <button
-                        onClick={onCancel}
-                        className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
-                    >
-                        Cancel
-                    </button>
-                    <button
+        <Dialog.Root open={true} onOpenChange={(open) => !open && onCancel()}>
+            <Dialog.Content style={{ maxWidth: 450 }}>
+                <Dialog.Title>
+                    <Text size="5" weight="medium" color="mint">
+                        Confirm Conversion
+                    </Text>
+                </Dialog.Title>
+                
+                <Box mt="3" mb="4">
+                    <Text size="3" color="mint">
+                        {getMessage()}
+                    </Text>
+                </Box>
+                
+                <Flex justify="end" gap="3">
+                    <Dialog.Close>
+                        <Button 
+                            onClick={onCancel}
+                            variant="outline"
+                            color="mint"
+                        >
+                            Cancel
+                        </Button>
+                    </Dialog.Close>
+                    <Button 
                         onClick={onConfirm}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        variant="solid"
+                        color="blue"
                     >
                         Convert
-                    </button>
-                </div>
-            </div>
-        </div>
+                    </Button>
+                </Flex>
+            </Dialog.Content>
+        </Dialog.Root>
     );
 }

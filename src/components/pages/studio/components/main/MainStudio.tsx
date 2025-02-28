@@ -1,40 +1,58 @@
 import * as React from 'react';
+import {
+  Box,
+  Flex,
+  Grid,
+  Card,
+  Container
+} from '@radix-ui/themes';
 import { AdvancedEditor } from '../../../../utils/AdvancedEditor/AdvancedEditor';
 import ToggleEditor from '../../../../utils/ToggleEditor/ToggleEditor';
-import { StudioNavigation } from './StudioNavigation';
+import { StudioNavigationButtons } from './StudioNavigationButtons';
 import { SidebarMenu } from '../sidebar/SidebarMenu';
 import { RecordingLogs } from '../footer/RecordingLogs';
 import { VideoTimeEstimationsAndStats } from '../footer/VideoTimeEstimationsAndStats';
 
 export function MainStudio() {
-    return (
-        <>
-            <SidebarMenu/>
-            <div className="min-h-screen bg-slate-50 p-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-[1800px] mx-auto">
+  return (
+    <>
+      <SidebarMenu />
+      <Box
+        style={{
+          minHeight: '100vh',
+          padding: '1rem'
+        }}
+        mt="9"
+      >
+        <Grid columns={{ initial: '1', md: '3' }} gap="3">
+          {/* Left Action Editor */}
+          <Box style={{ width: '100%', height: '650px' }}>
+            <Card>
+              <ToggleEditor />
+            </Card>
+          </Box>
 
-                    {/* Left/Top Editor */}
-                    <div className="w-full col-span-1">
-                        <ToggleEditor />
-                    </div>
-                    {/* Right/Bottom Editor */}
-                    <div className="w-full col-span-2">
-                        <div className="rounded-lg bg-slate-800 shadow-sm border border-slate-700">
-                            <StudioNavigation />
-                            {/* Advanced Editor */}
-                            <div className="h-[500px]">
-                                <AdvancedEditor
-                                    mode="step"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <RecordingLogs />
-                    <VideoTimeEstimationsAndStats />
-                </div>
-            </div>
-        </>
-    );
+          {/* Right IDE Preview */}
+          <Box style={{ width: '100%', gridColumn: 'span 2' }}>
+            <Card>
+              <StudioNavigationButtons />
+              {/* Advanced Editor */}
+              <Box style={{ height: '700px' }}>
+                <AdvancedEditor
+                  mode="step"
+                />
+              </Box>
+            </Card>
+          </Box>
+        </Grid>
+
+        {/* Under both additional details */}
+        <Flex direction="column" justify="start" align="start" gap="2" mt="4" style={{ width: '100%', gridColumn: 'span 2' }}> 
+          <RecordingLogs />
+          <VideoTimeEstimationsAndStats />
+        </Flex>
+
+      </Box>
+    </>
+  );
 }

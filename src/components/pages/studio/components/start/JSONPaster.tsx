@@ -1,4 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import {
+  Box,
+  Flex,
+  Button,
+  Text,
+  TextArea,
+  Card,
+  Heading,
+  Dialog,
+  Code,
+  IconButton
+} from '@radix-ui/themes';
+import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons';
 import { ICourse, ILesson, IAction, isActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { addNewCourseToProjects, addNewLessonToProjects, addNewActionsToProjects } from '../../../../../store/editorSlice';
@@ -48,7 +61,7 @@ export const JSONPaster: React.FC = () => {
     try {
       // Try to parse the JSON
       const parsed = JSON.parse(jsonInput);
-      
+
       // Check if it matches any of our types
       if (isCourse(parsed)) {
         setDetectedType('course');
@@ -84,13 +97,13 @@ export const JSONPaster: React.FC = () => {
       setValidationError(`Invalid JSON: ${(error as Error).message}`);
       setIsModalOpen(true);
     }
-    
+
     setIsValidating(false);
   };
 
   const handleImport = () => {
     if (!detectedType || !parsedData) return;
-    
+
     // Import the data based on its type
     switch (detectedType) {
       case 'course':
@@ -103,7 +116,7 @@ export const JSONPaster: React.FC = () => {
         dispatch(addNewActionsToProjects(parsedData as IAction[]));
         break;
     }
-    
+
     // Clear the input after successful import
     setJsonInput('');
     setDetectedType(null);
@@ -114,80 +127,87 @@ export const JSONPaster: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  // Loading spinner SVG as a component
+  const SpinnerIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+      style={{ animation: 'spin 1s linear infinite' }}>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25" />
+      <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+    </svg>
+  );
+
   return (
-    <div className="w-full">
-      <div className="bg-white dark:bg-slate-800 rounded-lg">
-        <textarea
-          value={jsonInput}
-          onChange={handleJsonChange}
-          placeholder='{"id": "example", "name": "Example Project", ...}'
-          className="w-full px-3 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-slate-800 dark:text-slate-200 font-mono text-sm h-15 resize-none"
-        />
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-center text-sm">
-            {isValidating ? (
-              <div className="flex items-center text-slate-500 dark:text-slate-400">
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Validating...
-              </div>
-            ) : detectedType ? (
-              <div className="flex items-center font-medium text-green-600 dark:text-green-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                Detected&nbsp;<code>{detectedType}</code>
-              </div>
-            ) : jsonInput ? (
-              <div className="flex items-center font-medium text-red-600 dark:text-red-400">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                Invalid Format
-              </div>
-            ) : null}
-          </div>
-          
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={handleImport}
-              disabled={!detectedType || isValidating}
-              className={`px-4 py-2 rounded-md transition-colors ${
-                detectedType && !isValidating
-                  ? 'bg-green-600 hover:bg-green-700 text-white' 
-                  : 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed'
-              }`}
-            >
-              Import
-            </button>
-          </div>
-        </div>
-      </div>
-      
+    <Box width="full">
+
+      <TextArea
+        value={jsonInput}
+        onChange={handleJsonChange}
+        placeholder='{"id": "example", "name": "Example Project", ...}'
+        style={{
+          fontFamily: 'monospace',
+          fontSize: '14px',
+          height: '6em',
+          resize: 'none'
+        }}
+      />
+
+      <Flex justify="between" align="center" mt="4">
+        <Flex align="center" gap="1">
+          {isValidating ? (
+            <Flex align="center" gap="1">
+              <SpinnerIcon />
+              <Text color="mint" size="1">Validating...</Text>
+            </Flex>
+          ) : detectedType ? (
+            <Flex align="center" gap="1">
+              <CheckCircledIcon width="16" height="16" color="mint" />
+              <Text color="mint" size="1" weight="medium">
+                Detected project of type <Code>{detectedType}</Code>
+              </Text>
+            </Flex>
+          ) : jsonInput ? (
+            <Flex align="center" gap="1">
+              <CrossCircledIcon width="16" height="16" color="red" />
+              <Text color="red" size="1" weight="medium">Invalid Format</Text>
+            </Flex>
+          ) : null}
+        </Flex>
+
+        <Flex gap="2">
+          <Button
+            onClick={handleImport}
+            disabled={!detectedType || isValidating}
+            color={detectedType && !isValidating ? "mint" : "gray"}
+            variant={detectedType && !isValidating ? "solid" : "soft"}
+          >
+            Import
+          </Button>
+        </Flex>
+      </Flex>
+
+
       {/* Error Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-800 rounded-lg max-w-md w-full p-6 mx-4">
-            <h3 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">
-              Validation Error
-            </h3>
-            <p className="text-slate-600 dark:text-slate-300 mb-6">
-              {validationError}
-            </p>
-            <div className="flex justify-end">
-              <button
-                onClick={closeModal}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-md text-slate-800 dark:text-slate-200 transition-colors"
-              >
+      <Dialog.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog.Content>
+          <Dialog.Title>
+            <Heading size="3" color="red" mb="1">Validation Error</Heading>
+          </Dialog.Title>
+          <Text color="mint" mb="4">{validationError}</Text>
+          <Flex justify="end">
+            <Dialog.Close>
+              <Button onClick={closeModal} color="mint" variant="soft">
                 Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+              </Button>
+            </Dialog.Close>
+          </Flex>
+        </Dialog.Content>
+      </Dialog.Root>
+    </Box>
   );
 };

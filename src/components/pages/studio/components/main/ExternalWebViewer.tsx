@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Box, Flex, Text } from '@radix-ui/themes';
 
 export interface IExternalWebViewerProps {
     url: string;
@@ -22,24 +23,24 @@ const ExternalWebViewer = (props: IExternalWebViewerProps) => {
     }, [hasLoaded]);
 
     return (
-        <div className="w-full h-screen">
+        <Box style={{ width: '100%', height: '100vh' }}>
             {hasError ? (
-                <div className="flex items-center justify-center h-full">
-                    <p className="text-xl text-gray-700">
+                <Flex align="center" justify="center" style={{ height: '100%' }}>
+                    <Text size="5" style={{ color: 'var(--gray-10)' }}>
                         Failed to load external content from {url}. The site may be invalid or not allow iframes.
-                    </p>
-                </div>
+                    </Text>
+                </Flex>
             ) : (
                 <iframe
                     src={url}
                     title="External Web Viewer"
-                    className="w-full h-full border-0"
+                    style={{ width: '100%', height: '100%', border: 0 }}
                     sandbox="allow-same-origin allow-scripts allow-popups"
                     onLoad={() => setHasLoaded(true)}
                     onError={() => setHasError(true)}
                 />
             )}
-        </div>
+        </Box>
     );
 };
 

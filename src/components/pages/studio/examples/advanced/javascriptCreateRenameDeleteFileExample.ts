@@ -4,13 +4,13 @@ import { javascriptCreateRenameDeleteFileExampleActions } from "../actionsExampl
 export const javascriptCreateRenameDeleteFileExample: ICourse = {
     id: 'javascript-create-rename-delete-file',
     name: 'JavaScript File Operations Example',
-    description: 'Learn how to create, rename, and delete files in JavaScript',
+    description: 'Learn how to create, rename, and delete files in JavaScript within the CodeVideo framework',
     primaryLanguage: 'javascript',
     lessons: [
       {
         id: 'javascript-create-rename-delete-file',
         name: 'JavaScript Create, Rename, and Delete File Example',
-        description: 'Learn how to create, rename, and delete files in JavaScript',
+        description: 'Learn how to create, rename, and delete files in JavaScript within the CodeVideo framework',
         initialSnapshot: {
           fileExplorerSnapshot: {
             fileStructure: {

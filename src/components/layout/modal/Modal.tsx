@@ -1,4 +1,11 @@
 import * as React from 'react';
+import {
+    Dialog,
+    Box,
+    Flex,
+    Button,
+    Card
+} from '@radix-ui/themes';
 import { ConfirmModal } from './ConfirmModal';
 import { AlertModal } from './AlertModal';
 import { closeModal } from '../../../store/modalSlice';
@@ -26,23 +33,35 @@ export const Modal = () => {
     };
 
     return (
+        <Dialog.Root open={isOpen} onOpenChange={() => dispatch(closeModal())}>
+            <Dialog.Content
+                style={{
+                    position: 'fixed',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '100%',
+                    maxWidth: '42rem',
+                    zIndex: 51
+                }}
+            >
 
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="relative w-full max-w-2xl">
-                <div className="bg-white dark:bg-slate-800 rounded-lg p-6">
-                    <div className="text-center text-slate-600 dark:text-slate-300">
-                        {renderModalContent()}
-                    </div>
-                    <div className="flex justify-end mt-4">
-                        <button
+                <Box style={{ color: 'var(--mint-9)' }}>
+                    {renderModalContent()}
+                </Box>
+                <Flex justify="end" mt="4">
+                    <Dialog.Close>
+                        <Button
                             onClick={() => dispatch(closeModal())}
-                            className="px-4 py-2 bg-slate-200 dark:bg-slate-700 rounded-md"
+                            variant="soft"
+                            color="mint"
                         >
                             Close
-                        </button>
-                    </div>
-                </div> 
-            </div>
-        </div>
+                        </Button>
+                    </Dialog.Close>
+                </Flex>
+
+            </Dialog.Content>
+        </Dialog.Root>
     );
 };

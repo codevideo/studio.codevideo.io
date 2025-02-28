@@ -97,6 +97,47 @@ export const javascriptCreateRenameDeleteFileExampleActions: Array<IAction> = [
     }
 ];
 
+export const mouseMovementExampleActions: Array<IAction> = [
+    {
+        "name": "author-speak-before",
+        "value": "Let's test CodeVideo's ability to move the mouse to specific coordinates!"
+    },
+    // move mouse in a square 2x, starting at 200,200 - that means 8 actions
+    {
+        "name": "mouse-move",
+        "value": "200,200"
+    },
+    {
+        "name": "mouse-move",
+        "value": "400,200"
+    },
+    {
+        "name": "mouse-move",
+        "value": "400,400"
+    },
+    {
+        "name": "mouse-move",
+        "value": "200,400"
+    },
+    {
+        "name": "mouse-move",
+        "value": "200,200"
+    },
+    {
+        "name": "mouse-move",
+        "value": "400,200"
+    },
+    {
+        "name": "mouse-move",
+        "value": "400,400"
+    },
+    {
+        "name": "mouse-move",
+        "value": "200,400"
+    }
+
+];
+
 export const pythonExampleActions: Array<IAction> = [
     {
         "name": "author-speak-before",
@@ -104,15 +145,15 @@ export const pythonExampleActions: Array<IAction> = [
     },
     {
         "name": "author-speak-before",
-        "value": "First, to make it clear that this is a Python file, I'll just put a comment here"
+        "value": "First, let's make a Python file."
     },
     {
-        "name": "editor-type",
-        "value": "# main.py"
+        "name": "file-explorer-create-file",
+        "value": "main.py"
     },
     {
-        "name": "editor-enter",
-        "value": "1"
+        "name": "file-explorer-open-file",
+        "value": "main.py"
     },
     {
         "name": "author-speak-before",
@@ -157,6 +198,86 @@ export const pythonExampleActions: Array<IAction> = [
     {
         "name": "author-speak-before",
         "value": "Console logging is simple, yet powerful and very useful!"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Well done, lets save our file."
+    },
+    {
+        "name": "editor-save",
+        "value": "main.py"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Saved!"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Oh... and I've just realized... this file looks a bit strange... let's add the python shebang to the top of the file."
+    },
+    {
+        "name": "editor-arrow-up",
+        "value": "4"
+    },
+    {
+        "name": "editor-command-left",
+        "value": "1"
+    },
+    {
+        "name": "editor-enter",
+        "value": "1"
+    },
+    {
+        "name": "editor-arrow-up",
+        "value": "1"
+    },
+    {
+        "name": "editor-type",
+        "value": "#!/usr/bin/env python"
+    },
+    {
+        "name": "editor-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Ah...much better!"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Let's save the file again."
+    },
+    {
+        "name": "editor-save",
+        "value": "main.py"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Saved!"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Now, let's open a terminal and run this file..."
+    },
+    {
+        "name": "terminal-open",
+        "value": "1"
+    },
+    {
+        "name": "terminal-type",
+        "value": "python main.py"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "terminal-type",
+        "value": "Hello, world!"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Perfect, our code is working as expected!"
     }
 ];
 
@@ -362,7 +483,7 @@ export const goLangExampleActions: Array<IAction> = [
     },
     {
         "name": "editor-enter",
-        "value": "10"
+        "value": "1"
     },
     {
         "name": "editor-type",

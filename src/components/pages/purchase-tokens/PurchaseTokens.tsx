@@ -1,8 +1,5 @@
 import * as React from 'react';
 
-export interface IPurchaseCreditsPageProps {
-}
-
 interface PricingOption {
     credits: number;
     price: number;
@@ -17,7 +14,7 @@ const pricingOptions: PricingOption[] = [
     { credits: 2000, price: 100, time: '2.5 hours' },
 ];
 
-export function PurchaseCreditsPage(props: IPurchaseCreditsPageProps) {
+export function PurchaseTokens() {
     const handlePurchase = async (credits: number, price: number) => {
         // TODO: Implement Stripe checkout integration
         console.log(`Purchasing ${credits} credits for $${price}`);
@@ -34,7 +31,7 @@ export function PurchaseCreditsPage(props: IPurchaseCreditsPageProps) {
                 {pricingOptions.map(({ credits, price, time }) => (
                     <div
                         key={credits}
-                        className="flex flex-col justify-between bg-white rounded-lg shadow-md p-6 hover:-translate-y-1 transition-transform duration-200 ease-in-out min-h-[320px]"
+                        className="flex flex-col justify-between bg-white rounded-lg shadow-md p-6 hover:-tranemerald-y-1 transition-transform duration-200 ease-in-out min-h-[320px]"
                     >
                         <div className="flex flex-col items-center text-center flex-grow">
                             <h2 className="text-3xl font-bold mb-2">{credits} Credits</h2>
