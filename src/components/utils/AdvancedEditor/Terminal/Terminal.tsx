@@ -43,7 +43,7 @@ export function Terminal(props: TerminalProps) {
             className={className}
             style={{
                 borderTop: '1px solid var(--gray-7)',
-                minHeight: '500px',
+                minHeight: '150px',
                 backgroundColor: '#272822',
                 fontFamily: 'Fira Code, monospace',
                 padding: '8px',
