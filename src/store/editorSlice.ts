@@ -24,6 +24,7 @@ export interface EditorState {
     mouseVisible: boolean;
     isSidebarOpen: boolean;
     isFullScreen: boolean;
+    isPlaying: boolean;
 }
 
 const now = new Date().toISOString();
@@ -52,6 +53,7 @@ export const editorInitialState: EditorState = {
     mouseVisible: true,
     isSidebarOpen: false,
     isFullScreen: false,
+    isPlaying: false,
 };
 
 // helper to set the currentActions based on the current project type
@@ -220,6 +222,9 @@ const editorSlice = createSlice({
         },
         setIsFullScreen(state, action) {
             state.isFullScreen = action.payload;
+        },
+        setIsPlaying(state, action) {
+            state.isPlaying = action.payload;
         }
     }
 });
@@ -241,7 +246,8 @@ export const {
     createNewProject,
     toggleSidebar,
     setIsSidebarOpen,
-    setIsFullScreen
+    setIsFullScreen,
+    setIsPlaying
 } = editorSlice.actions;
 
 export default editorSlice.reducer;

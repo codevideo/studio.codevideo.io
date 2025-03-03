@@ -1,0 +1,79 @@
+// src/components/RustBrowserCompiler.tsx
+import React, { useState, useEffect } from 'react';
+import * as wasm from '../../static/wasm/rust_browser_compiler.js';
+
+interface RustFile {
+  path: string;
+  content: string;
+}
+
+interface RustBrowserCompilerProps {
+  files: RustFile[];
+  onResultChange?: (result: string) => void;
+}
+
+const RustBrowserCompiler: React.FC<RustBrowserCompilerProps> = ({ 
+  files, 
+  onResultChange 
+}) => {
+  // const { wasm, loading, error } = useRustWasm();
+  const [result, setResult] = useState<string>('Loading WASM module...');
+  const [isCompiling, setIsCompiling] = useState(false);
+
+  // Skip SSR
+  const isBrowser = typeof window !== 'undefined';
+  
+  // Compile and run when files change or when WASM is loaded
+  useEffect(() => {
+    if (!isBrowser || !wasm || files.length === 0) return;
+
+    const compileAndRun = async () => {
+      setIsCompiling(true);
+      
+      try {
+        // Create a new virtual file system
+        const vfs = new wasm.VirtualFileSystem();
+        
+        // Add all files to the virtual file system
+        files.forEach(file => {
+          vfs.add_file(file.path, file.content);
+        });
+        
+        // Compile and run the Rust code
+        const output = vfs.compile_and_run();
+        setResult(output);
+        
+        // Call the callback if provided
+        if (onResultChange) {
+          onResultChange(output);
+        }
+      } catch (err) {
+        console.error('Error during compilation:', err);
+        setResult(`Error during compilation: ${err}`);
+      } finally {
+        setIsCompiling(false);
+      }
+    };
+
+    compileAndRun();
+  }, [files, wasm, isBrowser, onResultChange]);
+
+  // Handle SSR
+  if (!isBrowser) {
+    return <div>Loading compiler...</div>;
+  }
+
+  return (
+    <div className="rust-browser-compiler">
+      <h3>Rust Compiler Output</h3>
+      <div className="compiler-status">
+        {isCompiling && ' (Compiling...)'}
+      </div>
+      <pre className="compiler-output">
+        {result}
+      </pre>
+    </div>
+  );
+};
+
+export default RustBrowserCompiler;

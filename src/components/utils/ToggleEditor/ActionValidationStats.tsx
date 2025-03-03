@@ -3,7 +3,7 @@ import { IAction, isValidAction, filterAuthorActions, filterFileExplorerActions,
 import { useEffect, useState } from 'react';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { Flex, Text, Box } from '@radix-ui/themes';
-import { setActions, setDraftActionsString } from '../../../store/editorSlice';
+import { setActions, setCurrentActionIndex, setDraftActionsString } from '../../../store/editorSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 
 export interface IActionValidationStatsProps {
@@ -13,7 +13,7 @@ export interface IActionValidationStatsProps {
 export function ActionValidationStats(props: IActionValidationStatsProps) {
   const { editorMode } = props;
   // we monitor both actions (From the GUI editor) and draftActionsString (From the JSON editor)
-  const { currentActions, draftActionsString } = useAppSelector((state) => state.editor);
+  const { currentActions, currentActionIndex, draftActionsString } = useAppSelector((state) => state.editor);
   const dispatch = useAppDispatch();
   const [isValidating, setIsValidating] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export function ActionValidationStats(props: IActionValidationStatsProps) {
 
   // debounced validation effect
   useEffect(() => {
-    if (draftActionsString === "") {
+    if (draftActionsString === "" || draftActionsString === "[]") {
       setIsValidating(false);
       setValidationError(null);
       setIsValid(true);
@@ -55,7 +55,13 @@ export function ActionValidationStats(props: IActionValidationStatsProps) {
         setIsValid(true);
         setValidationError(null);
         setParsedActions(parsedActions);
-        // dispatch(setActions(parsedActions));
+        dispatch(setActions(parsedActions));
+
+        // also ensure that the currentActionIndex is at most the length of the actions
+        if (currentActionIndex >= parsedActions.length) {
+          dispatch(setCurrentActionIndex(parsedActions.length - 1));
+        }
+
         // dispatch(setDraftActionsString(JSON.stringify(parsedActions, null, 2)));
       } catch (error) {
         setIsValid(false);

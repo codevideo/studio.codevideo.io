@@ -72,3 +72,6 @@ yarn-error.log
 .netlify
 .aider*
 .env
+
+# Rust build artifacts
+rust-browser-compiler/target
