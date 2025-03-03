@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
-import { setActions, setCurrentActionIndex, setIsFullScreen } from '../../../../../store/editorSlice';
+import { setActions, setCurrentActionIndex, setIsFullScreen, setIsPlaying } from '../../../../../store/editorSlice';
 import { setIsRecording, turnOffRecording } from '../../../../../store/recordingSlice';
 import { useRecordActions } from '../../../../../hooks/useRecordActions';
 import { Flex, Button } from '@radix-ui/themes';
@@ -10,7 +10,7 @@ import { EnterFullScreenIcon } from '@radix-ui/react-icons';
 import { addToast } from '../../../../../store/toastSlice';
 
 export function StudioNavigationButtons() {
-    const { currentActions, currentActionIndex, isFullScreen } = useAppSelector(state => state.editor);
+    const { currentActions, currentActionIndex, isFullScreen, isPlaying } = useAppSelector(state => state.editor);
     const { isRecording, collectedRecordedActions } = useAppSelector(state => state.recording);
     const dispatch = useAppDispatch();
     useRecordActions();
@@ -39,9 +39,31 @@ export function StudioNavigationButtons() {
         dispatch(setCurrentActionIndex(currentActions.length - 1));
     }
 
+    const handlePlayback = () => {
+        // if we are turning off playback, just need to stop
+        if (isPlaying) {
+            dispatch(setIsPlaying(false))
+        } else {
+            // if we are activating playback, we also need to ensure recording is off
+            dispatch(addToast(`Playback starting...`));
+            dispatch(setIsPlaying(true))
+            dispatch(setIsRecording(false))
+            // also always trigger the first action when starting playback
+            dispatch(setCurrentActionIndex(0))
+        }
+    }
+
     const handleRecord = () => {
         // if we are turning off recording, insert the collected actions into the current actions at the current index
         if (isRecording) {
+
+            // if collected actions is empty, just turn off recording, nothing more to do
+            if (collectedRecordedActions.length === 0) {
+                dispatch(addToast(`No actions recorded.`));
+                dispatch(turnOffRecording());
+                return;
+            }
+
             const newActions = [...currentActions];
             newActions.splice(currentActionIndex + 1, 0, ...collectedRecordedActions);
 
@@ -54,11 +76,13 @@ export function StudioNavigationButtons() {
             // clean up recording state
             dispatch(turnOffRecording());
         } else {
+            dispatch(setIsPlaying(false));
             dispatch(setIsRecording(true));
         }
     }
 
-    const recordButtonText = isRecording ? `Stop` : <>Record<sup style={{fontSize: '0.5rem', paddingBottom: '1rem'}}>Beta</sup></>;
+    const playButtonText = isPlaying ? `Stop` : <>Playback<sup style={{ fontSize: '0.5rem', paddingBottom: '1rem' }}>Beta</sup></>;
+    const recordButtonText = isRecording ? `Stop` : <>Record<sup style={{ fontSize: '0.5rem', paddingBottom: '1rem' }}>Beta</sup></>;
 
     return (
         <Flex
@@ -69,7 +93,7 @@ export function StudioNavigationButtons() {
             <Flex gap="2" align="center">
                 <Button
                     onClick={handleFirst}
-                    disabled={currentActionIndex === 0}
+                    disabled={currentActionIndex === 0 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
                     style={{
@@ -81,7 +105,7 @@ export function StudioNavigationButtons() {
                 </Button>
                 <Button
                     onClick={handleJumpBackward}
-                    disabled={currentActionIndex === 0}
+                    disabled={currentActionIndex === 0 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
                     style={{
@@ -93,7 +117,7 @@ export function StudioNavigationButtons() {
                 </Button>
                 <Button
                     onClick={handlePrevious}
-                    disabled={currentActionIndex === 0}
+                    disabled={currentActionIndex === 0 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
                     style={{
@@ -105,7 +129,7 @@ export function StudioNavigationButtons() {
                 </Button>
                 <Button
                     onClick={handleNext}
-                    disabled={currentActionIndex === currentActions.length - 1}
+                    disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
                     style={{
@@ -117,7 +141,7 @@ export function StudioNavigationButtons() {
                 </Button>
                 <Button
                     onClick={handleJumpForward}
-                    disabled={currentActionIndex === currentActions.length - 1}
+                    disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
                     style={{
@@ -129,7 +153,7 @@ export function StudioNavigationButtons() {
                 </Button>
                 <Button
                     onClick={handleLast}
-                    disabled={currentActionIndex === currentActions.length - 1}
+                    disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
                     style={{
@@ -142,6 +166,15 @@ export function StudioNavigationButtons() {
                 <ActionCounter />
             </Flex>
             <Flex align="center" gap="2">
+                <Button
+                    title={isPlaying ? 'Stop playback' : 'Start playing actions (beta)'}
+                    onClick={handlePlayback}
+                    color="mint"
+                    variant="soft"
+                    style={{ cursor: 'pointer' }}
+                >
+                    {playButtonText}
+                </Button>
                 <Button
                     title={isRecording ? 'Stop recording' : 'Start recording actions (beta)'}
                     onClick={handleRecord}

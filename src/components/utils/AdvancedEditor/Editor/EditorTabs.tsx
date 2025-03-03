@@ -10,8 +10,6 @@ export interface IEditorTabsProps {
 export function EditorTabs(props: IEditorTabsProps) {
     const { editors } = props;
 
-    console.log(editors);
-
     // if editors are empty, render fixed height to prevent layout shift
     if (editors.length === 0) {
         return <Box style={{

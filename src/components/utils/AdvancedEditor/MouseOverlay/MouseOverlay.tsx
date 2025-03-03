@@ -1,23 +1,54 @@
-import { IAction, IFileStructure, IPoint } from '@fullstackcraftllc/codevideo-types';
+import { GUIMode, IAction, IFileStructure, IPoint } from '@fullstackcraftllc/codevideo-types';
 import { Box } from '@radix-ui/themes';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAppSelector } from '../../../../hooks/useAppSelector';
 
 interface IMouseOverlayProps {
+  mode: GUIMode
+  actions: IAction[];
+  actionIndex: number;
+  mouseVisible: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
+  actionFinishedCallback: () => void;
 }
 
 export const MouseOverlay = (props: IMouseOverlayProps) => {
-  const { currentActions, currentActionIndex, mouseVisible } = useAppSelector(state => state.editor);
-  const { containerRef } = props;
+  const { mode, actions, actionIndex, mouseVisible, containerRef, actionFinishedCallback } = props;
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
 
+  // transition end listener
+  useEffect(() => {
+    if (mode !== 'replay') {
+      return;
+    }
 
+    const currentAction = actions[actionIndex];
+    if (currentAction?.name.startsWith('mouse')) {
+      return;
+    }
+
+    const currentOverlay = overlayRef.current;
+    
+    if (currentOverlay) {
+      const handleTransitionEnd = () => {
+        console.log('Mouse transition finished');
+        // Call the callback passed via props
+        // actionFinishedCallback();
+      };
+
+      currentOverlay.addEventListener('transitionend', handleTransitionEnd);
+      
+      // Clean up event listener when component unmounts
+      return () => {
+        currentOverlay.removeEventListener('transitionend', handleTransitionEnd);
+      };
+    }
+  }, [mode, actionIndex]);
 
   useEffect(() => {
-    if (!currentActionIndex) return;
-    const currentAction = currentActions[currentActionIndex];
+    if (!actionIndex) return;
+    const currentAction = actions[actionIndex];
     if (!currentAction) return;
 
     let newPosition = { x: mousePosition.x, y: mousePosition.y };
@@ -42,15 +73,13 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
         break;
     }
 
-    console.log('setting mouse to ' + newPosition.x + ', ' + newPosition.y);
     setMousePosition(newPosition);
-  }, [currentActionIndex, currentActions]);
+  }, [actions, actionIndex]);
 
   // on mount, set the mouse to the center of the editor
   useEffect(() => {
     if (!containerRef?.current) return;
     const rect = containerRef.current.getBoundingClientRect();
-    console.log('setting mouse to ' + rect.width / 2 + ', ' + rect.height / 2);
     setMousePosition({
       x: rect.width / 2,
       y: rect.height / 2,
@@ -67,7 +96,7 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
       ref={overlayRef}
       style={{
         transform: `translate(${mousePosition.x}px, ${mousePosition.y}px) scale(0.8)`,
-        transition: 'transform 0.3s ease-out',
+        transition: 'transform 0.75s ease-in-out',
         zIndex: 100000000,
         position: 'absolute',
         pointerEvents: 'none',

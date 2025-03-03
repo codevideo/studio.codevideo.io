@@ -17,15 +17,44 @@ import { VideoTimeEstimationsAndStats } from '../footer/VideoTimeEstimationsAndS
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { LessonCounter } from '../../../../utils/LessonCounter';
 import { useState } from 'react';
-import { ICourse } from '@fullstackcraftllc/codevideo-types';
-import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
+import { GUIMode, ICourse, isCourse } from '@fullstackcraftllc/codevideo-types';
 import { VirtualIDELogs } from '../footer/VirtualIDELogs';
 import { LessonAdder } from '../../../../utils/LessonAdder';
+import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
+import { setCurrentActionIndex, setIsPlaying } from '../../../../../store/editorSlice';
 
 export function MainStudio() {
-  const { currentProject, isFullScreen } = useAppSelector((state) => state.editor);
+  const { currentProject, currentActions, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying } = useAppSelector((state) => state.editor);
+  const { isRecording } = useAppSelector(state => state.recording);
   const dispatch = useAppDispatch();
   const [editorMode, setEditorMode] = useState("editor");
+
+  const defaultLanguage = currentProject && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
+
+  // for external browser
+  const isExternalBrowserStepUrl = currentActions[currentActionIndex] && currentActions[currentActionIndex].name === 'external-browser' ?
+    currentActions[currentActionIndex].value : null;
+
+  const goToNextAction = () => {
+    // if we are playing, move to the next action
+    if (isPlaying) {
+      // if we are at the end of the actions, stop playing
+      if (currentActionIndex === currentActions.length - 1) {
+        dispatch(setIsPlaying(false))
+      } else {
+        // otherwise, move to the next action
+        dispatch(setCurrentActionIndex(currentActionIndex + 1))
+      }
+    }
+  }
+
+  let mode: GUIMode = 'step'
+  if (isPlaying) {
+    mode = 'replay'
+  }
+  if (isRecording) {
+    mode = 'record'
+  }
 
   // for fullscreen, render the editor only
   if (isFullScreen) {
@@ -37,9 +66,16 @@ export function MainStudio() {
         }}
       >
         <StudioNavigationButtons />
-        <AdvancedEditor
-          mode="step"
-        />
+        {currentProject && <AdvancedEditor
+          project={currentProject.project}
+          mode={mode}
+          defaultLanguage={defaultLanguage}
+          isExternalBrowserStepUrl={isExternalBrowserStepUrl}
+          actions={currentActions}
+          currentActionIndex={currentActionIndex}
+          currentLessonIndex={currentLessonIndex}
+          actionFinishedCallback={goToNextAction}
+        />}
       </Box>
     );
   }
@@ -64,7 +100,7 @@ export function MainStudio() {
                   <Flex align="center" gap="2">
                     <Code size="1">{currentProject?.projectType}</Code>
                     <LessonCounter />
-                    <LessonAdder/>
+                    <LessonAdder />
                   </Flex>
                 </Flex>
                 {/* <LessonCounter />
@@ -94,9 +130,16 @@ export function MainStudio() {
               <StudioNavigationButtons />
               {/* Advanced Editor */}
               <Box style={{ height: '700px' }}>
-                <AdvancedEditor
-                  mode="step"
-                />
+                {currentProject && <AdvancedEditor
+                  project={currentProject.project}
+                  mode={mode}
+                  defaultLanguage={defaultLanguage}
+                  isExternalBrowserStepUrl={isExternalBrowserStepUrl}
+                  actions={currentActions}
+                  currentActionIndex={currentActionIndex}
+                  currentLessonIndex={currentLessonIndex}
+                  actionFinishedCallback={goToNextAction}
+                />}
               </Box>
             </Card>
           </Box>

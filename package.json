@@ -11,7 +11,8 @@
     "serve": "gatsby serve",
     "clean": "gatsby clean",
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "build-wasm": "cd rust-browser-compiler && wasm-pack build --target web --out-dir ../static/wasm && cd .."
   },
   "dependencies": {
     "@fullstackcraftllc/codevideo-doc-gen": "^0.0.12",
@@ -21,6 +22,7 @@
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-icons": "^1.3.2",
     "@radix-ui/themes": "^3.2.1",
+    "@react-symbols/icons": "^1.2.8",
     "@reduxjs/toolkit": "^2.3.0",
     "@supabase/supabase-js": "^2.46.1",
     "gatsby": "^5.13.7",

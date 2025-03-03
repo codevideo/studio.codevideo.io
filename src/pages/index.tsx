@@ -6,7 +6,7 @@ import SEO from "../components/layout/SEO"
 export default function Studio() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo: Studio" />
+      <SEO title="CodeVideo Studio" />
       <StudioPage />
     </Layout>
   )

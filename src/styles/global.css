@@ -1,12 +1,15 @@
 @keyframes blink {
-    0%, 49% {
+
+    0%,
+    49% {
         opacity: 1;
     }
-    
-    50%, 99% {
+
+    50%,
+    99% {
         opacity: 0;
     }
-    
+
     100% {
         opacity: 1;
     }
@@ -28,4 +31,18 @@
 
 .highlight-animation {
     animation: highlightCard 1.5s ease;
+}
+
+.no-mouse {
+    pointer-events: none;
+    cursor: default;
+    user-select: none;
+}
+
+.display-none {
+    display: none;
+}
+
+.display-block {
+    display: block;
 }

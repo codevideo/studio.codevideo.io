@@ -1,9 +1,10 @@
 import React, { JSX } from 'react';
 import { IFileStructure } from '@fullstackcraftllc/codevideo-types';
-import { getFileIcon } from './FileIcons/FileIcons';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { setIsFileExplorerFocused } from '../../../store/recordingSlice';
 import { Box, Flex, Text } from '@radix-ui/themes';
+import { FileIcon } from './FileIcons/FileIcon';
+import { Folder } from '@react-symbols/icons';
 
 export interface IFileExplorerProps {
     currentFileName?: string
@@ -19,12 +20,12 @@ export function FileExplorer(props: IFileExplorerProps) {
         const sortedEntries = Object.entries(structure).sort((a, b) => {
             const aIsDir = a[1].type === 'directory';
             const bIsDir = b[1].type === 'directory';
-            
+
             // If both are directories or both are files, sort alphabetically
             if (aIsDir === bIsDir) {
                 return a[0].localeCompare(b[0]);
             }
-            
+
             // Otherwise, directories come first
             return aIsDir ? -1 : 1;
         });
@@ -40,15 +41,13 @@ export function FileExplorer(props: IFileExplorerProps) {
                         data-codevideo-id={`file-explorer-${fullPath}`}
                         align="center"
                         gap="2"
-                        p="1"
                         style={{
                             borderRadius: 'var(--radius-2)',
                             backgroundColor: currentFileName === fullPath ? 'var(--mint-8)' : 'transparent',
-                            cursor: 'pointer',
                         }}
                     >
                         <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>
-                            {isDirectory ? '📁' : getFileIcon(name)}
+                            {isDirectory ? <Folder height="20"/> : <FileIcon filename={name} />}
                         </Text>
                         <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>{name}</Text>
                     </Flex>
@@ -60,6 +59,7 @@ export function FileExplorer(props: IFileExplorerProps) {
 
     return (
         <Box
+        p="1"
             onClick={() => dispatch(setIsFileExplorerFocused(true))}
             style={{
                 height: '100%',
