@@ -10,10 +10,12 @@ import { csharpConsoleWriteLineExample } from "./how-to-print-stuff/csharpConsol
 import { pythonPrintExample } from "./how-to-print-stuff/pythonPrintExample";
 import { goPrintlnExample } from "./how-to-print-stuff/goPrintlnExample";
 import { mouseMovementExample } from "./advanced/javascriptMouseMovementExample";
+import { functionalTerminalExample } from "./advanced/functionalTerminalExample";
 
 export const allProjects: ICourse[] = [
     javascriptCreateRenameDeleteFileExample,
     mouseMovementExample,
+    functionalTerminalExample,
     rustAdvancedExample,
     blankCSharpExample,
     blankGoExample,

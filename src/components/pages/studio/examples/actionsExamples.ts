@@ -78,6 +78,217 @@ export const javaScriptExampleActions: Array<IAction> = [
     }
 ];
 
+export const functionalTerminalActions: Array<IAction> = [
+    {
+        "name": "author-speak-before",
+        "value": "The CodeVideo framework features a 'sensible-enough' terminal including all commands that would be needed for a software course."
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Currently the terminal supports the following commands: cat, cd, cp, echo, ls, mkdir, mv, pwd, touch, and tree"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Keep in mind our goal is not to rewrite an entire operating system but just provide the most common commands used in educational content :)."
+    },
+    {
+        "name": "author-speak-before",
+        "value": "So, let's open up a terminal and go through each of these commands.",
+    },
+    {
+        "name": "terminal-open",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "First is the classic echo command. This command simply prints out the arguments passed to it."
+    },
+    {
+        "name": "terminal-type",
+        "value": "echo 'Hello, world!'"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    { 
+        "name": "author-speak-before", 
+        "value": "Next, let's create a file with the touch command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "touch my-file.txt"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "We can also create a directory with the mkdir command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "mkdir my-directory"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Now, let's list the contents of the directory with the ls command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "ls"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Now, let's move the file we created into the directory we just created."
+    },
+    {
+        "name": "terminal-type",
+        "value": "mv my-file.txt my-directory/my-file.txt"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Let's list the contents of the directory again to see the file has been moved."
+    },
+    {
+        "name": "terminal-type",
+        "value": "ls my-directory"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "We can also move into directories with the cd command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "cd my-directory"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Note that the terminal's prompt has changed to reflect the current directory."
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Likewise commands that rely on the current directory will now be executed in the new directory, for example the ls command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "ls"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "Let's move back to the root directory with the cd command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "cd .."
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "And list the contents of the directory again to see we are back in the root directory."
+    },
+    {
+        "name": "terminal-type",
+        "value": "ls"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "We can also copy the file back to the root directory with the cp command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "cp my-directory/my-file.txt ~/my-file.txt"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "And list the contents of the directory again to see the file has been copied."
+    },
+    {
+        "name": "terminal-type",
+        "value": "ls"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "We can also print the current working directory with the pwd command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "pwd"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "We can print the contents of the file with the cat command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "cat my-file.txt"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "And finally, we can print the directory structure with the tree command."
+    },
+    {
+        "name": "terminal-type",
+        "value": "tree"
+    },
+    {
+        "name": "terminal-enter",
+        "value": "1"
+    },
+    {
+        "name": "author-speak-before",
+        "value": "And that's it! These are the commands currently supported in the CodeVideo terminal."
+    }
+]
+
 export const javascriptCreateRenameDeleteFileExampleActions: Array<IAction> = [
     {
         "name": "author-speak-before",

@@ -5,7 +5,7 @@ import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { addLessonToCourse, addNewLessonToProjects } from '../../../../../store/editorSlice';
 import { formatNameToSafeId } from '../../../../../utils/formatNameToSafeId';
-import { openModal } from '../../../../../store/modalSlice';
+import { closeModal, openModal } from '../../../../../store/modalSlice';
 import { ModalTypes } from '../../../../../types/modal';
 import {
   Text,
@@ -80,6 +80,9 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
       description: localLesson.description,
       actions: localLesson.actions
     }));
+
+    // close modal
+    dispatch(closeModal());
   };
 
   return (

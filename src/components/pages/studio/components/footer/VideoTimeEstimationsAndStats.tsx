@@ -8,17 +8,19 @@ import { useMemo, useState } from 'react';
 export function VideoTimeEstimationsAndStats() {
     const [isExpanded, setIsExpanded] = useState(false);
     const { currentActions } = useAppSelector(state => state.editor);
-    const { 
-        totalDuration, 
-        longestSpeakActionDuration, 
-        longestSpeakActionIndex, 
-        longestCodeActionDuration, 
-        longestCodeActionIndex 
-    } = useMemo(() => 
+    const {
+        totalDuration,
+        longestSpeakActionDuration,
+        longestSpeakActionIndex,
+        longestCodeActionDuration,
+        longestCodeActionIndex
+    } = useMemo(() =>
         estimateVideoDurationInSeconds(currentActions),
         [currentActions]
     );
-    const numClips = Math.ceil(totalDuration / 4);
+
+    // num clips is equivalent to the number of actions
+    const numClips = currentActions.length;
     const avgClipDuration = Math.ceil(totalDuration / numClips);
     const generationTimeM4 = Math.ceil(numClips / 18);
     const generationTimeDigitalOcean = Math.ceil(numClips / 4);
@@ -54,12 +56,15 @@ export function VideoTimeEstimationsAndStats() {
                     <Grid columns={{ initial: "1", lg: "2" }} gap="4">
                         <Box style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <Text size="2">Total Actions: <Text size="2" weight="medium">{currentActions.length}</Text></Text>
-                            <Text size="2">Estimated Video Length: <Text size="2" weight="medium">{formatDuration(totalDuration)} ({numClips} clips at {formatDuration(avgClipDuration)})</Text></Text>
-                            <Text size="2">Estimated Video Generation Times:</Text>
+                            <Text size="2">Estimated Video Length: <Text size="2" weight="medium">{formatDuration(totalDuration)} ({numClips} clips at {formatDuration(avgClipDuration)} / ea.)</Text></Text>
+                            <Text size="2">Estimated Generation Times:</Text>
                             <Flex direction="column" pl="2">
+                                <Text size="1">In Production:</Text>
+                                <Text size="1">- 4 GB Intel, CodeVide API v1.0.0: <Text size="1" weight="medium">{formatDuration(totalDuration)}</Text></Text>
+                                <Text size="1">In development:</Text>
                                 <Text size="1">- Parallel cloud arch: <Text size="1" weight="medium">{formatDuration(longestSpeakActionDuration)}</Text> (maximum length of longest action)</Text>
-                                <Text size="1">- 64 GB Apple Silicon: <Text size="1" weight="medium">{formatDuration(generationTimeM4)}</Text></Text>
-                                <Text size="1">- 4 GB Intel: <Text size="1" weight="medium">{formatDuration(generationTimeDigitalOcean)}</Text></Text>
+                                <Text size="1">- 64 GB Apple Silicon, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeM4)}</Text></Text>
+                                <Text size="1">- 4 GB Intel, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeDigitalOcean)}</Text></Text>
                             </Flex>
                         </Box>
                         <Box style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -67,7 +72,9 @@ export function VideoTimeEstimationsAndStats() {
                                 <Text size="2" mb="1">Longest Estimated Speak Action: <Text size="2" weight="medium">{formatDuration(longestSpeakActionDuration)}</Text> (Step {longestSpeakActionIndex + 1})</Text>
                                 <Box
                                 >
-                                    <pre>{JSON.stringify(currentActions[longestSpeakActionIndex], null, 2)}</pre>
+                                    <pre>
+                                        <Text size="1">{JSON.stringify(currentActions[longestSpeakActionIndex], null, 2)}</Text>
+                                    </pre>
                                 </Box>
                             </Box>
                             <Box>
@@ -75,7 +82,7 @@ export function VideoTimeEstimationsAndStats() {
                                 <Box
                                 >
                                     <pre>
-                                        {JSON.stringify(currentActions[longestCodeActionIndex], null, 2)}
+                                        <Text size="1">{JSON.stringify(currentActions[longestCodeActionIndex], null, 2)}</Text>
                                     </pre>
                                 </Box>
                             </Box>

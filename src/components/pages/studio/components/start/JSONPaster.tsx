@@ -12,7 +12,7 @@ import {
   IconButton
 } from '@radix-ui/themes';
 import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons';
-import { ICourse, ILesson, IAction, isActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
+import { ICourse, ILesson, IAction, isValidActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { addNewCourseToProjects, addNewLessonToProjects, addNewActionsToProjects } from '../../../../../store/editorSlice';
 
@@ -71,7 +71,7 @@ export const JSONPaster: React.FC = () => {
         setDetectedType('lesson');
         setParsedData(parsed as ILesson);
         setValidationError('');
-      } else if (isActions(parsed)) {
+      } else if (isValidActions(parsed)) {
         // we require at least one action to be present
         if ((parsed as IAction[]).length === 0) {
           setDetectedType(null);

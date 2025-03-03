@@ -15,7 +15,21 @@ export function FileExplorer(props: IFileExplorerProps) {
     const dispatch = useAppDispatch();
 
     const renderFileTree = (structure: IFileStructure, path: string = '', level: number): JSX.Element[] => {
-        return Object.entries(structure).map(([name, item]) => {
+        // Sort entries alphabetically, with directories first, then files
+        const sortedEntries = Object.entries(structure).sort((a, b) => {
+            const aIsDir = a[1].type === 'directory';
+            const bIsDir = b[1].type === 'directory';
+            
+            // If both are directories or both are files, sort alphabetically
+            if (aIsDir === bIsDir) {
+                return a[0].localeCompare(b[0]);
+            }
+            
+            // Otherwise, directories come first
+            return aIsDir ? -1 : 1;
+        });
+
+        return sortedEntries.map(([name, item]) => {
             const fullPath = path ? `${path}/${name}` : name;
             const isDirectory = item.type === 'directory';
             const leftMargin = level === 0 ? "0" : "4";
@@ -53,7 +67,7 @@ export function FileExplorer(props: IFileExplorerProps) {
                 borderRight: '1px solid var(--gray-7)',
                 backgroundColor: '#272822',
                 pointerEvents: 'none',
-        userSelect: 'none',
+                userSelect: 'none',
             }}>
             <Box p="2">{renderFileTree(fileStructure, '', 0)}</Box>
         </Box>

@@ -1,5 +1,5 @@
 
-import { IAction, ICourse, ILesson, isActions, isCourse, isLesson, Project, ProjectType } from "@fullstackcraftllc/codevideo-types";
+import { IAction, ICourse, ILesson, isValidActions, isCourse, isLesson, Project, ProjectType } from "@fullstackcraftllc/codevideo-types";
 import { createSlice } from "@reduxjs/toolkit";
 import { pythonPrintExample } from "../components/pages/studio/examples/how-to-print-stuff/pythonPrintExample";
 
@@ -23,6 +23,7 @@ export interface EditorState {
     mousePosition: { x: number; y: number };
     mouseVisible: boolean;
     isSidebarOpen: boolean;
+    isFullScreen: boolean;
 }
 
 const now = new Date().toISOString();
@@ -41,7 +42,7 @@ export const editorInitialState: EditorState = {
         created: now,
         modified: now,
     },
-    currentLessonIndex: -1,
+    currentLessonIndex: 0,
     currentActions: pythonPrintExample?.lessons[0]?.actions || [],
     draftActionsString: JSON.stringify([], null, 2),
     actionsString: JSON.stringify(pythonPrintExample?.lessons[0]?.actions, null, 2),
@@ -50,6 +51,7 @@ export const editorInitialState: EditorState = {
     mousePosition: { x: 20, y: 20 },
     mouseVisible: true,
     isSidebarOpen: false,
+    isFullScreen: false,
 };
 
 // helper to set the currentActions based on the current project type
@@ -63,7 +65,7 @@ const setCurrentActions = (state: EditorState, currentProject: UserProject) => {
     if (isLesson(currentProject.project)) {
         state.currentActions = currentProject.project.actions;
     }
-    if (isActions(currentProject.project)) {
+    if (isValidActions(currentProject.project)) {
         state.currentActions = currentProject.project;
     }
 
@@ -95,7 +97,7 @@ const editorSlice = createSlice({
                     currentProject.project.actions = action.payload;
                     state.currentProject = currentProject;
                 }
-                if (isActions(currentProject.project)) {
+                if (isValidActions(currentProject.project)) {
                     currentProject.project = action.payload;
                     state.currentProject = currentProject;
                 }
@@ -215,6 +217,9 @@ const editorSlice = createSlice({
         },
         setIsSidebarOpen(state, action) {
             state.isSidebarOpen = action.payload;
+        },
+        setIsFullScreen(state, action) {
+            state.isFullScreen = action.payload;
         }
     }
 });
@@ -235,7 +240,8 @@ export const {
     addLessonToCourse,
     createNewProject,
     toggleSidebar,
-    setIsSidebarOpen
+    setIsSidebarOpen,
+    setIsFullScreen
 } = editorSlice.actions;
 
 export default editorSlice.reducer;

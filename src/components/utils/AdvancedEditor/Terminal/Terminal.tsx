@@ -1,66 +1,57 @@
-import React, { useEffect, useState } from 'react';
-import { IAction } from '@fullstackcraftllc/codevideo-types';
+import React, { useEffect, useRef } from 'react';
 import { Box } from '@radix-ui/themes';
 
-interface TerminalProps {
-    actions: Array<IAction>;
-    actionIndex?: number;
-    className?: string;
+export interface ITerminalProps {
+    virtualTerminal: any;
 }
 
-const defaultPrompt = '[codevideo.studio] /> ';
+export function Terminal(props: ITerminalProps) {
+    const { virtualTerminal } = props;
+    const terminalRef = useRef<HTMLDivElement>(null);
 
-export function Terminal(props: TerminalProps) {
-    const { actions, actionIndex = 0, className = '' } = props;
-    const [displayText, setDisplayText] = useState(defaultPrompt);
+    if (!virtualTerminal) {
+        return null;
+    }
 
-    const getCurrentTerminalCommand = () => {
-        if (!actionIndex) {
-            return "";
-        }
-        const currentAction = actions[actionIndex];
-        if (!currentAction) {
-            return "";
-        }
-        if (currentAction.name === 'terminal-type') {
-            return currentAction.value;
-        }
-        return "";
-    };
+    const terminalBuffer = virtualTerminal.getBuffer().join('\n');
 
+    // Auto-scroll to bottom whenever the terminal buffer changes
     useEffect(() => {
-        const currentCommand = getCurrentTerminalCommand();
-        if (currentCommand) {
-            setDisplayText(defaultPrompt + currentCommand);
-        } else {
-            setDisplayText(defaultPrompt);
+        if (terminalRef.current) {
+            terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
         }
-    }, [actionIndex, actions]);
+    }, [terminalBuffer]);
 
     return (
         <Box
             data-codevideo-id="terminal"
-            className={className}
+            ref={terminalRef}
             style={{
                 borderTop: '1px solid var(--gray-7)',
-                minHeight: '150px',
+                height: '150px',
                 backgroundColor: '#272822',
                 fontFamily: 'Fira Code, monospace',
                 padding: '8px',
                 position: 'relative',
-                overflow: 'hidden',
+                overflow: 'auto', // Changed from 'hidden' to 'auto' to enable scrolling
+                scrollBehavior: 'smooth', // Add smooth scrolling effect
             }}
         >
-            <Box style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontWeight: 'bold' }}>
-                {displayText}
+            <Box style={{ 
+                whiteSpace: 'pre-wrap',  // This enables text wrapping
+                wordBreak: 'break-word', // This ensures words break properly
+                fontWeight: 'bold',
+                width: '100%',           // Ensure the content takes full width of container
+            }}>
+                {terminalBuffer}
                 <Box
                     style={{
                         display: 'inline-block',
-                        width: '8px',
-                        height: '16px',
-                        backgroundColor: 'var(--gray-5)',
-                        marginLeft: '4px',
-                        animation: 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                        width: '2px',
+                        height: '19px',
+                        marginBottom: '-4px',
+                        backgroundColor: 'var(--gray-12)',
+                        animation: 'blink 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
                     }}
                 />
             </Box>

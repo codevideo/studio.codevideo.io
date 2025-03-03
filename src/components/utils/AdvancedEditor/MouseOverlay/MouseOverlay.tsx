@@ -13,7 +13,7 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  
+
 
   useEffect(() => {
     if (!currentActionIndex) return;
@@ -24,10 +24,11 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
 
     switch (currentAction.name) {
       case 'mouse-click-terminal':
+      case 'terminal-open':
         newPosition = getCoordinatesOfTerminalInput(containerRef)
         break;
       case 'mouse-click-editor':
-        case 'editor-type':
+      case 'editor-type':
         newPosition = getCoordinatesOfEditor(containerRef)
         break;
       case 'file-explorer-create-folder':
@@ -62,7 +63,7 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
 
   return (
     <Box
-    id="mouse-overlay"
+      id="mouse-overlay"
       ref={overlayRef}
       style={{
         transform: `translate(${mousePosition.x}px, ${mousePosition.y}px) scale(0.8)`,
@@ -137,9 +138,9 @@ const parseCoordinatesFromAction = (value: string, containerRef: React.RefObject
 
 const convertToContainerCoordinates = (point: IPoint, containerRef: React.RefObject<HTMLDivElement>): IPoint => {
   if (!containerRef?.current) return point;
-  
+
   const containerRect = containerRef.current.getBoundingClientRect();
-  
+
   return {
     x: point.x - containerRect.left,
     y: point.y - containerRect.top

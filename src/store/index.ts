@@ -4,6 +4,7 @@ import editorSlice from './editorSlice'
 import recordingSlice from './recordingSlice'
 import userSlice from './userSlice'
 import modalSlice from './modalSlice'
+import toastSlice from './toastSlice'
 import themeSlice from './themeSlice'
 
 const createStore = () =>
@@ -14,6 +15,7 @@ const createStore = () =>
             recording: recordingSlice,
             user: userSlice,
             modal: modalSlice,
+            toast: toastSlice,
         }
     })
 
