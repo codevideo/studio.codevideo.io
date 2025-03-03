@@ -205,10 +205,12 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
               </Box>
               {/* Terminal */}
               {terminals.length > 0 ? (
-                <Terminal
-                  actions={currentActions}
-                  actionIndex={currentActionIndex}
-                />
+                <>
+                  {virtualIDE.virtualTerminals.map((virtualTerminal, i) => (
+                    <Terminal key={i} virtualTerminal={virtualTerminal}
+                    />
+                  ))}
+                </>
               ) : (
                 /* Empty terminal - colored background */
                 <Box style={{ backgroundColor: '#272822', height: '30px', borderTop: '1px solid var(--gray-7)' }} />
@@ -225,23 +227,23 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
           <Box
             style={{
               width: '100%',
-              padding: '40px',
+              padding: '50px',
               backgroundColor: 'rgba(0, 0, 0, 0.75)',
               color: 'white',
               borderBottomLeftRadius: 'var(--radius-3)',
               borderBottomRightRadius: 'var(--radius-3)',
+              position: 'relative'
             }}
           >
             <Box style={{ margin: '0 auto', maxWidth: '64rem' }}>
               <Text>{captionText}</Text>
             </Box>
+            {/* Sound Toggle Button */}
+            <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
+              <SoundToggleButton />
+            </Box>
           </Box>
         )}
-
-        {/* Sound Toggle Button */}
-        <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
-          <SoundToggleButton />
-        </Box>
       </Flex>
     </Flex>
   );

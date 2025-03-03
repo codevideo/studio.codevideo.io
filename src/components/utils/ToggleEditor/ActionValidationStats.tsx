@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IAction, isAction, filterAuthorActions, filterFileExplorerActions, filterEditorActions, filterTerminalActions, filterMouseActions, filterExternalActions } from '@fullstackcraftllc/codevideo-types';
+import { IAction, isValidAction, filterAuthorActions, filterFileExplorerActions, filterEditorActions, filterTerminalActions, filterMouseActions, filterExternalActions } from '@fullstackcraftllc/codevideo-types';
 import { useEffect, useState } from 'react';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { Flex, Text, Box } from '@radix-ui/themes';
@@ -44,7 +44,7 @@ export function ActionValidationStats(props: IActionValidationStatsProps) {
         // check each action and if it is valid with type guard
         for (let i = 0; i < parsedActions.length; i++) {
           const action = parsedActions[i];
-          if (!isAction(action)) {
+          if (!isValidAction(action)) {
             setIsValid(false);
             setValidationError(`Invalid action at index ${i + 1}: ${JSON.stringify(action)}`);
             return;

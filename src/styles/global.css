@@ -1,11 +1,14 @@
-@keyframes pulse {
-    0%,
-    100% {
+@keyframes blink {
+    0%, 49% {
         opacity: 1;
     }
-
-    50% {
-        opacity: 0.5;
+    
+    50%, 99% {
+        opacity: 0;
+    }
+    
+    100% {
+        opacity: 1;
     }
 }
 

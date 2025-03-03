@@ -1,8 +1,54 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useAppSelector } from "./useAppSelector";
 import { useAppDispatch } from "./useAppDispatch";
-import { IAction } from "@fullstackcraftllc/codevideo-types";
+import { AllActions, IAction } from "@fullstackcraftllc/codevideo-types";
 import { setAtomicRecordedActions, setCollectedRecordedActions, setIsEditorFocused, setIsFileExplorerFocused, setIsTerminalFocused } from "../store/recordingSlice";
+
+const convertKeyNameToCodeVideoName = (prefix: string, key: string) => {
+    switch (key) {
+        case "Enter":
+            return `${prefix}-enter`;
+        case "Backspace":
+            return `${prefix}-backspace`;
+        case "Delete":
+            return `${prefix}-delete`;
+        case "ArrowUp":
+        case "38": // Up arrow keycode
+            return `${prefix}-arrow-up`;
+        case "ArrowDown":
+        case "40": // Down arrow keycode
+            return `${prefix}-arrow-down`;
+        case "ArrowLeft":
+        case "37": // Left arrow keycode
+            return `${prefix}-arrow-left`;
+        case "ArrowRight":
+        case "39": // Right arrow keycode
+            return `${prefix}-arrow-right`;
+        case "Tab":
+            return `${prefix}-tab`;
+        case "Space":
+            return `${prefix}-space`;
+        default:
+            return `${prefix}-type`;
+    }
+};
+
+// Helper to convert keyCode to string representation
+const keyCodeToString = (keyCode: number): string => {
+    switch (keyCode) {
+        case 8: return "Backspace";
+        case 9: return "Tab";
+        case 13: return "Enter";
+        case 27: return "Escape";
+        case 32: return "Space";
+        case 37: return "ArrowLeft";
+        case 38: return "ArrowUp";
+        case 39: return "ArrowRight";
+        case 40: return "ArrowDown";
+        case 46: return "Delete";
+        default: return String(keyCode);
+    }
+};
 
 export const useRecordActions = () => {
     const { isRecording, atomicRecordedActions, collectedRecordedActions, isFileExplorerFocused, isEditorFocused, isTerminalFocused } = useAppSelector(state => state.recording);
@@ -11,12 +57,12 @@ export const useRecordActions = () => {
     const [actions, setActions] = useState<Array<IAction>>([]);
     const [speechRecognition, setSpeechRecognition] = useState<any | null>(null);
 
-    // KeyLogger for recording keystrokes
+    // KeyLogger for recording keystrokes (standard keys)
     const keyLoggerCallback = useCallback((event: KeyboardEvent) => {
-        console.log('keyLoggerCallback', event);
         if (!isRecording) return;
         
         let key = event.key;
+        console.log(`Key pressed (keydown): ${key}, keyCode: ${event.keyCode}`);
 
         // "Shift" we can ignore
         if (key === "Shift") {
@@ -28,12 +74,28 @@ export const useRecordActions = () => {
             key = "\n";
         }
         
-        recordKeyboardAction(key);
+        // Handle arrow keys and special keys
+        if (event.keyCode >= 37 && event.keyCode <= 40) {
+            // This is an arrow key - use keyCode
+            const arrowKey = keyCodeToString(event.keyCode);
+            recordKeyboardAction(arrowKey);
+            // Prevent default browser behavior for arrow keys
+            event.preventDefault();
+        } else if (event.key === 'Backspace' || event.keyCode === 8) {
+            // Explicitly handle Backspace key (keyCode 8)
+            console.log("Backspace detected");
+            recordKeyboardAction('Backspace');
+            // We don't prevent default for Backspace as we typically want the character deletion to happen
+        } else {
+            // Handle regular keys
+            recordKeyboardAction(key);
+        }
     }, [isRecording, isFileExplorerFocused, isEditorFocused, isTerminalFocused]);
 
     // Set up key event listeners
     useEffect(() => {
         if (isRecording) {
+            // We specifically use keydown to catch arrow keys
             window.addEventListener("keydown", keyLoggerCallback);
         }
         
@@ -67,9 +129,29 @@ export const useRecordActions = () => {
             // TODO: add file-explorer-edit-filename action
             // setActions(prev => [...prev, { name: 'file-explorer-edit-filename', value: key }]);
         } else if (isEditorFocused) {
-            setActions(prev => [...prev, { name: 'editor-type', value: key }]);
+            const codeVideoName = convertKeyNameToCodeVideoName('editor', key) as AllActions;
+            
+            console.log(`Recording action: ${codeVideoName}, key: ${key}`);
+            
+            if (key.startsWith('Arrow') || key === '37' || key === '38' || key === '39' || key === '40' || 
+                key === 'Backspace' || key === 'Delete' || key === 'Tab') {
+                // For arrow keys and other special keys, we record with a value of "1"
+                setActions(prev => [...prev, { name: codeVideoName, value: "1" }]);
+            } else if (codeVideoName === 'editor-type') {
+                // For regular typing
+                setActions(prev => [...prev, { name: codeVideoName, value: key }]);
+            } else {
+                // For other special keys
+                setActions(prev => [...prev, { name: codeVideoName, value: "1" }]);
+            }
         } else if (isTerminalFocused) {
-            setActions(prev => [...prev, { name: 'terminal-type', value: key }]);
+            // Handle terminal typing, including special keys
+            if (key.startsWith('Arrow') || key === '37' || key === '38' || key === '39' || key === '40') {
+                const terminalAction = `terminal-${key.toLowerCase().replace('arrow', 'arrow-')}` as AllActions;
+                setActions(prev => [...prev, { name: terminalAction, value: "1" }]);
+            } else {
+                setActions(prev => [...prev, { name: 'terminal-type', value: key }]);
+            }
         }
     };
 
@@ -234,7 +316,7 @@ export const useRecordActions = () => {
                 
                 // Update the last action in our collection
                 if (newCollectedActions.length > 0) {
-                        //@ts-ignore
+                    //@ts-ignore
                     newCollectedActions[newCollectedActions.length - 1] = lastCollectedAction;
                 }
                 

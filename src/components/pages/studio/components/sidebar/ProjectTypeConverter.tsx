@@ -9,7 +9,8 @@ import {
   Box, 
   Flex, 
   Button, 
-  Dialog
+  Dialog,
+  Code
 } from '@radix-ui/themes';
 
 export function ProjectTypeConverter() {
@@ -78,6 +79,32 @@ export function ProjectTypeConverter() {
     return null;
   }
 
+  const determiner = targetType === 'actions' ? 'an' : 'a';
+
+  let additionalDescription = '';
+
+  // upgrade conversions
+  if (currentProject?.projectType === 'actions' && targetType === 'lesson') {
+    additionalDescription = ' This will add all actions to a single lesson. You will be able to update the lesson name and description after conversion.';
+  }
+  if (currentProject?.projectType === 'actions' && targetType === 'course') {
+    additionalDescription = ' This will add all actions to a single lesson in a new course. You will be able to update the course name and description after conversion, as well as add new lessons.';
+  }
+  if (currentProject?.projectType === 'lesson' && targetType === 'course') {
+    additionalDescription = ' This will add the lesson to a new course. You will be able to update the course name and description after conversion, as well as add new lessons.';
+  }
+
+  // downgrade conversions
+  if (currentProject?.projectType === 'course' && targetType === 'lesson') {
+    additionalDescription = ' This will create a single lesson with actions combined from all lessons across the course. You will be able to update the lesson name and description after conversion.';
+  }
+  if (currentProject?.projectType === 'course' && targetType === 'actions') {
+    additionalDescription = ' This will create a single list of actions from all lessons across the course.';
+  }
+  if (currentProject?.projectType === 'lesson' && targetType === 'actions') {
+    additionalDescription = ' This will create a single list of actions from the lesson.';
+  }
+
   return (
     <>
       <Box>
@@ -106,8 +133,9 @@ export function ProjectTypeConverter() {
         <Dialog.Content size="2">
           <Dialog.Title>Convert Project</Dialog.Title>
           <Dialog.Description size="2" mb="4">
-            Are you sure you want to convert this {currentProject?.projectType} to a {targetType}? 
-            This action will create a new project and leave the original unchanged.
+            Are you sure you want to convert this <Code>{currentProject?.projectType}</Code> project to {determiner} <Code>{targetType}</Code> project? 
+            <br/><br/>{additionalDescription}<br/><br/>
+            No worries about data loss - a copy of the original project will remain in your projects.
           </Dialog.Description>
           
           <Flex gap="3" mt="4" justify="end">

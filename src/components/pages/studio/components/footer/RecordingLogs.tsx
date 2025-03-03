@@ -1,11 +1,15 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { Box, Grid, Button, Card, Heading, Flex, Text } from '@radix-ui/themes';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function RecordingLogs() {
-    const [isExpanded, setIsExpanded] = useState(false);
     const { isRecording, atomicRecordedActions, collectedRecordedActions } = useAppSelector(state => state.recording);
+    const [isExpanded, setIsExpanded] = useState(isRecording);
+
+    useEffect(() => {
+        setIsExpanded(isRecording);
+    }, [isRecording]);
 
     return (
         <Box mt="4">

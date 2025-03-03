@@ -15,11 +15,12 @@ import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { ProjectTypeConverter } from './ProjectTypeConverter';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { createNewProject, setIsSidebarOpen } from '../../../../../store/editorSlice';
-import { isActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
+import { isValidActions, isCourse, isLesson, ICourse, ILesson, IAction } from '@fullstackcraftllc/codevideo-types';
 import { ProjectSelector } from './ProjectSelector';
 import { MetadataEditor } from './MetadataEditor';
 import { ExportDropdown } from './ExportDropdown';
 import { firstCharacterUppercase } from '../../../../../utils/firstCharacterUppercase';
+import { ProjectRenderer } from './ProjectRenderer';
 
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
@@ -39,8 +40,8 @@ export function SidebarMenu() {
         currentProjectTitle = currentProject.project.name;
     } else if (isLesson(currentProject?.project)) {
         currentProjectTitle = currentProject.project.name;
-    } else if (isActions(currentProject?.project)) {
-        currentProjectTitle = '<no name>';
+    } else if (isValidActions(currentProject?.project)) {
+        currentProjectTitle = '';
     }
 
     return (
@@ -86,15 +87,11 @@ export function SidebarMenu() {
                         >
                             {/* Project Type Section */}
                             <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Project Info</Heading>
-                                <Text mb="2">
-                                    Current Project: 
-                                </Text>
-                                <Code>{currentProjectTitle}</Code>
-                                <Text mb="2">
-                                    Project type: 
-                                </Text>
-                                <Code>{currentProject?.projectType}</Code>
+                                <Heading size="4" mb="3">Current Project</Heading>
+                                <ProjectRenderer 
+                                userProject={currentProject}     
+                                isCurrentProject={true}             
+                                />
                             </Flex>
 
                             {/* Metadata Section */}
