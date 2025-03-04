@@ -4,12 +4,7 @@ import { setActions, setCurrentActionIndex, setDraftActionsString } from '../../
 import { Flex, Button, Box } from '@radix-ui/themes';
 import { useAppSelector } from '../../../../hooks/useAppSelector';
 
-export interface IInsertStepButtonProps {
-    buttonIndex: number;
-}
-
-export function InsertStepButton(props: IInsertStepButtonProps) {
-    const { buttonIndex } = props;
+export function InsertStepButton() {
     const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
 
@@ -28,22 +23,11 @@ export function InsertStepButton(props: IInsertStepButtonProps) {
         dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
     };
 
-    const getButtonText = () => {
-        // at the first or last index, we want to add a new action
-        if (currentActions.length === 0 || buttonIndex === currentActions.length - 1) {
-            return '+ Add Action';
-        }
-        // otherwise, we want to insert a new action inbetween
-        return '+ Insert Action';
-    }
-
-    const buttonText = getButtonText();
-
     return (
         <>
             {currentActions.length === 0 && (
                 <Flex justify="center" align="center">
-                    Add your first step!
+                    Add your first action!
                 </Flex>
             )}
             <Flex
@@ -57,7 +41,7 @@ export function InsertStepButton(props: IInsertStepButtonProps) {
                         color="mint"
                         onClick={handleInsertStep}
                     >
-                        {buttonText}
+                        + Add Action
                     </Button>
                 </Box>
             </Flex>

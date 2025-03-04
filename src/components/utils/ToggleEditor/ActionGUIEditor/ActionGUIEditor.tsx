@@ -20,6 +20,7 @@ import { useAppSelector } from "../../../../hooks/useAppSelector";
 import { setActions, setCurrentActionIndex, setDraftActionsString } from "../../../../store/editorSlice";
 import { ActionCounter } from "../../ActionCounter";
 import { useState, useEffect, useRef } from "react";
+import { TutorialCSSClassConstants } from "../../../pages/studio/components/sidebar/StudioTutorial";
 
 export function ActionGUIEditor() {
   const { currentActions, currentActionIndex } = useAppSelector((state) => state.editor);
@@ -130,12 +131,9 @@ export function ActionGUIEditor() {
     }
   }
 
-  if (!currentAction) {
-    return <></>;
-  }
-
   return (
     <Flex
+      className={TutorialCSSClassConstants.ACTION_GUI_EDITOR}
       direction="column"
       gap="2"
       style={{
@@ -144,7 +142,7 @@ export function ActionGUIEditor() {
       }}
     >
       {currentActions.length === 0 && (
-        <InsertStepButton buttonIndex={1} />
+        <InsertStepButton />
       )}
       <Flex direction="row" align="center" justify="between" gap="2">
         <Button
@@ -157,97 +155,99 @@ export function ActionGUIEditor() {
         </Button>
         <ActionCounter />
         <Button
+          className={TutorialCSSClassConstants.ACTION_GUI_NEXT_BUTTON}
           color="mint"
           variant="soft"
           onClick={() => dispatch(setCurrentActionIndex(currentActionIndex + 1))}
-          disabled={currentActionIndex === currentActions.length - 1}
+          disabled={currentActionIndex === 0 || currentActionIndex === currentActions.length - 1}
         >
           Next {'>'}
         </Button>
       </Flex>
-      
-      <Flex direction="column" gap="2">
-        <Select.Root
-          value={currentAction.name}
-          onValueChange={(value) => handleSelectChange(currentActionIndex, value)}
-        >
-          <Select.Trigger>
-            {getActionBadge(currentAction.name)}
-          </Select.Trigger>
-          <Select.Content>
-            <Select.Group>
-              {AllActionStrings.map((actionType) => (
-                <Select.Item key={actionType} value={actionType}>
-                  {getActionBadge(actionType)}
-                </Select.Item>
-              ))}
-            </Select.Group>
-          </Select.Content>
-        </Select.Root>
-        <Tooltip align="start" side="top" content={showValueHint.content} open={showValueHint.open}>
-          <TextArea
-            ref={textAreaRef}
-            value={currentAction.value}
-            onChange={(e) => isAuthorAction(currentAction) ?
-              handleTextAreaChange(currentActionIndex, e) :
-              handleInputChange(currentActionIndex, e as any)
-            }
-            style={{
-              flex: 1,
-              fontFamily: isAuthorAction(currentAction) ? 'sans-serif' : 'Fira Code, monospace',
-              minHeight: '100px',
-              overflow: 'hidden',
-              resize: 'none'
-            }}
-          />
-        </Tooltip>
-      </Flex>
-      <Flex ml="auto" gap="2">
-        <Button
-          color="mint"
-          variant="soft"
-          onClick={() => {
-            // add the current action to the previous index
-            const newActions = currentActions
-              .slice(0, currentActionIndex)
-              .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
-            dispatch(setActions(newActions));
-            dispatch(setCurrentActionIndex(currentActionIndex));
-            dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-          }}
-        >
-          Clone to Previous
-        </Button>
-        <Button
-          color="mint"
-          variant="soft"
-          onClick={() => {
-            // add the current action to the next index
-            const newActions = currentActions
-              .slice(0, currentActionIndex + 1)
-              .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
-            dispatch(setActions(newActions));
-            dispatch(setCurrentActionIndex(currentActionIndex + 1));
-            dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-          }}
-        >
-          Clone to Next
-        </Button>
 
-        <Button
-          color="red"
-          variant="soft"
-          onClick={() => {
-            const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
-            dispatch(setActions(newActions));
-            dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
-            dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-          }}
-        >
-          Delete
-        </Button>
-      </Flex>
-      {/* <InsertStepButton buttonIndex={currentActionIndex} /> */}
+      {currentAction && <>
+        <Flex direction="column" gap="2">
+          <Select.Root
+            value={currentAction.name}
+            onValueChange={(value) => handleSelectChange(currentActionIndex, value)}
+          >
+            <Select.Trigger>
+              {getActionBadge(currentAction.name)}
+            </Select.Trigger>
+            <Select.Content>
+              <Select.Group>
+                {AllActionStrings.map((actionType) => (
+                  <Select.Item key={actionType} value={actionType}>
+                    {getActionBadge(actionType)}
+                  </Select.Item>
+                ))}
+              </Select.Group>
+            </Select.Content>
+          </Select.Root>
+          <Tooltip align="start" side="top" content={showValueHint.content} open={showValueHint.open}>
+            <TextArea
+              ref={textAreaRef}
+              value={currentAction.value}
+              onChange={(e) => isAuthorAction(currentAction) ?
+                handleTextAreaChange(currentActionIndex, e) :
+                handleInputChange(currentActionIndex, e as any)
+              }
+              style={{
+                flex: 1,
+                fontFamily: isAuthorAction(currentAction) ? 'sans-serif' : 'Fira Code, monospace',
+                minHeight: '100px',
+                overflow: 'hidden',
+                resize: 'none'
+              }}
+            />
+          </Tooltip>
+        </Flex>
+        <Flex ml="auto" gap="2">
+          <Button
+            color="mint"
+            variant="soft"
+            onClick={() => {
+              // add the current action to the previous index
+              const newActions = currentActions
+                .slice(0, currentActionIndex)
+                .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
+              dispatch(setActions(newActions));
+              dispatch(setCurrentActionIndex(currentActionIndex));
+              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+            }}
+          >
+            Clone to Previous
+          </Button>
+          <Button
+            className={TutorialCSSClassConstants.ACTION_GUI_CLONE_TO_NEXT}
+            color="mint"
+            variant="soft"
+            onClick={() => {
+              // add the current action to the next index
+              const newActions = currentActions
+                .slice(0, currentActionIndex + 1)
+                .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
+              dispatch(setActions(newActions));
+              dispatch(setCurrentActionIndex(currentActionIndex + 1));
+              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+            }}
+          >
+            Clone to Next
+          </Button>
+          <Button
+            color="red"
+            variant="soft"
+            onClick={() => {
+              const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
+              dispatch(setActions(newActions));
+              dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
+              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+            }}
+          >
+            Delete
+          </Button>
+        </Flex>
+      </>}
     </Flex>
   );
 }

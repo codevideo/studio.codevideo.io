@@ -7,14 +7,15 @@ import {
   Box, 
   Button, 
   Select,
+  Text
 } from '@radix-ui/themes';
 
-export const ExportDropdown: React.FC = () => {
+export const ExportDropdown = () => {
+  const { projects, currentProjectIndex } = useAppSelector(state => state.editor);
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState<ExportType | ''>('');
   const [exportComplete, setExportComplete] = useState(false);
-  const { projects, currentProjectIndex } = useAppSelector(state => state.editor);
-  const project = projects[currentProjectIndex]?.project as Project;
+  const project = projects[currentProjectIndex]?.project;
   
   const handleExportChange = (value: string) => {
     setExportType(value as ExportType | '');
@@ -22,12 +23,21 @@ export const ExportDropdown: React.FC = () => {
   };
   
   const handleExport = async () => {
-    if (!exportType || !project) return;
+    if (!exportType) {
+      console.error('No export type selected');
+      return;
+    }
+
+    if (!project) {
+      console.error('No project to export');
+      return;
+    }
     
     setIsExporting(true);
     setExportComplete(false);
     
     try {
+      console.log('exporting project:', project, 'as', exportType);
       await exportProject(project, exportType);
       setExportComplete(true);
     } catch (error) {
@@ -38,8 +48,9 @@ export const ExportDropdown: React.FC = () => {
   };
   
   return (
-    <Flex align="center" gap="2">
+    <Flex align="center" justify="between" gap="2">
       <Box>
+        <Text size="1" mr="2">Export project to...</Text>
         <Select.Root
           value={exportType}
           onValueChange={handleExportChange}
@@ -47,7 +58,7 @@ export const ExportDropdown: React.FC = () => {
         >
           <Select.Trigger 
             variant="surface" 
-            placeholder="Export project to..."
+            placeholder="Select..."
           />
           <Select.Content>
             <Select.Item value="markdown">Markdown</Select.Item>
@@ -55,6 +66,7 @@ export const ExportDropdown: React.FC = () => {
             <Select.Item value="pdf">PDF</Select.Item>
             <Select.Item value="zip">ZIP</Select.Item>
             <Select.Item value="json">JSON</Select.Item>
+            <Select.Item value="pptx">PPTX (Beta)</Select.Item>
           </Select.Content>
         </Select.Root>
       </Box>

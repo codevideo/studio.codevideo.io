@@ -6,6 +6,7 @@ import userSlice from './userSlice'
 import modalSlice from './modalSlice'
 import toastSlice from './toastSlice'
 import themeSlice from './themeSlice'
+import tutorialSlice from './tutorialSlice'
 
 const createStore = () =>
     configureStore({
@@ -16,6 +17,7 @@ const createStore = () =>
             user: userSlice,
             modal: modalSlice,
             toast: toastSlice,
+            tutorial: tutorialSlice,
         }
     })
 

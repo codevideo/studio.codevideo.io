@@ -3,6 +3,341 @@ import { IAction } from "@fullstackcraftllc/codevideo-types";
 export const blankJavaScriptExampleActions: Array<IAction> = [
 ];
 
+export const typingUnitTestExampleActions: Array<IAction> = [
+    {
+        "name": "file-explorer-create-file",
+        "value": "text.txt"
+    },
+    {
+        "name": "file-explorer-open-file",
+        "value": "text.txt"
+    },
+    {
+        "name": "editor-type",
+        "value": "a"
+    },
+    {
+        "name": "editor-type",
+        "value": "b"
+    },
+    {
+        "name": "editor-type",
+        "value": "c"
+    },
+    {
+        "name": "editor-type",
+        "value": "d"
+    },
+    {
+        "name": "editor-type",
+        "value": "e"
+    },
+    {
+        "name": "editor-type",
+        "value": "f"
+    },
+    {
+        "name": "editor-type",
+        "value": "g"
+    },
+    {
+        "name": "editor-type",
+        "value": "h"
+    },
+    {
+        "name": "editor-type",
+        "value": "i"
+    },
+    {
+        "name": "editor-type",
+        "value": "j"
+    },
+    {
+        "name": "editor-type",
+        "value": "k"
+    },
+    {
+        "name": "editor-type",
+        "value": "l"
+    },
+    {
+        "name": "editor-type",
+        "value": "m"
+    },
+    {
+        "name": "editor-type",
+        "value": "n"
+    },
+    {
+        "name": "editor-type",
+        "value": "o"
+    },
+    {
+        "name": "editor-type",
+        "value": "p"
+    },
+    {
+        "name": "editor-type",
+        "value": "q"
+    },
+    {
+        "name": "editor-type",
+        "value": "r"
+    },
+    {
+        "name": "editor-type",
+        "value": "s"
+    },
+    {
+        "name": "editor-type",
+        "value": "t"
+    },
+    {
+        "name": "editor-type",
+        "value": "u"
+    },
+    {
+        "name": "editor-type",
+        "value": "v"
+    },
+    {
+        "name": "editor-type",
+        "value": "w"
+    },
+    {
+        "name": "editor-type",
+        "value": "x"
+    },
+    {
+        "name": "editor-type",
+        "value": "y"
+    },
+    {
+        "name": "editor-type",
+        "value": "z"
+    },
+    {
+        "name": "editor-backspace",
+        "value": "26"
+    },
+    {
+        "name": "editor-type",
+        "value": "a"
+    },
+    {
+        "name": "editor-type",
+        "value": "b"
+    },
+    {
+        "name": "editor-type",
+        "value": "c"
+    },
+    {
+        "name": "editor-type",
+        "value": "d"
+    },
+    {
+        "name": "editor-type",
+        "value": "e"
+    },
+    {
+        "name": "editor-type",
+        "value": "f"
+    },
+    {
+        "name": "editor-type",
+        "value": "g"
+    },
+    {
+        "name": "editor-type",
+        "value": "h"
+    },
+    {
+        "name": "editor-type",
+        "value": "i"
+    },
+    {
+        "name": "editor-type",
+        "value": "j"
+    },
+    {
+        "name": "editor-type",
+        "value": "k"
+    },
+    {
+        "name": "editor-type",
+        "value": "l"
+    },
+    {
+        "name": "editor-type",
+        "value": "m"
+    },
+    {
+        "name": "editor-type",
+        "value": "n"
+    },
+    {
+        "name": "editor-type",
+        "value": "o"
+    },
+    {
+        "name": "editor-type",
+        "value": "p"
+    },
+    {
+        "name": "editor-type",
+        "value": "q"
+    },
+    {
+        "name": "editor-type",
+        "value": "r"
+    },
+    {
+        "name": "editor-type",
+        "value": "s"
+    },
+    {
+        "name": "editor-type",
+        "value": "t"
+    },
+    {
+        "name": "editor-type",
+        "value": "u"
+    },
+    {
+        "name": "editor-type",
+        "value": "v"
+    },
+    {
+        "name": "editor-type",
+        "value": "w"
+    },
+    {
+        "name": "editor-type",
+        "value": "x"
+    },
+    {
+        "name": "editor-type",
+        "value": "y"
+    },
+    {
+        "name": "editor-type",
+        "value": "z"
+    },
+    {
+        "name": "editor-backspace",
+        "value": "26"
+    },
+    {
+        "name": "editor-type",
+        "value": "a"
+    },
+    {
+        "name": "editor-type",
+        "value": "b"
+    },
+    {
+        "name": "editor-type",
+        "value": "c"
+    },
+    {
+        "name": "editor-type",
+        "value": "d"
+    },
+    {
+        "name": "editor-type",
+        "value": "e"
+    },
+    {
+        "name": "editor-type",
+        "value": "f"
+    },
+    {
+        "name": "editor-type",
+        "value": "g"
+    },
+    {
+        "name": "editor-type",
+        "value": "h"
+    },
+    {
+        "name": "editor-type",
+        "value": "i"
+    },
+    {
+        "name": "editor-type",
+        "value": "j"
+    },
+    {
+        "name": "editor-type",
+        "value": "k"
+    },
+    {
+        "name": "editor-type",
+        "value": "l"
+    },
+    {
+        "name": "editor-type",
+        "value": "m"
+    },
+    {
+        "name": "editor-type",
+        "value": "n"
+    },
+    {
+        "name": "editor-type",
+        "value": "o"
+    },
+    {
+        "name": "editor-type",
+        "value": "p"
+    },
+    {
+        "name": "editor-type",
+        "value": "q"
+    },
+    {
+        "name": "editor-type",
+        "value": "r"
+    },
+    {
+        "name": "editor-type",
+        "value": "s"
+    },
+    {
+        "name": "editor-type",
+        "value": "t"
+    },
+    {
+        "name": "editor-type",
+        "value": "u"
+    },
+    {
+        "name": "editor-type",
+        "value": "v"
+    },
+    {
+        "name": "editor-type",
+        "value": "w"
+    },
+    {
+        "name": "editor-type",
+        "value": "x"
+    },
+    {
+        "name": "editor-type",
+        "value": "y"
+    },
+    {
+        "name": "editor-type",
+        "value": "z"
+    },
+    {
+        "name": "editor-backspace",
+        "value": "26"
+    },
+]
+
 export const javaScriptExampleActions: Array<IAction> = [
     {
         "name": "author-speak-before",

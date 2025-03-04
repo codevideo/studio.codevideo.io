@@ -18,13 +18,16 @@ import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { LessonCounter } from '../../../../utils/LessonCounter';
 import { useState } from 'react';
 import { GUIMode, ICourse, isCourse } from '@fullstackcraftllc/codevideo-types';
-import { VirtualIDELogs } from '../footer/VirtualIDELogs';
+import { VirtualLayerLogs } from '../footer/VirtualLayerLogs';
 import { LessonAdder } from '../../../../utils/LessonAdder';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
-import { setCurrentActionIndex, setIsPlaying } from '../../../../../store/editorSlice';
+import { setCurrentActionIndex, setIsPlaying, setIsSoundOn } from '../../../../../store/editorSlice';
+import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
+import { ExportDropdown } from '../sidebar/ExportDropdown';
+import { SoundToggleButton } from './SoundToggleButton';
 
 export function MainStudio() {
-  const { currentProject, currentActions, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying } = useAppSelector((state) => state.editor);
+  const { currentProject, currentActions, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying, isSoundOn } = useAppSelector((state) => state.editor);
   const { isRecording } = useAppSelector(state => state.recording);
   const dispatch = useAppDispatch();
   const [editorMode, setEditorMode] = useState("editor");
@@ -74,6 +77,7 @@ export function MainStudio() {
           actions={currentActions}
           currentActionIndex={currentActionIndex}
           currentLessonIndex={currentLessonIndex}
+          isSoundOn={isSoundOn}
           actionFinishedCallback={goToNextAction}
         />}
       </Box>
@@ -84,28 +88,28 @@ export function MainStudio() {
     <>
       <SidebarMenu />
       <Box
-        style={{
-          minHeight: '100vh',
-          padding: '1rem'
-        }}
+
+        p="1"
         mt="9"
       >
         <Grid columns={{ initial: '1', md: '3' }} gap="3">
           {/* Left Action Editor */}
-          <Box style={{ width: '100%', height: '650px' }}>
-            <Card mb="3">
-              <Flex gap="2" align="center" justify="between">
-                <Flex direction="column">
-                  <Text size="1" mb="1">{(currentProject?.project as ICourse).name}</Text>
-                  <Flex align="center" gap="2">
-                    <Code size="1">{currentProject?.projectType}</Code>
-                    <LessonCounter />
-                    <LessonAdder />
+          <Box style={{ width: '100%', height: '760px', overflowY: 'auto' }}>
+            <Flex direction="row" gap="2" justify="between">
+              <Card mb="3" className={TutorialCSSClassConstants.PROJECT_INFO_BOX}>
+                <Flex gap="2" align="center" justify="between">
+                  <Flex direction="column">
+                    <Text size="1" mb="1">{(currentProject?.project as ICourse).name}</Text>
+                    <Flex align="center" gap="2">
+                      <Code size="1" className={TutorialCSSClassConstants.PROJECT_INFO_PROJECT_TYPE}>{currentProject?.projectType}</Code>
+                      <LessonCounter />
+                      <LessonAdder />
+                    </Flex>
                   </Flex>
                 </Flex>
-                {/* <LessonCounter />
-                <Button color='mint'>Add Lesson</Button> */}
-                <Flex gap="2" align="center" justify="between">
+              </Card>
+              <Card mb="3" className={TutorialCSSClassConstants.EDITOR_SELECTOR}>
+                <Flex align="center" justify="center" mt="1">
                   <Select.Root
                     value={editorMode}
                     onValueChange={(value) => setEditorMode(value)}
@@ -117,14 +121,26 @@ export function MainStudio() {
                     </Select.Content>
                   </Select.Root>
                 </Flex>
-              </Flex>
-            </Card>
-            <Card>
+              </Card>
+            </Flex>
+            <Card mb="3">
               <ToggleEditor editorMode={editorMode} />
+            </Card>
+            <Card mb="3">
+              <ExportDropdown />
+            </Card>
+            <Card mb="3">
+              <RecordingLogs />
+            </Card>
+            <Card mb="3">
+              <VideoTimeEstimationsAndStats />
+            </Card>
+            <Card mb="3">
+              <VirtualLayerLogs />
             </Card>
           </Box>
 
-          {/* Right IDE Preview */}
+          {/* Right - Navigation Buttons and  IDE Preview */}
           <Box style={{ width: '100%', gridColumn: 'span 2' }}>
             <Card>
               <StudioNavigationButtons />
@@ -138,21 +154,18 @@ export function MainStudio() {
                   actions={currentActions}
                   currentActionIndex={currentActionIndex}
                   currentLessonIndex={currentLessonIndex}
+                  isSoundOn={isSoundOn}
                   actionFinishedCallback={goToNextAction}
                 />}
+                {/* Sound Toggle Button */}
+                <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
+                  <SoundToggleButton isSoundOn={isSoundOn} setIsSoundOn={(isSoundOn) => dispatch(setIsSoundOn(isSoundOn))} />
+                </Box>
               </Box>
             </Card>
           </Box>
-        </Grid>
-
-        {/* Under both additional details */}
-        <Flex direction="column" justify="start" align="start" gap="2" mt="4" style={{ width: '100%', gridColumn: 'span 2' }}>
-          <RecordingLogs />
-          <VideoTimeEstimationsAndStats />
-          <VirtualIDELogs />
-        </Flex>
-
-      </Box>
+        </Grid >
+      </Box >
     </>
   );
 }

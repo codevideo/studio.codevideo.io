@@ -16,7 +16,7 @@ import { ICourse, ILesson, IAction, isValidActions, isCourse, isLesson } from '@
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { addNewCourseToProjects, addNewLessonToProjects, addNewActionsToProjects } from '../../../../../store/editorSlice';
 
-export const JSONPaster: React.FC = () => {
+export const JSONPaster = () => {
   const dispatch = useAppDispatch();
   const [jsonInput, setJsonInput] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -3,9 +3,7 @@ import {
     Box,
     Flex,
     Heading,
-    Text,
     Button,
-    Code,
     ScrollArea,
     Dialog
 } from '@radix-ui/themes';
@@ -15,19 +13,26 @@ import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { ProjectTypeConverter } from './ProjectTypeConverter';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { createNewProject, setIsSidebarOpen } from '../../../../../store/editorSlice';
-import { isValidActions, isCourse, isLesson, ICourse, ILesson, IAction } from '@fullstackcraftllc/codevideo-types';
+import { isValidActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
 import { ProjectSelector } from './ProjectSelector';
 import { MetadataEditor } from './MetadataEditor';
 import { ExportDropdown } from './ExportDropdown';
 import { firstCharacterUppercase } from '../../../../../utils/firstCharacterUppercase';
 import { ProjectRenderer } from './ProjectRenderer';
+import { startTutorial } from '../../../../../store/tutorialSlice';
 
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
+    const { isTutorialRunning } = useAppSelector(state => state.tutorial);
     const dispatch = useAppDispatch();
 
     const onCreateNewProject = () => {
         dispatch(createNewProject());
+        dispatch(setIsSidebarOpen(false));
+    }
+
+    const onClickStartTutorial = () => {
+        dispatch(startTutorial());
         dispatch(setIsSidebarOpen(false));
     }
 
@@ -56,41 +61,53 @@ export function SidebarMenu() {
                 width: '320px',
                 backgroundColor: 'var(--gray-1)',
                 zIndex: 40,
-                boxShadow: 'var(--shadow-5)'
+                boxShadow: 'var(--shadow-5)',
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
             }}>
                 <Dialog.Title >
                     <VisuallyHidden>Project Sidebar</VisuallyHidden>
                 </Dialog.Title>
 
-                <Box position="relative" height="100%">
-                    {/* Close button */}
-                    <Dialog.Close>
-                        <Button
-                            onClick={() => dispatch(setIsSidebarOpen(false))}
-                            variant="ghost"
-                            style={{
-                                position: 'absolute',
-                                top: '16px',
-                                right: '16px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            <Cross2Icon />
-                        </Button>
-                    </Dialog.Close>
+                {/* Close button */}
+                <Dialog.Close>
+                    <Button
+                        onClick={() => dispatch(setIsSidebarOpen(false))}
+                        variant="ghost"
+                        style={{
+                            position: 'absolute',
+                            top: '16px',
+                            right: '16px',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <Cross2Icon />
+                    </Button>
+                </Dialog.Close>
 
+                <Box position="relative" height="100%">
                     <ScrollArea style={{ height: '100%' }}>
                         <Flex
                             direction="column"
-                            gap="6"
-                            style={{ paddingTop: '5rem' }}
+                            gap="3"
+                            mt="6"
                         >
+                            {/* Tutorial Button */}
+                            <Flex direction="column" gap="2">
+                                <Heading size="4" mb="3">Tutorial</Heading>
+                                <Flex>
+                                <Button disabled={isTutorialRunning} onClick={onClickStartTutorial}>
+                                    Start Interactive Tutorial
+                                </Button>
+                                </Flex>
+                            </Flex>
+
                             {/* Project Type Section */}
                             <Flex direction="column" gap="2">
                                 <Heading size="4" mb="3">Current Project</Heading>
-                                <ProjectRenderer 
-                                userProject={currentProject}     
-                                isCurrentProject={true}             
+                                <ProjectRenderer
+                                    userProject={currentProject}
+                                    isCurrentProject={true}
                                 />
                             </Flex>
 
@@ -124,9 +141,7 @@ export function SidebarMenu() {
 
                             {/* Other Actions */}
                             <Box>
-                                <Button
-                                    onClick={onCreateNewProject}
-                                                                >
+                                <Button onClick={onCreateNewProject}>
                                     Create New Project
                                 </Button>
                             </Box>

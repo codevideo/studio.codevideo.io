@@ -15,8 +15,8 @@
     "build-wasm": "cd rust-browser-compiler && wasm-pack build --target web --out-dir ../static/wasm && cd .."
   },
   "dependencies": {
-    "@fullstackcraftllc/codevideo-doc-gen": "^0.0.12",
-    "@fullstackcraftllc/codevideo-types": "^2.0.27",
+    "@fullstackcraftllc/codevideo-doc-gen": "^0.0.13",
+    "@fullstackcraftllc/codevideo-types": "^2.0.28",
     "@fullstackcraftllc/codevideo-virtual-ide": "^1.0.10",
     "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-dialog": "^1.1.6",
@@ -35,6 +35,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
+    "react-joyride": "^2.9.3",
     "react-redux": "^9.1.2"
   },
   "repository": {

@@ -1,58 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Box } from '@radix-ui/themes';
-import { GUIMode, IAction } from '@fullstackcraftllc/codevideo-types';
-import { sleep } from '../../../../utils/sleep';
 
 export interface ITerminalProps {
-    mode: GUIMode
-    actions: Array<IAction>;
-    currentActionIndex: number;
-    virtualTerminal: any;
-    actionFinishedCallback: () => void;
+    terminalBuffer: string;
 }
 
 export function Terminal(props: ITerminalProps) {
-    const { mode, actions, currentActionIndex, virtualTerminal, actionFinishedCallback } = props;
-    const [terminalBuffer, setTerminalBuffer] = useState<string>(virtualTerminal.getBuffer().join('\n'));
+    const { terminalBuffer } = props;
     const terminalRef = useRef<HTMLDivElement>(null);
-
-    if (!virtualTerminal) {
-        return null;
-    }
 
     // always update terminal buffer when current action index changes also auto-scroll to bottom whenever the terminal buffer changes
     useEffect(() => {
-        const terminalBuffer = virtualTerminal.getBuffer().join('\n');
-        setTerminalBuffer(terminalBuffer);
         if (terminalRef.current) {
             terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
         }
-    }, [currentActionIndex]);
+    }, [terminalBuffer]);
 
-    const typeLatestCommand = async () => {
-        const currentAction = actions[currentActionIndex];
-        if (currentAction && currentAction.name === 'terminal-type') {
-            const terminalOutput = currentAction.value;
-            const terminalLines = terminalOutput.split('\n');
-            const latestLine = terminalLines[terminalLines.length - 1];
-            if (latestLine) {
-                // loop at character level to simulate typing
-                for (let i = 0; i < latestLine.length; i++) {
-                    setTerminalBuffer((prev) => prev + latestLine[i]);
-                    await sleep(100)
-                }
-            }
-        }
-        // actionFinishedCallback();
-    }
-
-    // special effects for playback - if current action index changes and we are in playback mode, we need to animate the newest line
-    useEffect(() => {
-        const currentAction = actions[currentActionIndex];
-        if (mode === 'replay' && currentAction && currentAction.name === 'terminal-type') {
-            typeLatestCommand();
-        }
-    }, [mode, currentActionIndex]);
 
     return (
         <Box

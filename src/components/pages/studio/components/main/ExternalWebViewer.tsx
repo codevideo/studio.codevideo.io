@@ -5,7 +5,7 @@ export interface IExternalWebViewerProps {
     url: string;
 }
 
-const ExternalWebViewer = (props: IExternalWebViewerProps) => {
+export const ExternalWebViewer = (props: IExternalWebViewerProps) => {
     const { url } = props;
     const [hasError, setHasError] = useState(false);
     const [hasLoaded, setHasLoaded] = useState(false);
@@ -43,5 +43,3 @@ const ExternalWebViewer = (props: IExternalWebViewerProps) => {
         </Box>
     );
 };
-
-export default ExternalWebViewer;

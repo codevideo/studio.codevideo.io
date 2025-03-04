@@ -12,7 +12,7 @@ import {
   Card
 } from '@radix-ui/themes';
 
-export const MetadataEditor: React.FC = () => {
+export const MetadataEditor = () => {
     const { currentProject } = useAppSelector(state => state.editor);
     const [isOpen, setIsOpen] = useState(false);
     

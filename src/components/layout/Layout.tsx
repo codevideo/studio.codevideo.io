@@ -41,17 +41,11 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
                 appearance={theme}
                 panelBackground="translucent"
                 radius="large"
-                style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    height: '100vh',
-                    width: '100vw',
-                }}
             >
-                <Flex gap="0" p="0" m="1" direction="column" justify="center" align="center">
+                <Flex  direction="column" justify="center" align="center">
                     {children}
                 <Modal />
+                <ToastContainer />
                 </Flex>
             </Theme>
         )
@@ -66,7 +60,7 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
         >
             <SVGBackground />
             {withHeader && <Header />}
-            <Flex gap="0" p="0" direction="column" justify="between">
+            <Flex direction="column" justify="between">
                 {children}
                 <Footer />
                 <Modal />

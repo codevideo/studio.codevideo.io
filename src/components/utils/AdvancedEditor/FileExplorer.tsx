@@ -1,19 +1,16 @@
 import React, { JSX } from 'react';
 import { IFileStructure } from '@fullstackcraftllc/codevideo-types';
-import { useAppDispatch } from '../../../hooks/useAppDispatch';
-import { setIsFileExplorerFocused } from '../../../store/recordingSlice';
 import { Box, Flex, Text } from '@radix-ui/themes';
 import { FileIcon } from './FileIcons/FileIcon';
 import { Folder } from '@react-symbols/icons';
 
 export interface IFileExplorerProps {
     currentFileName?: string
-    fileStructure: IFileStructure
+    fileStructure?: IFileStructure
 }
 
 export function FileExplorer(props: IFileExplorerProps) {
     const { currentFileName, fileStructure } = props;
-    const dispatch = useAppDispatch();
 
     const renderFileTree = (structure: IFileStructure, path: string = '', level: number): JSX.Element[] => {
         // Sort entries alphabetically, with directories first, then files
@@ -57,10 +54,13 @@ export function FileExplorer(props: IFileExplorerProps) {
         });
     };
 
+    if (!fileStructure) {
+        return <></>;
+    }
+
     return (
         <Box
-        p="1"
-            onClick={() => dispatch(setIsFileExplorerFocused(true))}
+            p="1"
             style={{
                 height: '100%',
                 minWidth: '200px',

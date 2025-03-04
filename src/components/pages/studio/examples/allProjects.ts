@@ -1,4 +1,4 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, Project } from "@fullstackcraftllc/codevideo-types";
 import { javascriptCreateRenameDeleteFileExample } from "./advanced/javascriptCreateRenameDeleteFileExample";
 import { blankCSharpExample } from "./blank/blankCSharpExample";
 import { blankJavaScriptExample } from "./blank/blankJavaScriptExample";
@@ -11,8 +11,9 @@ import { pythonPrintExample } from "./how-to-print-stuff/pythonPrintExample";
 import { goPrintlnExample } from "./how-to-print-stuff/goPrintlnExample";
 import { mouseMovementExample } from "./advanced/javascriptMouseMovementExample";
 import { functionalTerminalExample } from "./advanced/functionalTerminalExample";
+import { typingUnitTestExample } from "./how-to-print-stuff/typingUnitTestExample";
 
-export const allProjects: ICourse[] = [
+export const allProjects: Project[] = [
     javascriptCreateRenameDeleteFileExample,
     mouseMovementExample,
     functionalTerminalExample,
@@ -25,4 +26,5 @@ export const allProjects: ICourse[] = [
     csharpConsoleWriteLineExample,
     goPrintlnExample,
     pythonPrintExample,
+    typingUnitTestExample
 ]

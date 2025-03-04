@@ -1,8 +1,6 @@
 import * as React from "react";
 
-export interface ISVGBackgroundProps {}
-
-export function SVGBackground(props: ISVGBackgroundProps) {
+export function SVGBackground() {
   return (
     <svg
       viewBox="0 0 2560 1920"

@@ -15,8 +15,6 @@ export function ActionJsonEditor() {
   const { actionsString } = useAppSelector((state) => state.editor);
   const dispatch = useAppDispatch();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
-  // const tokenizerCode = resolveTokenizerCodeSnippet("json");
-
   const handleOnMount = (
     _editor: monaco.editor.IStandaloneCodeEditor,
     monaco: Monaco
@@ -30,16 +28,11 @@ export function ActionJsonEditor() {
     setTimeout(() => {
       monaco.editor.setTheme('Monokai');
     }, 1);
-
-    // if (typeof window !== "undefined") {
-    //   setTimeout(() => {
-    //     (window as any).monaco.editor.tokenize(tokenizerCode, "json");
-    //   }, 1000);
-    // }
   };
 
   const editor = (
-    <Flex direction="column" style={{ height: "640px"}}>
+    <Flex 
+      direction="column" style={{ height: "640px"}}>
       <Editor
         path={"json/"}
         height="100%"

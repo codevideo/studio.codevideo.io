@@ -8,6 +8,7 @@ import { Flex, Button } from '@radix-ui/themes';
 import { ActionCounter } from '../../../../utils/ActionCounter';
 import { EnterFullScreenIcon } from '@radix-ui/react-icons';
 import { addToast } from '../../../../../store/toastSlice';
+import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
 
 export function StudioNavigationButtons() {
     const { currentActions, currentActionIndex, isFullScreen, isPlaying } = useAppSelector(state => state.editor);
@@ -140,6 +141,7 @@ export function StudioNavigationButtons() {
                     Next {'>'}
                 </Button>
                 <Button
+                    className={TutorialCSSClassConstants.STUDIO_NAVIGATION_PLUS_TEN_BUTTON}
                     onClick={handleJumpForward}
                     disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
@@ -167,6 +169,7 @@ export function StudioNavigationButtons() {
             </Flex>
             <Flex align="center" gap="2">
                 <Button
+                    className={TutorialCSSClassConstants.PLAYBACK_BUTTON}
                     title={isPlaying ? 'Stop playback' : 'Start playing actions (beta)'}
                     onClick={handlePlayback}
                     color="mint"
@@ -176,6 +179,7 @@ export function StudioNavigationButtons() {
                     {playButtonText}
                 </Button>
                 <Button
+                    className={TutorialCSSClassConstants.RECORD_BUTTON}
                     title={isRecording ? 'Stop recording' : 'Start recording actions (beta)'}
                     onClick={handleRecord}
                     color="red"
@@ -185,6 +189,7 @@ export function StudioNavigationButtons() {
                     {recordButtonText}
                 </Button>
                 <Button
+                    className={TutorialCSSClassConstants.FULL_SCREEN_BUTTON}
                     title='Toggle Full Screen'
                     onClick={() => dispatch(setIsFullScreen(!isFullScreen))}
                     color="mint"

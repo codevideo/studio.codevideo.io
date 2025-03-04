@@ -1,16 +1,17 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
-import { Box, Grid, Button, Card, Select, Flex, Text, Badge, Code } from '@radix-ui/themes';
-import { useEffect, useState } from 'react';
+import { Box, Grid, Button, Select, Flex, Text, Badge, Code } from '@radix-ui/themes';
+import { useState } from 'react';
 import { VirtualIDE } from '@fullstackcraftllc/codevideo-virtual-ide';
 import { IVirtualLayerLog, LogType, VirtualLayerLogSource } from '@fullstackcraftllc/codevideo-types';
+import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
 
-export function VirtualIDELogs() {
+export function VirtualLayerLogs() {
     const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
     const [isExpanded, setIsExpanded] = useState(false);
     const [minLevel, setMinLevel] = useState<'all' | LogType>('all');
     const [source, setSource] = useState<'all' | VirtualLayerLogSource>('all');
-    const virtualIDE = new VirtualIDE(currentActions, currentActionIndex);
+    const virtualIDE = new VirtualIDE(currentActions, currentActionIndex, true);
     const logs = virtualIDE.getLogs();
 
     // filter out logs based on minLevel and source
@@ -47,8 +48,9 @@ export function VirtualIDELogs() {
     const logTypes: Array<'all' | LogType> = ['all', 'info', 'warning', 'error'];
 
     return (
-        <Box mt="4">
+        <Box>
             <Button
+                className={TutorialCSSClassConstants.VIRTUAL_LAYER_LOGS_BUTTON}
                 onClick={() => setIsExpanded(!isExpanded)}
                 variant="ghost"
                 color="mint"
@@ -67,7 +69,7 @@ export function VirtualIDELogs() {
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-                Virtual IDE Logs
+                Virtual Layer Logs
             </Button>
 
             {isExpanded && (
@@ -117,37 +119,36 @@ export function VirtualIDELogs() {
                     </Flex>
 
                     <Grid columns={{ initial: "1", lg: "1" }} gap="4" mt="2">
-                        <Card>
-                            {filteredLogs.length === 0 ? (
-                                <Card>
-                                    {source === 'all' && <Text size="2" weight="medium" style={{ color: 'var(--colors-slate11)' }}>
-                                        No logs of type <Code>{minLevel}</Code> found! Nice work!
-                                    </Text>}
-                                    {source !== 'all' && <Text size="2" weight="medium" style={{ color: 'var(--colors-slate11)' }}>
-                                        No logs of type <Code>{minLevel}</Code>, source <Code>{source}</Code> found! Nice work!
-                                    </Text>}
-                                </Card>
-                            ) : (
-                                <Box style={{
-                                    overflow: 'auto',
-                                    fontSize: 'var(--font-size-1)',
-                                    
-                                }}>
-                                    {filteredLogs.map((log, index) => (
-                                        <pre key={index}
+
+                        {filteredLogs.length === 0 ? (
+                            <Box>
+                                {source === 'all' && <Text size="2" weight="medium" style={{ color: 'var(--colors-slate11)' }}>
+                                    No logs of type <Code>{minLevel}</Code> found! Nice work!
+                                </Text>}
+                                {source !== 'all' && <Text size="2" weight="medium" style={{ color: 'var(--colors-slate11)' }}>
+                                    No logs of type <Code>{minLevel}</Code>, source <Code>{source}</Code> found! Nice work!
+                                </Text>}
+                            </Box>
+                        ) : (
+                            <Box style={{
+                                overflow: 'auto',
+                                fontSize: 'var(--font-size-1)',
+
+                            }}>
+                                {filteredLogs.map((log, index) => (
+                                    <pre key={index}
                                         style={{
                                             whiteSpace: 'pre-wrap',  // This enables text wrapping
                                             wordBreak: 'break-word', // This ensures words break properly
                                         }}
-                                        >
-                                            <Badge style={{ fontFamily: 'Fira Code, monospace' }} color="gray" size="1">{new Date(log.timestamp).toLocaleDateString()} {new Date(log.timestamp).toLocaleTimeString()}</Badge> 
-                                            {getColoredSourceBadge(log)}
-                                            <Badge style={{ fontFamily: 'Fira Code, monospace' }} color="gray" size="1">{log.message}</Badge>
-                                        </pre>
-                                    ))}
-                                </Box>
-                            )}
-                        </Card>
+                                    >
+                                        <Badge style={{ fontFamily: 'Fira Code, monospace' }} color="gray" size="1">{new Date(log.timestamp).toLocaleDateString()} {new Date(log.timestamp).toLocaleTimeString()}</Badge>
+                                        {getColoredSourceBadge(log)}
+                                        <Badge style={{ fontFamily: 'Fira Code, monospace' }} color="gray" size="1">{log.message}</Badge>
+                                    </pre>
+                                ))}
+                            </Box>
+                        )}
                     </Grid>
                 </Flex>
             )}

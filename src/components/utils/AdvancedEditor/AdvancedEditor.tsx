@@ -1,21 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { MouseOverlay } from './MouseOverlay/MouseOverlay';
 import Editor, { Monaco, loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
-import { Terminal } from './Terminal/Terminal';
 import Monokai from "monaco-themes/themes/Monokai.json";
-import { GUIMode, IAction, IEditorPosition, isCourse, isLesson, isValidActions, Project } from '@fullstackcraftllc/codevideo-types';
+import { GUIMode, IAction, ICourseSnapshot, IEditor, IEditorPosition, IFileStructure, IPoint, isCourse, isLesson, isValidActions, Project } from '@fullstackcraftllc/codevideo-types';
 import { VirtualIDE } from '@fullstackcraftllc/codevideo-virtual-ide';
 import { FileExplorer } from './FileExplorer';
-import ExternalWebViewer from '../../pages/studio/components/main/ExternalWebViewer';
 import { EditorTabs } from './Editor/EditorTabs';
-import { SoundToggleButton } from '../../pages/studio/components/main/SoundToggleButton';
+import { Terminal } from './Terminal/Terminal';
+import { MouseOverlay } from './MouseOverlay/MouseOverlay';
+import { ExternalWebViewer } from '../../pages/studio/components/main/ExternalWebViewer';
 import { Box, Flex, Text } from '@radix-ui/themes';
 import { sleep } from '../../../utils/sleep';
+import { speakText, stopSpeaking } from '../../../utils/speakText';
+import { getCoordinatesOfTerminalInput } from './MouseOverlay/coordinateFunctions/getCoordinatesOfTerminalInput';
+import { getCoordinatesOfEditor } from './MouseOverlay/coordinateFunctions/getCoordinatesOfEditor';
+import { getCoordinatesOfFileOrFolder } from './MouseOverlay/coordinateFunctions/getCoordinatesOfFileOrFolder';
+import { parseCoordinatesFromAction } from './MouseOverlay/coordinateFunctions/parseCoordinatesFromAction';
 
-const STANDARD_PAUSE_MS = 500;
-const KEYBOARD_TYPING_PAUSE_MS = 150
-const DEFAULT_CARET_POSITION = { row: 0, col: 0 };
+const STANDARD_PAUSE_MS = 1000;
+const KEYBOARD_TYPING_PAUSE_MS = 100
+const DEFAULT_CARET_POSITION = { row: 1, col: 1 };
 
 interface AdvancedEditorProps {
   project: Project;
@@ -25,6 +29,7 @@ interface AdvancedEditorProps {
   mode: GUIMode;
   defaultLanguage: string;
   isExternalBrowserStepUrl: string | null;
+  isSoundOn: boolean;
   actionFinishedCallback: () => void;
 }
 
@@ -50,17 +55,32 @@ export const extractActionsFromProject = (project: Project, currentLessonIndex: 
  * @returns 
  */
 export function AdvancedEditor(props: AdvancedEditorProps) {
-  const { project, actions, mode, defaultLanguage, isExternalBrowserStepUrl, currentActionIndex, currentLessonIndex, actionFinishedCallback } = props;
+  const { project, actions, mode, defaultLanguage, isExternalBrowserStepUrl, currentActionIndex, currentLessonIndex, isSoundOn, actionFinishedCallback } = props;
   const isRecording = mode === 'record'
   const [virtualIDE, setVirtualIDE] = useState<VirtualIDE>(new VirtualIDE(project));
+  const [courseSnapshot, setCourseSnapshot] = useState<ICourseSnapshot>();
+  const [currentFile, setCurrentFile] = useState<IEditor>();
+  const [currentFileStructure, setCurrentFileStructure] = useState<IFileStructure>();
   const [currentCode, setCurrentCode] = useState<string>('');
+  const [terminalBuffer, setTerminalBuffer] = useState<string>('');
+  const [mousePosition, setMousePosition] = useState<IPoint>({ x: 0, y: 0 });
   const [currentCaretPosition, setCurrentCaretPosition] = useState<IEditorPosition>(DEFAULT_CARET_POSITION);
+  const [captionText, setCaptionText] = useState<string>('');
   const containerRef = useRef<HTMLDivElement>(null);
   const monacoEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | undefined>();
 
   const applyAnimation = async () => {
     if (monacoEditorRef.current && actions[currentActionIndex]) {
-      await executeActionAnimationForMonacoInstance(monacoEditorRef.current, actions[currentActionIndex]);
+      await executeActionPlaybackForMonacoInstance(
+        monacoEditorRef.current,
+        actions[currentActionIndex],
+        isSoundOn,
+        setTerminalBuffer,
+        mousePosition,
+        containerRef,
+        setMousePosition,
+        setCaptionText
+      );
     }
     updateState();
     actionFinishedCallback();
@@ -81,12 +101,86 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
       isActive: false,
       isSaved: false
     };
+    const fileStructure = courseSnapshot.fileExplorerSnapshot.fileStructure;
     const currentCode = currentFile ? currentFile.content : '';
     const currentCaretPosition = virtualIDE.virtualEditors && virtualIDE.virtualEditors.length > 0 ? virtualIDE.virtualEditors[0]?.virtualEditor.getCurrentCaretPosition() || DEFAULT_CARET_POSITION : DEFAULT_CARET_POSITION;
+    const currentTerminalBuffer = virtualIDE.virtualTerminals.length > 0 ? virtualIDE.virtualTerminals[0]?.getBuffer().join('\n') || '' : '';
+    const captionText = courseSnapshot?.authorSnapshot.authors[0]?.currentSpeechCaption || '';
+    setCourseSnapshot(courseSnapshot);
     setVirtualIDE(virtualIDE);
+    setCurrentFile(currentFile);
+    setCurrentFileStructure(fileStructure);
     setCurrentCode(currentCode);
     setCurrentCaretPosition(currentCaretPosition);
+    setTerminalBuffer(currentTerminalBuffer);
+    setCaptionText(captionText);
+    
+    // TODO: these should be derived from the snapshot directly but I ran out of time :(
+    // can unit test and add back in later - though the coordinate based stuff is a mix of client.. not sure how to solve that one discreetly.
+    updateMouseState();
   }
+
+  // This is copied basically in animation way down logic below, could be refactored
+  const updateMouseState = () => {
+    if (currentActionIndex === 0 && mode === 'step') {
+      if (!containerRef?.current) {
+        console.log('no container ref');
+        return;
+      }
+      const rect = containerRef.current.getBoundingClientRect();
+      console.log('setting mouse position to center of editor', rect);
+      setMousePosition({
+        x: rect.width / 2,
+        y: rect.height / 2,
+      });
+      return;
+    }
+    const currentAction = actions[currentActionIndex];
+    if (!currentAction) return;
+
+    let newPosition = { x: mousePosition.x, y: mousePosition.y };
+
+    console.log('containerRef', containerRef);
+
+    switch (currentAction.name) {
+      case 'mouse-click-terminal':
+      case 'terminal-open':
+        newPosition = getCoordinatesOfTerminalInput(containerRef)
+        break;
+      case 'mouse-click-editor':
+      case 'editor-type':
+        newPosition = getCoordinatesOfEditor(containerRef)
+        break;
+      case 'file-explorer-create-folder':
+      case 'file-explorer-create-file':
+      case 'file-explorer-open-file':
+      case 'mouse-click-filename':
+        newPosition = getCoordinatesOfFileOrFolder(currentAction.value, containerRef)
+        break;
+      case 'mouse-move':
+        newPosition = parseCoordinatesFromAction(currentAction.value, containerRef)
+        break;
+    }
+
+    console.log('updating mouse position', newPosition);
+    setMousePosition(newPosition);
+  }
+
+  // on index change in step mode, update mouse state
+  useEffect(() => {
+    if (mode === 'step') {
+      updateMouseState();
+    }
+  }, [mode, currentFileStructure, currentActionIndex]);
+
+  // whenever issoundon changes or currentActionIndex, and we are in step mode, and the current action includes 'speak', we should speak
+  useEffect(() => {
+    if (isSoundOn && mode === 'step' && actions[currentActionIndex]?.name.startsWith('author-')) {
+      speakText(actions[currentActionIndex].value, 1);
+    } else {
+      stopSpeaking();
+    }
+  }, [isSoundOn, currentActionIndex]);
 
   // update virtual when current action index changes
   useEffect(() => {
@@ -111,28 +205,11 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
   }, [mode, currentActionIndex, actions]);
 
 
-  // get the course snapshot
-  const courseSnapshot = virtualIDE.getCourseSnapshot();
-
-  // for the file explorer
-  const fileStructure = courseSnapshot.fileExplorerSnapshot.fileStructure;
-
   // for the editors
-  const editors = courseSnapshot.editorSnapshot.editors;
-  const currentFile = editors?.find(editor => editor.isActive) || editors?.[0] || {
-    filename: '',
-    content: '',
-    caretPosition: DEFAULT_CARET_POSITION,
-    highlightCoordinates: null,
-    isActive: false,
-    isSaved: false
-  };
+  const editors = courseSnapshot?.editorSnapshot.editors || [];
 
   // TODO: figure out highlights! (breaks due to SSR)
   // const currentHighlightCoordinates = currentFile ? currentFile.highlightCoordinates : null;
-
-  // for the caption overlay
-  const captionText = courseSnapshot.authorSnapshot.authors[0]?.currentSpeechCaption;
 
   const handleEditorDidMount = (
     monacoEditor: monaco.editor.IStandaloneCodeEditor,
@@ -158,11 +235,13 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
     }, 1);
   };
 
-  // TODO: also fix this, if typing in the GUI editor this pulls focus away... garbage...
-  // for now seems to work fine in replay mode
-  // caret position effect (only when not recording)
+  // caret position effect - we don't use in replay mode because it is handled in the animation
+  // works fine for step by step mode though!
   useEffect(() => {
-    if (monacoEditorRef.current) {
+    if (monacoEditorRef.current && mode === 'step') {
+
+      console.log('setting caret position', currentCaretPosition);
+
       monacoEditorRef.current.setPosition({
         lineNumber: currentCaretPosition.row,
         column: currentCaretPosition.col
@@ -174,6 +253,7 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
       });
 
       // trigger a focus to actually highlight where the caret is
+      // TODO: need to prevent this when they are typing elsewhere!!!!
       monacoEditorRef.current.focus();
     }
   }, [currentCaretPosition]);
@@ -230,7 +310,7 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
           </Flex>
         ) : (
           <>
-            <FileExplorer currentFileName={currentFile?.filename} fileStructure={fileStructure} />
+            <FileExplorer currentFileName={currentFile?.filename} fileStructure={currentFileStructure} />
             {/* Editor Tabs, Main Editor, and Terminal stack on top of eachother */}
             <Flex direction="column" width="100%">
               <EditorTabs currentFile={currentFile} editors={editors} />
@@ -278,10 +358,7 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
                   {virtualIDE.virtualTerminals.map((virtualTerminal, i) => (
                     <Terminal
                       key={i}
-                      actions={actions}
-                      currentActionIndex={currentActionIndex}
-                      virtualTerminal={virtualTerminal}
-                      actionFinishedCallback={actionFinishedCallback} mode={'step'} />
+                      terminalBuffer={terminalBuffer} />
                   ))}
                 </>
               ) : (
@@ -294,11 +371,8 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
         {/* Mouse Overlay */}
         <MouseOverlay
           mode={mode}
-          actions={actions}
-          actionIndex={currentActionIndex}
           mouseVisible={true}
-          containerRef={containerRef}
-          actionFinishedCallback={actionFinishedCallback} />
+          mousePosition={mousePosition} />
       </Flex>
       <Flex>
         {/* Caption Overlay */}
@@ -313,13 +387,9 @@ export function AdvancedEditor(props: AdvancedEditorProps) {
               position: 'relative'
             }}
           >
-            <Flex justify="center" align="center" style={{margin: '50px'}}>
+            <Flex justify="center" align="center" style={{ margin: '50px' }}>
               <Text>{captionText}</Text>
             </Flex>
-            {/* Sound Toggle Button */}
-            <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
-              <SoundToggleButton />
-            </Box>
           </Box>
         )}
       </Flex>
@@ -352,6 +422,18 @@ const simulateHumanTyping = (
             forceMoveMarkers: true,
           },
         ]);
+        // editor.setPosition({
+        //   lineNumber: selection?.endLineNumber || 1,
+        //   column: selection?.endColumn || 1
+        // });
+  
+        // editor.revealPositionInCenter({
+        //   lineNumber: selection?.endLineNumber || 1,
+        //   column: selection?.endColumn || 1
+        // });
+  
+        // trigger a focus to actually highlight where the caret is
+        editor.focus();
         index++;
         setTimeout(typeNextCharacter, KEYBOARD_TYPING_PAUSE_MS);
       } else {
@@ -369,15 +451,47 @@ const simulateKeyboardPause = async () => {
   );
 }
 
-// TODO: copied mostly from the backend single editor endpoint from codevideo-backend-engine... can we generalize this?
-export const executeActionAnimationForMonacoInstance = async (
+// TODO: copied the EDITOR parts mostly from the backend single editor endpoint from codevideo-backend-engine... can we generalize this?
+// the speaking and terminal stuff is new
+export const executeActionPlaybackForMonacoInstance = async (
   editor: monaco.editor.IStandaloneCodeEditor,
-  action: IAction
+  action: IAction,
+  isSoundOn: boolean,
+  setTerminalBuffer: (value: any) => void,
+  mousePosition: IPoint,
+  containerRef: React.RefObject<HTMLDivElement>,
+  setMousePosition: (value: any) => void,
+  setCaptionText: (value: any) => void
 ) => {
   let startTime = -1;
   editor.getSupportedActions().forEach((value) => {
     console.log(value);
   });
+
+  // MOUSE MOVEMENT ANIMATIONS, PASS THROUGH AND CONTINUE BELOW
+  let newPosition = { x: mousePosition.x, y: mousePosition.y };
+
+  switch (action.name) {
+    case 'mouse-click-terminal':
+    case 'terminal-open':
+      newPosition = getCoordinatesOfTerminalInput(containerRef)
+      break;
+    case 'mouse-click-editor':
+    case 'editor-type':
+      newPosition = getCoordinatesOfEditor(containerRef)
+      break;
+    case 'file-explorer-create-folder':
+    case 'file-explorer-create-file':
+    case 'file-explorer-open-file':
+    case 'mouse-click-filename':
+      newPosition = getCoordinatesOfFileOrFolder(action.value, containerRef)
+      break;
+    case 'mouse-move':
+      newPosition = parseCoordinatesFromAction(action.value, containerRef)
+      break;
+  }
+
+  setMousePosition(newPosition);
 
   // const highlightText = (
   //   editor: monaco.editor.IStandaloneCodeEditor,
@@ -439,12 +553,22 @@ export const executeActionAnimationForMonacoInstance = async (
   for (let i = 0; i < times; i++) {
     // actual logic
     switch (true) {
-      // case "speak-before":
-      //   await playAudioInPuppeteer(
-      //     id,
-      //     `./audio/${action.value}.mp3`
-      //   );
-      //   break;
+      case action.name.startsWith("author-"):
+        setCaptionText(action.value);
+        await speakText(action.value, isSoundOn ? 1 : 0);
+        break;
+      case action.name === 'terminal-type':
+        const terminalOutput = action.value;
+        const terminalLines = terminalOutput.split('\n');
+        const latestLine = terminalLines[terminalLines.length - 1];
+        if (latestLine) {
+          // loop at character level to simulate typing
+          for (let i = 0; i < latestLine.length; i++) {
+            setTerminalBuffer((prev: string) => prev + latestLine[i]);
+            await sleep(100)
+          }
+        }
+        break;
       case action.name === "editor-arrow-down" && pos !== null:
         // @ts-ignore
         pos.lineNumber = pos.lineNumber + 1;
