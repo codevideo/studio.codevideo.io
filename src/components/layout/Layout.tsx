@@ -8,7 +8,8 @@ import { Footer } from './Footer';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { ToastContainer } from './toast/ToastContainer';
 import { SidebarMenu } from './sidebar/SidebarMenu';
-import { SignUpOverlay } from './signup/SignUpOverlay';
+import { SignUpOverlay } from './auth/SignUpOverlay';
+import { SignInOverlay } from './auth/SignInOverlay';
 
 export interface ILayoutProps {
     withHeader?: boolean;
@@ -68,6 +69,7 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
                 <Footer />
                 <Modal />
                 <SignUpOverlay />
+                <SignInOverlay />
                 <ToastContainer />
             </Flex>
         </Theme>

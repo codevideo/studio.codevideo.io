@@ -35,7 +35,11 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	}
 
 	if eventData.Type == "user.created" {
-		apiKey := os.Getenv("CLERK_API_KEY")
+		apiKey := os.Getenv("CLERK_SECRET_KEY")
+		if apiKey == "" {
+			log.Println("CLERK_SECRET_KEY not set")
+			return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Server Error"}, nil
+		}
 		config := &clerk.ClientConfig{}
 		config.Key = &apiKey
 		client := user.NewClient(config)

@@ -4,7 +4,7 @@
 
 set -e
 
-FUNCTIONS=("clerkSignupWebhook" "contactForm" "decrementTokens" "stripeSuccess")
+FUNCTIONS=("clerkSignupWebhook" "contactForm" "decrementTokens" "stripeSuccess" "subscriptionCancellation" "subscriptionChange")
 
 for f in "${FUNCTIONS[@]}"; do
   echo "Building $f..."
