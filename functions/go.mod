@@ -7,6 +7,8 @@ require (
 	github.com/clerk/clerk-sdk-go/v2 v2.2.0
 )
 
+require github.com/codevideo/go-utils v0.0.1 // indirect
+
 require (
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
 	github.com/mailjet/mailjet-apiv3-go v0.0.0-20201009050126-c24bc15a9394
