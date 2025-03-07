@@ -9,12 +9,13 @@ import {
   Text
 } from '@radix-ui/themes';
 import mixpanel from "mixpanel-browser";
-import { useAuth } from '@clerk/clerk-react';
+import { SignUp, useAuth, useSignIn } from '@clerk/clerk-react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useGifRecorder } from '../../../hooks/useGifRecorder';
 import { setCurrentActionIndex, setIsPlaying } from '../../../store/editorSlice';
 import { decrementTokens } from '../../../utils/api/decrementTokens';
+import { setShowSignUpOverlay } from '../../../store/authSlice';
 
 const tokenCosts = {
   'json': 0,
@@ -54,12 +55,6 @@ export const ExportDropdown = () => {
   };
   
   const handleExport = async () => {
-    const token = await getToken();
-    if (token === null) {
-      // trigger login
-      return;
-    }
-
     if (!exportType) {
       console.error('No export type selected');
       return;
@@ -67,6 +62,34 @@ export const ExportDropdown = () => {
 
     if (!project) {
       console.error('No project to export');
+      return;
+    }
+
+    mixpanel.track(`Export Type ${exportType.toUpperCase()} Clicked Studio`);
+
+    // if the export is json or markdown, we can export it
+    // without a clerk token or being logged in
+    if (exportType === 'json' || exportType === 'markdown') {
+      setIsExporting(true);
+      setExportComplete(false);
+      try {
+        console.log('exporting project:', project, 'as', exportType);
+        await exportProject(project, exportType);
+        mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
+        setExportComplete(true);
+      } catch (error) {
+        console.error('Export failed:', error);
+      } finally {
+        setIsExporting(false);
+      }
+      return;
+    }
+
+    // all other types require a clerk token and thus a login
+    const token = await getToken();
+    if (token === null) {
+      // show signup
+      dispatch(setShowSignUpOverlay(true));
       return;
     }
 
@@ -78,22 +101,17 @@ export const ExportDropdown = () => {
       return;
     }
 
-    
     setIsExporting(true);
     setExportComplete(false);
     
     try {
       console.log('exporting project:', project, 'as', exportType);
-      mixpanel.track(`Export Type ${exportType.toUpperCase()} Clicked Studio`);
       await exportProject(project, exportType);
       mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
       setExportComplete(true);
 
       // decrement tokens
-      if (exportType !== 'json') {
-        await decrementTokens(token, tokenCosts[exportType]);
-      }
-
+      await decrementTokens(token, tokenCosts[exportType]);
     } catch (error) {
       console.error('Export failed:', error);
     } finally {

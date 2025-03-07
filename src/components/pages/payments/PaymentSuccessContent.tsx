@@ -67,7 +67,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
             case 'enterprise':
                 return 'Enterprise subscription';
             case 'topup':
-                return 'new credits';
+                return 'new tokens';
             case 'lifetime':
                 return 'CodeVideo Lifetime license';
             default:

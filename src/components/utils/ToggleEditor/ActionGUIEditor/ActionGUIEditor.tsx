@@ -256,6 +256,22 @@ export function ActionGUIEditor() {
       },
       {
         action: {
+          name: 'terminal-type',
+          value: 'code'
+        },
+        label: 'type',
+        color: 'gray'
+      },
+      {
+        action: {
+          name: 'terminal-enter',
+          value: "1"
+        },
+        label: 'enter',
+        color: 'gray'
+      },
+      {
+        action: {
           name: 'file-explorer-create-file',
           value: 'myfile.txt'
         },

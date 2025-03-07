@@ -1,6 +1,7 @@
 package main
 
 import (
+	"codevideo-functions/utils"
 	"context"
 	"encoding/json"
 	"log"
@@ -110,7 +111,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		clerkUserId = payload.ClerkUserId
 	}
 
-	// Fetch the current clerkUser so we can add to the existing credits.
+	// Fetch the current clerkUser so we can add to the existing tokens.
 	clerkUser, err := client.Get(context.Background(), clerkUserId)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
@@ -120,18 +121,18 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}, nil
 	}
 
-	// Retrieve current credits from public metadata (default to 0 if not set).
-	currentCredits := 0
+	// Retrieve current tokens from public metadata (default to 0 if not set).
+	currentTokens := 0
 	if clerkUser.PublicMetadata != nil {
 		var meta map[string]interface{}
 		if err := json.Unmarshal(clerkUser.PublicMetadata, &meta); err == nil {
-			if creditsVal, ok := meta["credits"]; ok {
-				switch v := creditsVal.(type) {
+			if tokensVal, ok := meta["tokens"]; ok {
+				switch v := tokensVal.(type) {
 				case float64:
-					currentCredits = int(v)
+					currentTokens = int(v)
 				case string:
 					if i, err := strconv.Atoi(v); err == nil {
-						currentCredits = i
+						currentTokens = i
 					}
 				}
 			}
@@ -143,22 +144,28 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	// Always update the stripeId.
 	newMetadata["stripeId"] = payload.StripeSessionId
 
+	// slack message of the product type that was just purchased
+	err = utils.SendSlackMessage("$$$ A user just purchased the " + payload.Product + " product!!!")
+	if err != nil {
+		log.Printf("Error sending Slack message: %v", err)
+	}
+
 	switch payload.Product {
 	case "starter":
 		newMetadata["subscriptionPlan"] = "starter"
 		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["creditsPerCycle"] = StarterTokens
-		newMetadata["credits"] = currentCredits + StarterTokens
+		newMetadata["tokensPerCycle"] = StarterTokens
+		newMetadata["tokens"] = currentTokens + StarterTokens
 	case "creator":
 		newMetadata["subscriptionPlan"] = "creator"
 		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["creditsPerCycle"] = CreatorTokens
-		newMetadata["credits"] = currentCredits + CreatorTokens
+		newMetadata["tokensPerCycle"] = CreatorTokens
+		newMetadata["tokens"] = currentTokens + CreatorTokens
 	case "enterprise":
 		newMetadata["subscriptionPlan"] = "enterprise"
 		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["creditsPerCycle"] = EnterpriseTokens
-		newMetadata["credits"] = currentCredits + EnterpriseTokens
+		newMetadata["tokensPerCycle"] = EnterpriseTokens
+		newMetadata["tokens"] = currentTokens + EnterpriseTokens
 	case "topup":
 		// Retrieve purchased quantity from Stripe via the checkout session.
 		stripeKey := os.Getenv("STRIPE_API_KEY")
@@ -191,7 +198,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}
 
 		tokensToAdd := totalQuantity * TopupTokensPerItem
-		newMetadata["credits"] = currentCredits + tokensToAdd
+		newMetadata["tokens"] = currentTokens + tokensToAdd
 	case "lifetime":
 		newMetadata["subscriptionPlan"] = "lifetime"
 		newMetadata["subscriptionStatus"] = "active"

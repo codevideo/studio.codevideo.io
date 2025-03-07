@@ -15,7 +15,7 @@ export function CaptionOverlay(props: ICaptionOverlayProps) {
                         width: '100%',
                         color: 'white',
                         position: 'absolute',
-                        bottom: 50,
+                        bottom: 65,
                     }}
                 >
                     <Flex justify="center" align="center">
@@ -25,7 +25,7 @@ export function CaptionOverlay(props: ICaptionOverlayProps) {
                             // borderRadius: 'var(--radius-3)',
                             padding: '4px 8px',
                         }}>
-                            <Text>{captionText}</Text>
+                            <Text size="6">{captionText}</Text>
                         </Box>
                     </Flex>
                 </Box>
