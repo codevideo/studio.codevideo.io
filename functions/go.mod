@@ -1,13 +1,13 @@
 module codevideo-functions
 
-go 1.23
+go 1.19
 
 require (
 	github.com/aws/aws-lambda-go v1.47.0
 	github.com/clerk/clerk-sdk-go/v2 v2.2.0
 )
 
-require github.com/codevideo/go-utils v0.0.1 // indirect
+require github.com/codevideo/go-utils v0.0.2
 
 require (
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
