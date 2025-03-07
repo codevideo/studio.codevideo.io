@@ -9,24 +9,17 @@ import {
   Text
 } from '@radix-ui/themes';
 import mixpanel from "mixpanel-browser";
-import { SignUp, useAuth, useSignIn } from '@clerk/clerk-react';
+import { SignUp, useAuth, useSignIn, useUser } from '@clerk/clerk-react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useGifRecorder } from '../../../hooks/useGifRecorder';
 import { setCurrentActionIndex, setIsPlaying } from '../../../store/editorSlice';
 import { decrementTokens } from '../../../utils/api/decrementTokens';
 import { setShowSignUpOverlay } from '../../../store/authSlice';
+import { addToast } from '../../../store/toastSlice';
+import { TokenCosts } from '../../../constants/TokenCosts';
 
-const tokenCosts = {
-  'json': 0,
-  'markdown': 0,
-  'complex-markdown': 1,
-  'html': 2,
-  'pdf': 3,
-  'zip': 4,
-  'pptx': 6,
-  'mp4': 10,
-};
+
 
 
 export const ExportDropdown = () => {
@@ -36,6 +29,14 @@ export const ExportDropdown = () => {
   const [exportComplete, setExportComplete] = useState(false);
   const dispatch = useAppDispatch();
   const { getToken } = useAuth()
+  const { user } = useUser();
+
+  // if they just finished exporting, refresh the user (need to refresh to get new token count)
+  useEffect(() => {
+    if (exportComplete) {
+      user?.reload();
+    }
+  }, [exportComplete]);
 
   // if we are in gifmode, start recording
   const { progress } = useGifRecorder('advanced-editor', exportType === 'gif' && isPlaying, 100)
@@ -93,6 +94,12 @@ export const ExportDropdown = () => {
       return;
     }
 
+    // if they have no tokens, show toast
+    if (user?.publicMetadata.tokens as number < TokenCosts[exportType]) {
+      dispatch(addToast(`Not enough tokens for a ${exportType} export. Please purchase more tokens.`));
+      return;
+    }
+
     if (exportType === 'gif') {
       // handled by hook
       dispatch(setCurrentActionIndex(0));
@@ -111,7 +118,7 @@ export const ExportDropdown = () => {
       setExportComplete(true);
 
       // decrement tokens
-      await decrementTokens(token, tokenCosts[exportType]);
+      await decrementTokens(token, TokenCosts[exportType], dispatch);
     } catch (error) {
       console.error('Export failed:', error);
     } finally {
@@ -122,7 +129,7 @@ export const ExportDropdown = () => {
   return (
     <Flex align="center" justify="between" gap="2">
       <Box>
-        <Text size="1" mr="2">Export project to...</Text>
+        <Text size="1" mr="2">Export to...</Text>
         <Select.Root
           value={exportType}
           onValueChange={handleExportChange}
@@ -133,15 +140,18 @@ export const ExportDropdown = () => {
             placeholder="Select..."
           />
           <Select.Content>
-            <Select.Item value="gif">GIF</Select.Item>
+          <Select.Item value="json">JSON</Select.Item>
             <Select.Item value="markdown">Markdown</Select.Item>
+            <Select.Item value="gif">GIF (Slow)</Select.Item>
             <Select.Item value="html">HTML</Select.Item>
             <Select.Item value="pdf">PDF</Select.Item>
             <Select.Item value="zip">ZIP</Select.Item>
-            <Select.Item value="json">JSON</Select.Item>
             <Select.Item value="pptx">PPTX (Beta)</Select.Item>
+            {/* TODO: finish that damn API and activate! */}
+            {/* <Select.Item value="mp4">Video (Beta)</Select.Item> */}
           </Select.Content>
         </Select.Root>
+        <Text color="amber" size="1" ml="2">Cost: {(TokenCosts)[exportType] === 0 ? 'FREE' : `${(TokenCosts)[exportType]} tokens`}</Text>
       </Box>
       {exportType === 'gif' && isExporting && (
         <Text color='mint' size="1" ml="2">{progress === 0 ? 'Recording playback...' : `Building gif ... ${progress}% done`}</Text>
