@@ -1,17 +1,17 @@
 import React, { useEffect } from 'react';
-import { SignUp } from '@clerk/clerk-react';
-import { Theme, Box, Flex } from '@radix-ui/themes';
+import { SignIn } from '@clerk/clerk-react';
+import { Box, Flex } from '@radix-ui/themes';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
-import { setShowSignUpOverlay } from '../../../store/authSlice';
+import { setShowSignInOverlay } from '../../../store/authSlice';
 
-export const SignUpOverlay = () => {
-    const { showSignUpOverlay } = useAppSelector(state => state.auth);
+export const SignInOverlay = () => {
+    const { showSignInOverlay } = useAppSelector(state => state.auth);
     const dispatch = useAppDispatch();
     
   // Prevent scrolling on body when overlay is open
   useEffect(() => {
-    if (showSignUpOverlay) {
+    if (showSignInOverlay) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'auto';
@@ -21,26 +21,25 @@ export const SignUpOverlay = () => {
     return () => {
       document.body.style.overflow = 'auto';
     };
-  }, [showSignUpOverlay]);
+  }, [showSignInOverlay]);
 
   // Handle escape key press to close overlay
   useEffect(() => {
     const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && showSignUpOverlay) {
-        dispatch(setShowSignUpOverlay(false));
+      if (event.key === 'Escape' && showSignInOverlay) {
+        dispatch(setShowSignInOverlay(false));
       }
     };
 
     window.addEventListener('keydown', handleEscKey);
     return () => window.removeEventListener('keydown', handleEscKey);
-  }, [showSignUpOverlay]);
+  }, [showSignInOverlay]);
 
-  if (!showSignUpOverlay) {
+  if (!showSignInOverlay) {
     return <></>
   }
 
   return (
-    <Theme appearance="dark">
       <Box
         style={{
           position: 'fixed',
@@ -51,7 +50,7 @@ export const SignUpOverlay = () => {
           backgroundColor: 'rgba(0, 0, 0, 0.75)',
           zIndex: 999,
         }}
-        onClick={() => dispatch(setShowSignUpOverlay(false))}
+        onClick={() => dispatch(setShowSignInOverlay(false))}
       >
         <Flex
           justify="center"
@@ -64,10 +63,9 @@ export const SignUpOverlay = () => {
           <Box
             onClick={(e) => e.stopPropagation()} // Prevent clicks inside the box from closing the overlay
           >
-            <SignUp />
+            <SignIn />
           </Box>
         </Flex>
       </Box>
-    </Theme>
   );
 };

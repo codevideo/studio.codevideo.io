@@ -8,13 +8,15 @@ import {
   Badge,
   Button,
   Separator,
-  Tooltip
+  Tooltip,
+  Link as RadixLink
 } from '@radix-ui/themes';
 import {
   InfoCircledIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'gatsby';
-import { resolveTokensColor } from '../../../utils/resolveTokensColor';
+import { TokenCountBadge } from '../../utils/TokenCountBadge';
+import { TokenCosts } from '../../../constants/TokenCosts';
 
 export interface ClerkMetadata {
   tokens: number;
@@ -23,6 +25,19 @@ export interface ClerkMetadata {
   subscriptionPlan: string;
   subscriptionStatus: string;
   tokensPerCycle: number;
+}
+
+const subscriptionPlansToMonthlyTokens = (plan: string) => {
+  switch (plan) {
+    case 'starter':
+      return 50;
+    case 'creator':
+      return 500;
+    case 'enterprise':
+      return 10000;
+    default:
+      return 0;
+  }
 }
 
 const fallbackValues: ClerkMetadata = {
@@ -37,7 +52,6 @@ const fallbackValues: ClerkMetadata = {
 export const AccountPage = () => {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
-  console.log(user)
 
   // Get subscription data from Clerk metadata
   const getUserData = (): ClerkMetadata => {
@@ -51,20 +65,6 @@ export const AccountPage = () => {
       subscriptionStatus: (user.publicMetadata as any).subscriptionStatus || fallbackValues.subscriptionStatus,
       tokensPerCycle: (user.publicMetadata as any).tokensPerCycle || fallbackValues.tokensPerCycle
     };
-  };
-
-  // Get subscription plan name and details
-  const getSubscriptionInfo = (userData: any) => {
-    if (!userData || !userData.subscription) return { name: 'No Active Subscription', tokens: 0 };
-
-    switch (userData.subscription.plan) {
-      case 'subscription-standard':
-        return { name: 'Standard Plan', tokens: 50 };
-      case 'subscription-premium':
-        return { name: 'Premium Plan', tokens: 500 };
-      default:
-        return { name: 'Custom Plan', tokens: userData.subscription.tokens_per_cycle || 0 };
-    }
   };
 
   const onClickLogout = () => {
@@ -81,9 +81,22 @@ export const AccountPage = () => {
   }
 
   const userData = getUserData();
-  const subscriptionInfo = getSubscriptionInfo(userData);
 
-  const tokensColor = resolveTokensColor(userData.tokens);
+  const htmlsLeft = Math.floor(userData.tokens/TokenCosts['html'])
+  const pdfsLeft = Math.floor(userData.tokens/TokenCosts['pdf'])
+  const reactsLeft = Math.floor(userData.tokens/TokenCosts['react'])
+  const advancedMarkdownsLeft = Math.floor(userData.tokens/TokenCosts['complex-markdown'])
+  const videoGenerationsLeft = Math.floor(userData.tokens/TokenCosts['mp4'])
+  const pptxsLeft = Math.floor(userData.tokens/TokenCosts['pptx'])
+
+  const videosPer10 = Math.floor(10/TokenCosts['mp4'])
+  const pptxPer10 = Math.floor(10/TokenCosts['pptx'])
+  const pdfPer10 = Math.floor(10/TokenCosts['pdf'])
+  const reactPer10 = Math.floor(10/TokenCosts['react'])
+  const htmlPer10 = Math.floor(10/TokenCosts['html'])
+  const advancedMarkdownPer10 = Math.floor(10/TokenCosts['complex-markdown'])
+
+  console.log('userData', userData);
 
   return (
     <Box mt="4" p="1" pt="9">
@@ -113,25 +126,40 @@ export const AccountPage = () => {
             <Separator size="1" my="2" />
 
             <Text size="1" color="gray">Available tokens</Text>
-            <Flex align="center" gap="2">
-              <Text size="1" weight="bold" color={tokensColor}>{userData.tokens}</Text>
+            <Flex align="center" gap="1" mx="1">
+              <TokenCountBadge />
             </Flex>
+            <Text size="1" color="gray">~{advancedMarkdownsLeft} Advanced markdown generations</Text>
+            <Text size="1" color="gray">~{htmlsLeft} HTML generations</Text>
+            <Text size="1" color="gray">~{pdfsLeft} PDF generations</Text>
+            <Text size="1" color="gray">~{reactsLeft} Interactive React page generations</Text>
+            <Text size="1" color="gray">~{pptxsLeft} Powerpoint generations</Text>
+            <Text size="1" color="gray">~{videoGenerationsLeft} Video generations</Text>
+
+            <Separator size="1" my="2" />
+
+            <Text size="1" color="gray">Add more tokens</Text>
+            <Text size="1" color="gray">10 tokens per $2</Text>
+
             <Flex direction="column" gap="1">
               <Box>
-                <Button size="1" color="mint" ml="1">+ 50 tokens for $10</Button>
-              </Box>
-              <Box>
-                <Button size="1" color="mint" ml="1">+ 100 tokens for $20</Button>
-              </Box>
-              <Box>
-                <Button size="1" color="mint" ml="1">+ 500 tokens for $49</Button>
-              </Box>
-              <Box>
-                <Button size="1" color="mint" ml="1">+ 10000 tokens for $499</Button>
+                <RadixLink href={process.env.GATSBY_STRIPE_TOPUP_PAYMENT_LINK}>
+                  <Button size="1" color="mint" ml="1">Buy Tokens</Button>
+                </RadixLink>
               </Box>
               {/* Info icon with tooltip for generations per token */}
               <Flex>
-                <Tooltip content={<>10 tokens can generate:<br /><br />1 Video<br />2 Powerpoint<br />2 PDF<br />2 React<br />5 HTML<br />10 Markdown<br /></>}>
+                <Tooltip content={<>
+                  10 tokens can be used for the following exports:<br />
+                  <br />
+                  {advancedMarkdownPer10} Advanced Markdown<br />
+                  {htmlPer10} HTML<br />
+                  {pdfPer10} PDF<br />
+                  {reactPer10} React<br />
+                  {pptxPer10} Powerpoint<br />
+                  {videosPer10} Video<br />
+                  <br />
+                  *Simple Markdown and JSON always free</>}>
                   <Box>
                     <InfoCircledIcon />
                     <Text size="1" color="gray">Token usage and costs</Text>
@@ -145,48 +173,62 @@ export const AccountPage = () => {
 
             <Text size="1" color="gray">Plan</Text>
             <Flex align="center" gap="2" wrap="wrap">
-              <Text size="1" weight="bold">{subscriptionInfo.name}</Text>
+              <Text color="mint" size="1" weight="bold">{userData.subscriptionPlan}</Text>
               {userData.subscriptionPlan === 'lifetime' && (
                 <Badge size="1" color="mint" variant="soft">Unlimited</Badge>
               )}
               {userData.subscriptionPlan !== 'lifetime' && userData.subscriptionPlan !== fallbackValues.subscriptionPlan && (
                 <Badge size="1" color="mint" variant="soft">
-                  {subscriptionInfo.tokens} tokens/month
+                  {subscriptionPlansToMonthlyTokens(userData.subscriptionPlan)} tokens/month
                 </Badge>
               )}
-              {userData.subscriptionPlan !== fallbackValues.subscriptionPlan && <Button size="1" variant="soft" color="red">
+              {userData.subscriptionPlan !== 'No plan found' && 
+              <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK}>
+              <Button size="1" variant="soft" color="red">
                 Cancel
-              </Button>}
+              </Button></RadixLink>}
             </Flex>
 
-            {userData.subscriptionPlan === fallbackValues.subscriptionPlan && (
-              <Flex direction="column" gap="1">
-                <Box>
+            <Separator size="1" my="2" />
+
+            <Text size="1" color="gray">Change Plan</Text>
+
+            <Flex direction="column" gap="1">
+              {userData.subscriptionPlan !== 'starter' && <Box>
+                <RadixLink href={process.env.GATSBY_STRIPE_STARTER_PAYMENT_LINK}>
                   <Button size="1" color="mint">Buy Starter</Button>
-                  <Text size="1" color="gray" ml="1">50 tokens for $10 / mo.</Text>
-                </Box>
-                <Box>
+                </RadixLink>
+                <Text size="1" color="gray" ml="1">50 tokens for $10 / mo.</Text>
+              </Box>}
+              {userData.subscriptionPlan !== 'creator' && <Box>
+                <RadixLink href={process.env.GATSBY_STRIPE_CREATOR_PAYMENT_LINK}>
                   <Button size="1" color="mint">Buy Creator</Button>
-                  <Text size="1" color="gray" ml="1">500 tokens for $49 / mo.</Text>
-                </Box>
-                <Box>
+                </RadixLink>
+                <Text size="1" color="gray" ml="1">500 tokens for $49 / mo.</Text>
+              </Box>}
+              {userData.subscriptionPlan !== 'enterprise' && <Box>
+                <RadixLink href={process.env.GATSBY_STRIPE_ENTERPRISE_PAYMENT_LINK}>
                   <Button size="1" color="mint">Buy Enterprise</Button>
-                  <Text size="1" color="gray" ml="1">10000 tokens for $499 / mo.</Text>
-                </Box>
-                <Box>
+                </RadixLink>
+                <Text size="1" color="gray" ml="1">10000 tokens for $499 / mo.</Text>
+              </Box>}
+              {userData.subscriptionPlan !== 'lifetime' && <Box>
+                <RadixLink href={process.env.GATSBY_STRIPE_LIFETIME_PAYMENT_LINK}>
                   <Button size="1" color="amber">Buy Lifetime</Button>
-                  <Text size="1" color="gray" ml="1">Lifetime usage for $2000</Text>
-                </Box>
-              </Flex>
-            )}
+                </RadixLink>
+                <Text size="1" color="gray" ml="1">Lifetime usage for $2000</Text>
+              </Box>}
+            </Flex>
 
             <Separator size="1" my="2" />
 
             <Text size="1" color="gray">Payment Methods</Text>
             <Flex>
+            <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK}>
               <Button size="1" variant="outline">
                 Manage in Stripe
               </Button>
+              </RadixLink>
             </Flex>
 
             <Separator size="1" my="2" />

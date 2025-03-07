@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -25,6 +27,13 @@ type StripeSuccessRequest struct {
 	Product         string `json:"product"` // e.g. "starter", "creator", "enterprise", "topup", "lifetime"
 }
 
+// ResponseData is returned to the client.
+type ResponseData struct {
+	Success      bool   `json:"success"`
+	Email        string `json:"email,omitempty"`
+	TempPassword string `json:"tempPassword,omitempty"`
+}
+
 // Hardcoded configuration for each product.
 const (
 	StarterTokens      = 50
@@ -32,6 +41,16 @@ const (
 	EnterpriseTokens   = 10000
 	TopupTokensPerItem = 10
 )
+
+// generateTempPassword creates a temporary password in the format "codevideo_<randomhex>"
+func generateTempPassword() string {
+	b := make([]byte, 8) // 8 bytes = 16 hex characters
+	if _, err := rand.Read(b); err != nil {
+		log.Printf("Error generating random bytes: %v", err)
+		return "codevideo_default"
+	}
+	return "codevideo_" + hex.EncodeToString(b)
+}
 
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 	// Allow only POST requests.
@@ -51,9 +70,9 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}, nil
 	}
 
-	apiKey := os.Getenv("CLERK_API_KEY")
+	apiKey := os.Getenv("CLERK_SECRET_KEY")
 	if apiKey == "" {
-		log.Println("CLERK_API_KEY not set")
+		log.Println("CLERK_SECRET_KEY not set")
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
 			Body:       "Server Error",
@@ -63,13 +82,14 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	config.Key = &apiKey
 	client := user.NewClient(config)
 
-	// If ClerkUserId is empty, try to create a new user based on the Stripe session email.
+	// Track whether we're creating a new user.
+	var tempPassword string
 	var clerkUserId string
 	if payload.ClerkUserId == "" {
 		// Initialize Stripe.
-		stripeKey := os.Getenv("STRIPE_API_KEY")
+		stripeKey := os.Getenv("STRIPE_SECRET_KEY")
 		if stripeKey == "" {
-			log.Println("STRIPE_API_KEY not set")
+			log.Fatalf("STRIPE_SECRET_KEY not set")
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
 				Body:       "Server Error",
@@ -94,9 +114,13 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 			}, nil
 		}
 
-		// Create a new Clerk user using the Stripe customer email.
+		// Generate a temporary password.
+		tempPassword = generateTempPassword()
+
+		// Create a new Clerk user using the Stripe customer email and temporary password.
 		createParams := user.CreateParams{
 			EmailAddresses: &[]string{session.CustomerDetails.Email},
+			Password:       &tempPassword,
 		}
 		newUser, err := client.Create(context.Background(), &createParams)
 		if err != nil {
@@ -168,9 +192,9 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		newMetadata["tokens"] = currentTokens + EnterpriseTokens
 	case "topup":
 		// Retrieve purchased quantity from Stripe via the checkout session.
-		stripeKey := os.Getenv("STRIPE_API_KEY")
+		stripeKey := os.Getenv("STRIPE_SECRET_KEY")
 		if stripeKey == "" {
-			log.Println("STRIPE_API_KEY not set")
+			log.Fatalf("STRIPE_SECRET_KEY not set")
 			return events.APIGatewayProxyResponse{
 				StatusCode: http.StatusInternalServerError,
 				Body:       "Server Error",
@@ -230,9 +254,28 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}, nil
 	}
 
+	// Build the response.
+	respData := ResponseData{
+		Success: true,
+	}
+	// Include the temporary password in the response if a new user was created.
+	if payload.ClerkUserId == "" {
+		respData.Email = clerkUser.EmailAddresses[0].EmailAddress
+		respData.TempPassword = tempPassword
+	}
+
+	respJSON, err := json.Marshal(respData)
+	if err != nil {
+		log.Printf("Error marshaling response: %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       "Server Error",
+		}, nil
+	}
+
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       "Payment verified and metadata updated",
+		Body:       string(respJSON),
 	}, nil
 }
 

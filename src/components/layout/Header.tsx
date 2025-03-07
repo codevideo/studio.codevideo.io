@@ -7,7 +7,7 @@ import {
     IconButton,
     Text,
     Card,
-    Badge
+    Link as RadixLink
 } from '@radix-ui/themes';
 import { HamburgerMenuIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -15,24 +15,21 @@ import { toggleSidebar } from '../../store/editorSlice';
 import { ThemeToggle } from './ThemeToggle';
 import { TutorialButton } from '../utils/Buttons/TutorialButton';
 import { TokensButton } from '../utils/Buttons/TokensButton';
-import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
 import { useIsDesktop } from '../../hooks/useIsDesktop';
 import { WhitepaperButton } from '../utils/Buttons/WhitepaperButton';
 import { TutorialCSSClassConstants } from './sidebar/StudioTutorial';
-import { resolveTokensColor } from '../../utils/resolveTokensColor';
+import { TokenCountBadge } from '../utils/TokenCountBadge';
 
 export function Header() {
     const dispatch = useAppDispatch();
     const isDesktop = useIsDesktop();
-    const { user } = useUser();
-    const tokens = user?.publicMetadata.tokens as any || 0;
-    const tokensColor = resolveTokensColor(tokens);
 
     return (
         <Box position="fixed" left="0" right="0" style={{ zIndex: 10000, backdropFilter: 'blur(8px)' }} className="z-40" mx="3">
             <Card>
                 <Flex align="center" justify="between">
-                    <Box> {/* Fixed width container for left side */}
+                    <Flex direction="row" gap="3"> {/* Fixed width container for left side */}
                         <IconButton
                             onClick={() => dispatch(toggleSidebar())}
                             size="1"
@@ -42,22 +39,28 @@ export function Header() {
                         >
                             <HamburgerMenuIcon width="18" height="18" />
                         </IconButton>
-                    </Box>
-                    <Box
-                        className={TutorialCSSClassConstants.HEADER_SELECTOR}
-                        style={{
-                            position: 'absolute',
-                            left: '50%',
-                            transform: 'translateX(-50%)'
-                        }}
-                    >
-                        <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
-                            <Flex align="center" gap="2">
-                                <Text color="mint" weight="bold">{'/>'}</Text>
-                                <Text color="mint" weight="bold">CodeVideo™ Studio</Text>
-                            </Flex>
+                        <Box
+                            className={TutorialCSSClassConstants.HEADER_SELECTOR}
+                        >
+                            <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
+                                <Flex align="center" gap="1">
+                                    <Text color="mint" weight="bold">{'/>'}</Text>
+                                    <Text color="mint" weight="bold">CodeVideo™ Studio</Text>
+                                </Flex>
+                            </Link>
+                        </Box>
+                        <Link to="/faq">
+                            <Button size="1" color="mint">
+                                FAQs
+                            </Button>
                         </Link>
-                    </Box>
+                        <RadixLink href="https://codevideo.substack.com/" target="_blank">
+                            <Button size="1" color="mint">
+                                Blog
+                            </Button>
+                        </RadixLink>
+                    </Flex>
+
                     <Flex justify="end" align="center" gap="2"> {/* Fixed width container for right side */}
                         <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
                         <TutorialButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
@@ -89,10 +92,7 @@ export function Header() {
 
                         <SignedIn>
                             <Link to="/account">
-                                <Badge size="2" color="amber">
-                                    <Text size="1" color="amber">Tokens:
-                                        <Text ml="1" weight="bold" color={tokensColor}>{tokens}</Text></Text>
-                                </Badge>
+                                <TokenCountBadge />
                             </Link>
                             <Link to="/account">
                                 <Button
@@ -104,6 +104,8 @@ export function Header() {
                                     Account
                                 </Button>
                             </Link>
+                        <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
+
                         </SignedIn>
                         <ThemeToggle />
                     </Flex>
