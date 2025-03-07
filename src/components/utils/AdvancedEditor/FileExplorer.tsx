@@ -5,12 +5,13 @@ import { FileIcon } from './FileIcons/FileIcon';
 import { Folder } from '@react-symbols/icons';
 
 export interface IFileExplorerProps {
+    theme: 'light' | 'dark'
     currentFileName?: string
     fileStructure?: IFileStructure
 }
 
 export function FileExplorer(props: IFileExplorerProps) {
-    const { currentFileName, fileStructure } = props;
+    const { theme, currentFileName, fileStructure } = props;
 
     const renderFileTree = (structure: IFileStructure, path: string = '', level: number): JSX.Element[] => {
         // Sort entries alphabetically, with directories first, then files
@@ -65,7 +66,7 @@ export function FileExplorer(props: IFileExplorerProps) {
                 height: '100%',
                 minWidth: '200px',
                 borderRight: '1px solid var(--gray-7)',
-                backgroundColor: '#272822',
+                backgroundColor: theme === 'light' ? 'var(--gray-5)' : 'var(--gray-4)',
                 pointerEvents: 'none',
                 userSelect: 'none',
             }}>

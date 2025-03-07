@@ -1,0 +1,5 @@
+[functions.clerkSignupWebhook]
+  main = "netlify/functions/clerkSignupWebhook/main.go"
+
+[functions.decrementTokens]
+  main = "netlify/functions/decrementTokens/main.go"

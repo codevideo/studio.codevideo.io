@@ -6,20 +6,22 @@ import {
     Button,
     IconButton,
     Text,
-    Container,
     Card
 } from '@radix-ui/themes';
-import { HamburgerMenuIcon } from '@radix-ui/react-icons';
+import { HamburgerMenuIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { toggleSidebar } from '../../store/editorSlice';
-import { useAppSelector } from '../../hooks/useAppSelector';
 import { ThemeToggle } from './ThemeToggle';
+import { TutorialButton } from '../utils/Buttons/TutorialButton';
+import { TokensButton } from '../utils/Buttons/TokensButton';
+import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
+import { useIsDesktop } from '../../hooks/useIsDesktop';
+import { WhitepaperButton } from '../utils/Buttons/WhitepaperButton';
+import { TutorialCSSClassConstants } from './sidebar/StudioTutorial';
 
 export function Header() {
-    const { currentProjectIndex } = useAppSelector(state => state.editor)
-    // const { isUserLoggedIn } = useAppSelector(state => state.user)
     const dispatch = useAppDispatch();
-
+    const isDesktop = useIsDesktop();
     return (
         <Box position="fixed" left="0" right="0" style={{ zIndex: 10000, backdropFilter: 'blur(8px)' }} className="z-40" mx="3">
             <Card>
@@ -27,7 +29,7 @@ export function Header() {
                     <Box> {/* Fixed width container for left side */}
                         <IconButton
                             onClick={() => dispatch(toggleSidebar())}
-                            size="2"
+                            size="1"
                             variant="solid"
                             color="mint"
                             aria-label="Toggle menu"
@@ -36,6 +38,7 @@ export function Header() {
                         </IconButton>
                     </Box>
                     <Box
+                        className={TutorialCSSClassConstants.HEADER_SELECTOR}
                         style={{
                             position: 'absolute',
                             left: '50%',
@@ -49,64 +52,50 @@ export function Header() {
                             </Flex>
                         </Link>
                     </Box>
-                    <Flex justify="end" style={{ width: '300px' }} align="center"> {/* Fixed width container for right side */}
-                        <Link
-                            to="/pdf/CodeVideo_Framework_White_Paper.pdf"
-                            style={{ textDecoration: 'none', marginRight: '0.75rem' }}
-                        >
-                            <Button
-                                size="2"
-                                variant="solid"
-                                color="mint"
-                            >
-                                Read white paper
-                            </Button>
-                        </Link>
+                    <Flex justify="end" align="center" gap="2"> {/* Fixed width container for right side */}
+                        <TokensButton style={{display: isDesktop ? 'inline-block' : 'none'}}/>
+                        <TutorialButton style={{display: isDesktop ? 'inline-block' : 'none'}}/>
+                        <WhitepaperButton style={{display: isDesktop ? 'inline-block' : 'none'}}/>
                         <a
                             href="https://github.com/orgs/codevideo/repositories"
                             target="_blank"
                             rel="noreferrer"
                         >
                             <Button
-                                mr="2"
-                                size="2"
-                                variant="solid"
+                                style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none'  }}
+                                size="1"
+                                variant="soft"
                                 color="mint"
                             >
                                 GitHub
                             </Button>
                         </a>
+
+                        <SignedOut>
+                            <Button
+                                size="1"
+                                variant="soft"
+                                color="mint"
+                            >
+                                <SignInButton />
+                            </Button>
+                        </SignedOut>
+
+                        <SignedIn>
+                            <Link to="/account">
+                                <Button
+                                    size="1"
+                                    variant="soft"
+                                    color="mint"
+                                >
+                                    <PersonIcon height="12" width="12" />
+                                    Account
+                                </Button>
+                            </Link>
+                        </SignedIn>
                         <ThemeToggle />
                     </Flex>
-                    {/* {isUserLoggedIn ? (
-                  <Link
-                    to="/purchase-credits"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <Button
-                      size="2"
-                      variant="solid"
-                      color="mint"
-                    >
-                      Purchase Credits
-                    </Button>
-                  </Link>
-                ) : (
-                  <Link
-                    to="/login"
-                    style={{ textDecoration: 'none' }}
-                  >
-                    <Button
-                      size="2"
-                      variant="solid"
-                      color="mint"
-                    >
-                      Login
-                    </Button>
-                  </Link>
-                )} */}
                 </Flex>
-
             </Card>
         </Box>
     );

@@ -7,13 +7,17 @@ import { useAppSelector } from "../../../../hooks/useAppSelector";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { setDraftActionsString } from "../../../../store/editorSlice";
 import { Flex } from '@radix-ui/themes';
+import { useClerk } from "@clerk/clerk-react";
 
 // use local static files
 loader.config({ paths: { vs: "/vs" } });
 
 export function ActionJsonEditor() {
   const { actionsString } = useAppSelector((state) => state.editor);
+  const { theme } = useAppSelector((state) => state.theme);
   const dispatch = useAppDispatch();
+  // can't render the monaco editor until clerk is loaded - see https://github.com/clerk/javascript/issues/1643
+  const clerk = useClerk();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const handleOnMount = (
     _editor: monaco.editor.IStandaloneCodeEditor,
@@ -32,8 +36,9 @@ export function ActionJsonEditor() {
 
   const editor = (
     <Flex 
-      direction="column" style={{ height: "640px"}}>
-      <Editor
+      direction="column" style={{ height: "600px"}}>
+      {clerk.loaded && <Editor
+        theme={theme}
         path={"json/"}
         height="100%"
         defaultLanguage={"json"}
@@ -58,7 +63,7 @@ export function ActionJsonEditor() {
           // Always update the editor value, but validation happens in the effect
           dispatch(setDraftActionsString(newValue));
         }}
-      />
+      />}
     </Flex>
   );
 

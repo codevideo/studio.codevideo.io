@@ -13,7 +13,7 @@ import { mouseMovementExample } from "./advanced/javascriptMouseMovementExample"
 import { functionalTerminalExample } from "./advanced/functionalTerminalExample";
 import { typingUnitTestExample } from "./how-to-print-stuff/typingUnitTestExample";
 
-export const allProjects: Project[] = [
+export const allProjects: ICourse[] = [
     javascriptCreateRenameDeleteFileExample,
     mouseMovementExample,
     functionalTerminalExample,

@@ -1,8 +1,6 @@
 import * as React from 'react';
-import { useEffect } from 'react';
 import {
   Flex,
-  Box,
   Heading,
   Button,
   Text,
@@ -14,17 +12,11 @@ import {
   addNewActionsToProjects,
   addNewCourseToProjects,
   addNewLessonToProjects,
-  toggleSidebar
+  setLocationInStudio,
 } from '../../../../../store/editorSlice';
 import { JSONPaster } from './JSONPaster';
-import { ProjectType } from '@fullstackcraftllc/codevideo-types';
 
-export interface ICreateNewOverlayProps {
-  setSelectedProjectType: (projectType: ProjectType) => void;
-}
-
-export function CreateNewOverlay(props: ICreateNewOverlayProps) {
-  const { setSelectedProjectType } = props;
+export function CreateNewOverlay() {
   const dispatch = useAppDispatch();
 
   return (
@@ -45,7 +37,7 @@ export function CreateNewOverlay(props: ICreateNewOverlayProps) {
                 primaryLanguage: '',
                 lessons: []
               }))
-              setSelectedProjectType('course');
+              dispatch(setLocationInStudio('course'));
             }}
           >
             <Text>Create a New Course</Text>
@@ -60,7 +52,7 @@ export function CreateNewOverlay(props: ICreateNewOverlayProps) {
                 description: '',
                 actions: []
               }))
-              setSelectedProjectType('lesson');
+              dispatch(setLocationInStudio('lesson'));
             }}
           >
             <Text>Create a New Lesson</Text>
@@ -68,7 +60,10 @@ export function CreateNewOverlay(props: ICreateNewOverlayProps) {
 
           <Button
             size="3"
-            onClick={() => dispatch(addNewActionsToProjects([]))}
+            onClick={() => {
+              dispatch(addNewActionsToProjects([]))
+              dispatch(setLocationInStudio('studio'));
+            }}
           >
             <Flex direction="column" align="center" justify="center">
               <Text>Create Actions Only</Text>

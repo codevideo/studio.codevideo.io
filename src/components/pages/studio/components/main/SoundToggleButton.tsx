@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { IconButton, Box } from '@radix-ui/themes';
 import { SpeakerLoudIcon, SpeakerOffIcon } from '@radix-ui/react-icons';
-import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
+import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 
 export interface ISoundToggleProps {
     isSoundOn: boolean;

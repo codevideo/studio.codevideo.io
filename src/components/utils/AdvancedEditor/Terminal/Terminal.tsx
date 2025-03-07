@@ -2,20 +2,20 @@ import React, { useEffect, useRef } from 'react';
 import { Box } from '@radix-ui/themes';
 
 export interface ITerminalProps {
+    theme?: 'light' | 'dark';
     terminalBuffer: string;
 }
 
 export function Terminal(props: ITerminalProps) {
-    const { terminalBuffer } = props;
+    const { theme, terminalBuffer } = props;
     const terminalRef = useRef<HTMLDivElement>(null);
 
-    // always update terminal buffer when current action index changes also auto-scroll to bottom whenever the terminal buffer changes
+    // always auto-scroll to the bottom whenever the terminal buffer changes
     useEffect(() => {
         if (terminalRef.current) {
             terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
         }
     }, [terminalBuffer]);
-
 
     return (
         <Box
@@ -24,7 +24,7 @@ export function Terminal(props: ITerminalProps) {
             style={{
                 borderTop: '1px solid var(--gray-7)',
                 height: '150px',
-                backgroundColor: '#272822',
+                backgroundColor: theme === 'light' ? 'var(--gray-5)' : 'var(--gray-4)',
                 fontFamily: 'Fira Code, monospace',
                 padding: '8px',
                 position: 'relative',

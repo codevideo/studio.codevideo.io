@@ -15,8 +15,11 @@ const tutorialSlice = createSlice({
         startTutorial: (state) => {
             state.isTutorialRunning = true;
         },
+        endTutorial: (state) => {
+            state.isTutorialRunning = false;
+        }
     }
 });
 
-export const { startTutorial } = tutorialSlice.actions;
+export const { startTutorial, endTutorial } = tutorialSlice.actions;
 export default tutorialSlice.reducer;

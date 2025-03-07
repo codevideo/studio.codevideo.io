@@ -11,6 +11,7 @@ export interface UserProject {
 }
 
 export interface EditorState {
+    locationInStudio: 'select' | 'course' | 'lesson' | 'studio';
     projects: Array<UserProject>;
     currentProjectIndex: number;
     currentProject: UserProject | null;
@@ -26,11 +27,13 @@ export interface EditorState {
     isFullScreen: boolean;
     isPlaying: boolean;
     isSoundOn: boolean;
+    allowFocusInEditor: boolean;
 }
 
 const now = new Date().toISOString();
 
 export const editorInitialState: EditorState = {
+    locationInStudio: 'studio',
     projects: [{
         projectType: 'course',
         project: pythonPrintExample,
@@ -56,6 +59,7 @@ export const editorInitialState: EditorState = {
     isFullScreen: false,
     isPlaying: false,
     isSoundOn: false,
+    allowFocusInEditor: true,
 };
 
 // helper to set the currentActions based on the current project type
@@ -64,6 +68,12 @@ const setCurrentActions = (state: EditorState, currentProject: UserProject) => {
         const currentLesson = currentProject.project.lessons[state.currentLessonIndex];
         if (currentLesson) {
             state.currentActions = currentLesson.actions;
+        } else {
+            state.currentLessonIndex = 0;
+            const firstLesson = currentProject.project.lessons[state.currentLessonIndex];
+            if (firstLesson) {
+                state.currentActions = firstLesson.actions;
+            }
         }
     }
     if (isLesson(currentProject.project)) {
@@ -73,10 +83,10 @@ const setCurrentActions = (state: EditorState, currentProject: UserProject) => {
         state.currentActions = currentProject.project;
     }
 
-    // also update the action index
+    // also update the action index to start at the beginning
     state.currentActionIndex = 0;
 
-    // and the actions string
+    // and update the actions string to reflect the current actions
     state.actionsString = JSON.stringify(state.currentActions, null, 2);
 }
 
@@ -84,10 +94,17 @@ const editorSlice = createSlice({
     name: "editor",
     initialState: editorInitialState,
     reducers: {
+        setLocationInStudio(state, action) {
+            state.locationInStudio = action.payload;
+        },
         setActions(state, action) {
-            const currentProject = state.projects[state.currentProjectIndex]
+            // set current actions and actions string immediately
             state.currentActions = action.payload;
             state.actionsString = JSON.stringify(action.payload, null, 2);
+
+            // update the actions on the current project
+            const currentProject = state.projects[state.currentProjectIndex]
+            console.log('currentProject', currentProject)
             if (currentProject) {
                 if (isCourse(currentProject.project)) {
                     const currentLesson = currentProject.project.lessons[state.currentLessonIndex];
@@ -101,7 +118,8 @@ const editorSlice = createSlice({
                     currentProject.project.actions = action.payload;
                     state.currentProject = currentProject;
                 }
-                if (isValidActions(currentProject.project)) {
+                if (isValidActions(action.payload)) {
+                    console.log('setting actions to actions project!')
                     currentProject.project = action.payload;
                     state.currentProject = currentProject;
                 }
@@ -148,6 +166,7 @@ const editorSlice = createSlice({
             }
         },
         addNewLessonToProjects(state, action) {
+            console.log("ADDING NEW LESSON")
             state.projects.push({
                 projectType: 'lesson',
                 project: action.payload as ILesson,
@@ -230,11 +249,15 @@ const editorSlice = createSlice({
         },
         setIsSoundOn(state, action) {
             state.isSoundOn = action.payload;
+        },
+        setAllowFocusInEditor(state, action) {
+            state.allowFocusInEditor = action.payload;
         }
     }
 });
 
 export const {
+    setLocationInStudio,
     addNewCourseToProjects,
     addNewLessonToProjects,
     addNewActionsToProjects,
@@ -253,7 +276,8 @@ export const {
     setIsSidebarOpen,
     setIsFullScreen,
     setIsPlaying,
-    setIsSoundOn
+    setIsSoundOn,
+    setAllowFocusInEditor
 } = editorSlice.actions;
 
 export default editorSlice.reducer;

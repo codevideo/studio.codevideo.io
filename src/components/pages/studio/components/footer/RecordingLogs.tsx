@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
-import { Box, Grid, Button, Card, Heading, Flex, Text } from '@radix-ui/themes';
+import { Box, Grid, Button, Heading, Flex, Text } from '@radix-ui/themes';
 import { useEffect, useState } from 'react';
-import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
+import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 
 export function RecordingLogs() {
     const { isRecording, atomicRecordedActions, collectedRecordedActions } = useAppSelector(state => state.recording);
@@ -19,7 +19,7 @@ export function RecordingLogs() {
                 onClick={() => setIsExpanded(!isExpanded)}
                 variant="ghost"
                 color="mint"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                style={{ display: 'flex', alignItems: 'center', gap: '8px',  }}
             >
                 <svg
                     style={{

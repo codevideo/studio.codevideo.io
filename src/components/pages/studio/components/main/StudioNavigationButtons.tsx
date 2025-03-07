@@ -8,7 +8,7 @@ import { Flex, Button } from '@radix-ui/themes';
 import { ActionCounter } from '../../../../utils/ActionCounter';
 import { EnterFullScreenIcon } from '@radix-ui/react-icons';
 import { addToast } from '../../../../../store/toastSlice';
-import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
+import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 
 export function StudioNavigationButtons() {
     const { currentActions, currentActionIndex, isFullScreen, isPlaying } = useAppSelector(state => state.editor);
@@ -77,13 +77,14 @@ export function StudioNavigationButtons() {
             // clean up recording state
             dispatch(turnOffRecording());
         } else {
+            dispatch(addToast(`Action recording in progress.`));
             dispatch(setIsPlaying(false));
             dispatch(setIsRecording(true));
         }
     }
 
-    const playButtonText = isPlaying ? `Stop` : <>Playback<sup style={{ fontSize: '0.5rem', paddingBottom: '1rem' }}>Beta</sup></>;
-    const recordButtonText = isRecording ? `Stop` : <>Record<sup style={{ fontSize: '0.5rem', paddingBottom: '1rem' }}>Beta</sup></>;
+    const playButtonText = isPlaying ? `Stop` : <>Playback Actions<sup style={{ fontSize: '0.5rem', paddingBottom: '1rem' }}>Beta</sup></>;
+    const recordButtonText = isRecording ? `Stop` : <>Record Actions<sup style={{ fontSize: '0.5rem', paddingBottom: '1rem' }}>Beta</sup></>;
 
     return (
         <Flex
@@ -97,10 +98,6 @@ export function StudioNavigationButtons() {
                     disabled={currentActionIndex === 0 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
-                    style={{
-                        opacity: currentActionIndex === 0 ? 0.5 : 1,
-                        cursor: currentActionIndex === 0 ? 'not-allowed' : 'pointer'
-                    }}
                 >
                     {'<<<'} First
                 </Button>
@@ -109,10 +106,6 @@ export function StudioNavigationButtons() {
                     disabled={currentActionIndex === 0 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
-                    style={{
-                        opacity: currentActionIndex === 0 ? 0.5 : 1,
-                        cursor: currentActionIndex === 0 ? 'not-allowed' : 'pointer'
-                    }}
                 >
                     -10 {'<<'}
                 </Button>
@@ -121,10 +114,6 @@ export function StudioNavigationButtons() {
                     disabled={currentActionIndex === 0 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
-                    style={{
-                        opacity: currentActionIndex === 0 ? 0.5 : 1,
-                        cursor: currentActionIndex === 0 ? 'not-allowed' : 'pointer'
-                    }}
                 >
                     {'<'} Previous
                 </Button>
@@ -133,10 +122,6 @@ export function StudioNavigationButtons() {
                     disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
-                    style={{
-                        opacity: currentActionIndex === currentActions.length - 1 ? 0.5 : 1,
-                        cursor: currentActionIndex === currentActions.length - 1 ? 'not-allowed' : 'pointer'
-                    }}
                 >
                     Next {'>'}
                 </Button>
@@ -146,10 +131,6 @@ export function StudioNavigationButtons() {
                     disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
-                    style={{
-                        opacity: currentActionIndex === currentActions.length - 1 ? 0.5 : 1,
-                        cursor: currentActionIndex === currentActions.length - 1 ? 'not-allowed' : 'pointer'
-                    }}
                 >
                     +10 {'>>'}
                 </Button>
@@ -158,10 +139,6 @@ export function StudioNavigationButtons() {
                     disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
                     color="mint"
                     variant="soft"
-                    style={{
-                        opacity: currentActionIndex === currentActions.length - 1 ? 0.5 : 1,
-                        cursor: currentActionIndex === currentActions.length - 1 ? 'not-allowed' : 'pointer'
-                    }}
                 >
                     Last {'>>>'}
                 </Button>
@@ -175,6 +152,7 @@ export function StudioNavigationButtons() {
                     color="mint"
                     variant="soft"
                     style={{ cursor: 'pointer' }}
+                    disabled={isRecording}
                 >
                     {playButtonText}
                 </Button>
@@ -185,6 +163,7 @@ export function StudioNavigationButtons() {
                     color="red"
                     variant="soft"
                     style={{ cursor: 'pointer' }}
+                    disabled={isPlaying}
                 >
                     {recordButtonText}
                 </Button>
@@ -195,6 +174,7 @@ export function StudioNavigationButtons() {
                     color="mint"
                     variant="soft"
                     style={{ cursor: 'pointer' }}
+                    disabled={isPlaying || isRecording}
                 >
                     <EnterFullScreenIcon />
                 </Button>

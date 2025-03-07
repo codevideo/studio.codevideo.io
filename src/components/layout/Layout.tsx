@@ -7,6 +7,7 @@ import { SVGBackground } from './SVGBackground';
 import { Footer } from './Footer';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { ToastContainer } from './toast/ToastContainer';
+import { SidebarMenu } from './sidebar/SidebarMenu';
 
 export interface ILayoutProps {
     withHeader?: boolean;
@@ -42,10 +43,10 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
                 panelBackground="translucent"
                 radius="large"
             >
-                <Flex  direction="column" justify="center" align="center">
+                <Flex direction="column" justify="center" align="center">
                     {children}
-                <Modal />
-                <ToastContainer />
+                    <Modal />
+                    <ToastContainer />
                 </Flex>
             </Theme>
         )
@@ -59,6 +60,7 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
             radius="large"
         >
             <SVGBackground />
+            <SidebarMenu />
             {withHeader && <Header />}
             <Flex direction="column" justify="between">
                 {children}

@@ -4,7 +4,7 @@ import { estimateVideoDurationInSeconds } from '../../../../../utils/estimateVid
 import { formatDuration } from '../../../../../utils/formatDuration';
 import { Box, Button, Flex, Grid, Text } from '@radix-ui/themes';
 import { useMemo, useState } from 'react';
-import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
+import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 
 export function VideoTimeEstimationsAndStats() {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -61,7 +61,8 @@ export function VideoTimeEstimationsAndStats() {
                         <Text size="1">- 4 GB Intel, CodeVide API v1.0.0: <Text size="1" weight="medium">{formatDuration(totalDuration)}</Text></Text>
                         <Text size="1">In development:</Text>
                         <Text size="1">- Parallel cloud arch: <Text size="1" weight="medium">{formatDuration(longestSpeakActionDuration)}</Text> (maximum length of longest action)</Text>
-                        <Text size="1">- 64 GB Apple Silicon, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeM4)}</Text></Text>
+                        <Text size="1">- 512 GB Apple M3 Ultra, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeM4/4)}</Text></Text>
+                        <Text size="1">- 64 GB Apple M3, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeM4)}</Text></Text>
                         <Text size="1">- 4 GB Intel, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeDigitalOcean)}</Text></Text>
                     </Flex>
                     <Box>

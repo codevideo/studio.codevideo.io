@@ -1,25 +1,35 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { Box, Grid, Button, Select, Flex, Text, Badge, Code } from '@radix-ui/themes';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { VirtualIDE } from '@fullstackcraftllc/codevideo-virtual-ide';
 import { IVirtualLayerLog, LogType, VirtualLayerLogSource } from '@fullstackcraftllc/codevideo-types';
-import { TutorialCSSClassConstants } from '../sidebar/StudioTutorial';
+import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 
 export function VirtualLayerLogs() {
     const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
+    // const [allLogsOverAllTime, setAllLogsOverAllTime] = useState<IVirtualLayerLog[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
     const [minLevel, setMinLevel] = useState<'all' | LogType>('all');
     const [source, setSource] = useState<'all' | VirtualLayerLogSource>('all');
     const virtualIDE = new VirtualIDE(currentActions, currentActionIndex, true);
     const logs = virtualIDE.getLogs();
 
+
+    // TODO: this quickly explodes in size.. would need a virtualized list or clever way of showing only relevant logs
+    // every time logs change, update the allLogsOverAllTime - being sure not to include with identical timestamps
+    // useEffect(() => {
+    //     const newLogs = logs.filter(log => !allLogsOverAllTime.some(existingLog => existingLog.timestamp === log.timestamp));
+    //     setAllLogsOverAllTime([...allLogsOverAllTime, ...newLogs]);
+    // }, [logs]);
+
+
     // filter out logs based on minLevel and source
     const filteredLogs = logs.filter(log => {
         if (minLevel !== 'all' && log.type !== minLevel) return false;
         if (source !== 'all' && log.source !== source) return false;
         return true;
-    });
+    }).sort((a, b) => a.timestamp - b.timestamp);
 
     const getColoredSourceBadge = (log: IVirtualLayerLog) => {
         switch (true) {
@@ -74,7 +84,8 @@ export function VirtualLayerLogs() {
 
             {isExpanded && (
                 <Flex direction="column" mt="2">
-                    <Flex gap="4" mb="2">
+                    <Text>(Only shows logs of latest step)</Text>
+                    <Flex gap="4" my="2">
                         {/* Log Level Select with label */}
                         <Flex align="center" gap="2">
                             <Text size="2" weight="medium">Level:</Text>
@@ -119,11 +130,10 @@ export function VirtualLayerLogs() {
                     </Flex>
 
                     <Grid columns={{ initial: "1", lg: "1" }} gap="4" mt="2">
-
                         {filteredLogs.length === 0 ? (
                             <Box>
                                 {source === 'all' && <Text size="2" weight="medium" style={{ color: 'var(--colors-slate11)' }}>
-                                    No logs of type <Code>{minLevel}</Code> found! Nice work!
+                                    No logs of type <Code>{minLevel}</Code> found.
                                 </Text>}
                                 {source !== 'all' && <Text size="2" weight="medium" style={{ color: 'var(--colors-slate11)' }}>
                                     No logs of type <Code>{minLevel}</Code>, source <Code>{source}</Code> found! Nice work!
