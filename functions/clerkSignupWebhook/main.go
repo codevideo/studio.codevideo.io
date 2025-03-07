@@ -45,7 +45,10 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}
 
 		// slack message the user's email and they have been created
-		utils.SendSlackMessage("New user just signed up! " + eventData.Data.FirstName + " " + eventData.Data.LastName + " (" + eventData.Data.Email + ")")
+		err := utils.SendSlackMessage("New user just signed up! " + eventData.Data.FirstName + " " + eventData.Data.LastName + " (" + eventData.Data.Email + ")")
+		if err != nil {
+			log.Printf("Error sending Slack message: %v", err)
+		}
 
 		if _, err := client.UpdateMetadata(context.Background(), eventData.Data.ID, &params); err != nil {
 			log.Printf("Error updating metadata: %v", err)

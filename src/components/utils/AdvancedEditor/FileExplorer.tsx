@@ -44,10 +44,8 @@ export function FileExplorer(props: IFileExplorerProps) {
                             backgroundColor: currentFileName === fullPath ? 'var(--mint-8)' : 'transparent',
                         }}
                     >
-                        <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>
-                            {isDirectory ? <Folder height="20"/> : <FileIcon filename={name} />}
-                        </Text>
-                        <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC' }}>{name}</Text>
+                        {isDirectory ? <Folder height="20"/> : <FileIcon filename={name} />}
+                        <Text style={{ fontFamily: 'Fira Code, monospace', color: '#CCCECC', fontSize: '0.9em' }}>{name}</Text>
                     </Flex>
                     {isDirectory && item.children && renderFileTree(item.children, fullPath, nextLevel)}
                 </Box>
@@ -64,7 +62,7 @@ export function FileExplorer(props: IFileExplorerProps) {
             p="1"
             style={{
                 height: '100%',
-                minWidth: '200px',
+                minWidth: '250px',
                 borderRight: '1px solid var(--gray-7)',
                 backgroundColor: theme === 'light' ? 'var(--gray-5)' : 'var(--gray-4)',
                 pointerEvents: 'none',

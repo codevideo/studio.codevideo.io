@@ -1,5 +1,6 @@
-[functions.clerkSignupWebhook]
-  main = "netlify/functions/clerkSignupWebhook/main.go"
+[build]
+  command = "cd functions && ./build-go-functions.sh && cd .. && npm run build"
+  publish = "public"
 
-[functions.decrementTokens]
-  main = "netlify/functions/decrementTokens/main.go"
+[functions]
+  directory = "functions"

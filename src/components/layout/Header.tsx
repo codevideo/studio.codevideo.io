@@ -6,7 +6,8 @@ import {
     Button,
     IconButton,
     Text,
-    Card
+    Card,
+    Badge
 } from '@radix-ui/themes';
 import { HamburgerMenuIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -14,14 +15,19 @@ import { toggleSidebar } from '../../store/editorSlice';
 import { ThemeToggle } from './ThemeToggle';
 import { TutorialButton } from '../utils/Buttons/TutorialButton';
 import { TokensButton } from '../utils/Buttons/TokensButton';
-import { SignedIn, SignedOut, SignInButton } from '@clerk/clerk-react';
+import { SignedIn, SignedOut, SignInButton, useUser } from '@clerk/clerk-react';
 import { useIsDesktop } from '../../hooks/useIsDesktop';
 import { WhitepaperButton } from '../utils/Buttons/WhitepaperButton';
 import { TutorialCSSClassConstants } from './sidebar/StudioTutorial';
+import { resolveTokensColor } from '../../utils/resolveTokensColor';
 
 export function Header() {
     const dispatch = useAppDispatch();
     const isDesktop = useIsDesktop();
+    const { user } = useUser();
+    const tokens = user?.publicMetadata.tokens as any || 0;
+    const tokensColor = resolveTokensColor(tokens);
+
     return (
         <Box position="fixed" left="0" right="0" style={{ zIndex: 10000, backdropFilter: 'blur(8px)' }} className="z-40" mx="3">
             <Card>
@@ -53,16 +59,16 @@ export function Header() {
                         </Link>
                     </Box>
                     <Flex justify="end" align="center" gap="2"> {/* Fixed width container for right side */}
-                        <TokensButton style={{display: isDesktop ? 'inline-block' : 'none'}}/>
-                        <TutorialButton style={{display: isDesktop ? 'inline-block' : 'none'}}/>
-                        <WhitepaperButton style={{display: isDesktop ? 'inline-block' : 'none'}}/>
+                        <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
+                        <TutorialButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
+                        <WhitepaperButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
                         <a
                             href="https://github.com/orgs/codevideo/repositories"
                             target="_blank"
                             rel="noreferrer"
                         >
                             <Button
-                                style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none'  }}
+                                style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none' }}
                                 size="1"
                                 variant="soft"
                                 color="mint"
@@ -82,6 +88,12 @@ export function Header() {
                         </SignedOut>
 
                         <SignedIn>
+                            <Link to="/account">
+                                <Badge size="2" color="amber">
+                                    <Text size="1" color="amber">Tokens:
+                                        <Text ml="1" weight="bold" color={tokensColor}>{tokens}</Text></Text>
+                                </Badge>
+                            </Link>
                             <Link to="/account">
                                 <Button
                                     size="1"

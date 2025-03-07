@@ -45,6 +45,13 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	}
 	htmlContent := strings.Join(htmlParts, "\n")
 
+	slackMessageContent := fmt.Sprintf("New contact form submission: %v", bodyMap)
+	// slack message of the product type that was just purchased
+	err := utils.SendSlackMessage(slackMessageContent)
+	if err != nil {
+		log.Printf("Error sending Slack message: %v", err)
+	}
+
 	// Initialize Mailjet client.
 	mjPublic := os.Getenv("MJ_APIKEY_PUBLIC")
 	mjPrivate := os.Getenv("MJ_APIKEY_PRIVATE")
@@ -76,7 +83,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	messages := mailjet.MessagesV31{Info: messagesInfo}
 
 	// Send the email via Mailjet.
-	_, err := mailjetClient.SendMailV31(&messages)
+	_, err = mailjetClient.SendMailV31(&messages)
 	if err != nil {
 		log.Printf("Mailjet error: %v", err)
 		return events.APIGatewayProxyResponse{

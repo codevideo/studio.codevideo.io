@@ -7,6 +7,7 @@ import toastSlice from './toastSlice'
 import themeSlice from './themeSlice'
 import tutorialSlice from './tutorialSlice'
 import formsSlice from './formsSlice'
+import authSlice from './authSlice'
 
 const createStore = () =>
     configureStore({
@@ -17,7 +18,8 @@ const createStore = () =>
             modal: modalSlice,
             toast: toastSlice,
             tutorial: tutorialSlice,
-            forms: formsSlice
+            forms: formsSlice,
+            auth: authSlice,
         }
     })
 

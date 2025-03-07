@@ -14,23 +14,24 @@ import {
   InfoCircledIcon,
 } from '@radix-ui/react-icons';
 import { Link } from 'gatsby';
+import { resolveTokensColor } from '../../../utils/resolveTokensColor';
 
 export interface ClerkMetadata {
-  credits: number;
+  tokens: number;
   stripeId: string;
   unlimited: boolean;
   subscriptionPlan: string;
   subscriptionStatus: string;
-  creditsPerCycle: number;
+  tokensPerCycle: number;
 }
 
 const fallbackValues: ClerkMetadata = {
-  credits: 0,
+  tokens: 0,
   stripeId: '',
   unlimited: false,
   subscriptionPlan: 'No plan found',
   subscriptionStatus: 'No status found',
-  creditsPerCycle: 0
+  tokensPerCycle: 0
 };
 
 export const AccountPage = () => {
@@ -43,26 +44,26 @@ export const AccountPage = () => {
     if (!isLoaded || !user) return fallbackValues;
 
     return {
-      credits: (user.publicMetadata as any).credits || fallbackValues.credits,
+      tokens: (user.publicMetadata as any).tokens || fallbackValues.tokens,
       stripeId: (user.publicMetadata as any).stripeId || fallbackValues.stripeId,
       unlimited: (user.publicMetadata as any).unlimited || fallbackValues.unlimited,
       subscriptionPlan: (user.publicMetadata as any).subscriptionPlan || fallbackValues.subscriptionPlan,
       subscriptionStatus: (user.publicMetadata as any).subscriptionStatus || fallbackValues.subscriptionStatus,
-      creditsPerCycle: (user.publicMetadata as any).creditsPerCycle || fallbackValues.creditsPerCycle
+      tokensPerCycle: (user.publicMetadata as any).tokensPerCycle || fallbackValues.tokensPerCycle
     };
   };
 
   // Get subscription plan name and details
   const getSubscriptionInfo = (userData: any) => {
-    if (!userData || !userData.subscription) return { name: 'No Active Subscription', credits: 0 };
+    if (!userData || !userData.subscription) return { name: 'No Active Subscription', tokens: 0 };
 
     switch (userData.subscription.plan) {
       case 'subscription-standard':
-        return { name: 'Standard Plan', credits: 50 };
+        return { name: 'Standard Plan', tokens: 50 };
       case 'subscription-premium':
-        return { name: 'Premium Plan', credits: 500 };
+        return { name: 'Premium Plan', tokens: 500 };
       default:
-        return { name: 'Custom Plan', credits: userData.subscription.credits_per_cycle || 0 };
+        return { name: 'Custom Plan', tokens: userData.subscription.tokens_per_cycle || 0 };
     }
   };
 
@@ -82,13 +83,7 @@ export const AccountPage = () => {
   const userData = getUserData();
   const subscriptionInfo = getSubscriptionInfo(userData);
 
-  let creditsColor: any = 'mint'
-  if (userData.credits < 10) {
-    creditsColor = 'amber'
-  }
-  if (userData.credits < 5) {
-    creditsColor = 'tomato'
-  }
+  const tokensColor = resolveTokensColor(userData.tokens);
 
   return (
     <Box mt="4" p="1" pt="9">
@@ -117,9 +112,9 @@ export const AccountPage = () => {
 
             <Separator size="1" my="2" />
 
-            <Text size="1" color="gray">Available credits</Text>
+            <Text size="1" color="gray">Available tokens</Text>
             <Flex align="center" gap="2">
-              <Text size="1" weight="bold" color={creditsColor}>{userData.credits}</Text>
+              <Text size="1" weight="bold" color={tokensColor}>{userData.tokens}</Text>
             </Flex>
             <Flex direction="column" gap="1">
               <Box>
@@ -156,7 +151,7 @@ export const AccountPage = () => {
               )}
               {userData.subscriptionPlan !== 'lifetime' && userData.subscriptionPlan !== fallbackValues.subscriptionPlan && (
                 <Badge size="1" color="mint" variant="soft">
-                  {subscriptionInfo.credits} credits/month
+                  {subscriptionInfo.tokens} tokens/month
                 </Badge>
               )}
               {userData.subscriptionPlan !== fallbackValues.subscriptionPlan && <Button size="1" variant="soft" color="red">
