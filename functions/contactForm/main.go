@@ -1,7 +1,6 @@
 package main
 
 import (
-	"codevideo-functions/utils"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -11,6 +10,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	utils "github.com/codevideo/go-utils/slack"
 	mailjet "github.com/mailjet/mailjet-apiv3-go"
 )
 
@@ -46,6 +46,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	htmlContent := strings.Join(htmlParts, "\n")
 
 	slackMessageContent := fmt.Sprintf("New contact form submission: %v", bodyMap)
+
 	// slack message of the product type that was just purchased
 	err := utils.SendSlackMessage(slackMessageContent)
 	if err != nil {

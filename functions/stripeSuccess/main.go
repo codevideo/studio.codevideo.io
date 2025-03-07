@@ -1,7 +1,6 @@
 package main
 
 import (
-	"codevideo-functions/utils"
 	"context"
 	"encoding/json"
 	"log"
@@ -16,6 +15,7 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/user"
+	utils "github.com/codevideo/go-utils/slack"
 )
 
 // StripeSuccessRequest is the payload expected from the client.

@@ -2,6 +2,8 @@ github.com/aws/aws-lambda-go v1.47.0 h1:0H8s0vumYx/YKs4sE7YM0ktwL2eWse+kfopsRI1s
 github.com/aws/aws-lambda-go v1.47.0/go.mod h1:dpMpZgvWx5vuQJfBt0zqBha60q7Dd7RfgJv23DymV8A=
 github.com/clerk/clerk-sdk-go/v2 v2.2.0 h1:7z2HBQ7L1sW+xVm5LM/bOpzmfhExwa4xgII4fMNFk64=
 github.com/clerk/clerk-sdk-go/v2 v2.2.0/go.mod h1:tA+JDYh9xEmysBRs+BfJH9HeR0J0HOh8txfsiB115zY=
+github.com/codevideo/go-utils v0.0.1 h1:Vp/uC5k0Jx+T7kTqJPPPB699YqvoLNeK3uIXgrjsZk4=
+github.com/codevideo/go-utils v0.0.1/go.mod h1:0JnbFZ3fIbrpEWw/v+m16q+rHIYf2hPXMx3qvR/GTWY=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-jose/go-jose/v3 v3.0.3 h1:fFKWeig/irsp7XD2zBxvnmA/XaRWp5V3CBsZXJF7G7k=
 github.com/go-jose/go-jose/v3 v3.0.3/go.mod h1:5b+7YgP7ZICgJDBdfjZaIt+H/9L9T/YQrVfLAMboGkQ=
