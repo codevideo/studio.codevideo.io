@@ -62,8 +62,56 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	config.Key = &apiKey
 	client := user.NewClient(config)
 
+	// If ClerkUserId is empty, try to create a new user based on the Stripe session email.
+	var clerkUserId string
+	if payload.ClerkUserId == "" {
+		// Initialize Stripe.
+		stripeKey := os.Getenv("STRIPE_API_KEY")
+		if stripeKey == "" {
+			log.Println("STRIPE_API_KEY not set")
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       "Server Error",
+			}, nil
+		}
+		stripe.Key = stripeKey
+
+		// Retrieve the checkout session to get the customer's email.
+		session, err := stripeSession.Get(payload.StripeSessionId, nil)
+		if err != nil {
+			log.Printf("Error retrieving stripe session: %v", err)
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       "Error retrieving stripe session",
+			}, nil
+		}
+		if session.CustomerDetails == nil || session.CustomerDetails.Email == "" {
+			log.Println("Stripe session missing customer email")
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusBadRequest,
+				Body:       "No customer email found",
+			}, nil
+		}
+
+		// Create a new Clerk user using the Stripe customer email.
+		createParams := user.CreateParams{
+			EmailAddresses: &[]string{session.CustomerDetails.Email},
+		}
+		newUser, err := client.Create(context.Background(), &createParams)
+		if err != nil {
+			log.Printf("Error creating new Clerk user: %v", err)
+			return events.APIGatewayProxyResponse{
+				StatusCode: http.StatusInternalServerError,
+				Body:       "Error creating user",
+			}, nil
+		}
+		clerkUserId = newUser.ID
+	} else {
+		clerkUserId = payload.ClerkUserId
+	}
+
 	// Fetch the current clerkUser so we can add to the existing credits.
-	clerkUser, err := client.Get(context.Background(), payload.ClerkUserId)
+	clerkUser, err := client.Get(context.Background(), clerkUserId)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
 		return events.APIGatewayProxyResponse{
@@ -167,7 +215,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	updateParams := user.UpdateMetadataParams{
 		PublicMetadata: (*json.RawMessage)(&metaJSON),
 	}
-	if _, err := client.UpdateMetadata(context.Background(), payload.ClerkUserId, &updateParams); err != nil {
+	if _, err := client.UpdateMetadata(context.Background(), clerkUserId, &updateParams); err != nil {
 		log.Printf("Error updating metadata: %v", err)
 		return events.APIGatewayProxyResponse{
 			StatusCode: http.StatusInternalServerError,
@@ -177,7 +225,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
-		Body:       "Subscription verified and metadata updated",
+		Body:       "Payment verified and metadata updated",
 	}, nil
 }
 
