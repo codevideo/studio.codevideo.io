@@ -6,7 +6,7 @@ let currentUtterance: SpeechSynthesisUtterance | null = null;
  * @param text The text to speak
  * @returns A promise that resolves when speech is finished
  */
-export const speakText = (text: string): Promise<void> => {
+export const speakText = (text: string, volume: number): Promise<void> => {
   return new Promise<void>((resolve, reject) => {
     const speechSynthesis = window.speechSynthesis;
     
@@ -16,6 +16,9 @@ export const speakText = (text: string): Promise<void> => {
     // Create a new SpeechSynthesisUtterance object
     const utterance = new SpeechSynthesisUtterance(text);
     
+    // Set the volume
+    utterance.volume = volume;
+
     // Store reference to current utterance
     currentUtterance = utterance;
 

@@ -4,30 +4,39 @@ import {
   Flex,
   Grid,
   Card,
-  Text,
-  Code,
   Select,
 } from '@radix-ui/themes';
 import { AdvancedEditor } from '../../../../utils/AdvancedEditor/AdvancedEditor';
 import ToggleEditor from '../../../../utils/ToggleEditor/ToggleEditor';
 import { StudioNavigationButtons } from './StudioNavigationButtons';
-import { SidebarMenu } from '../sidebar/SidebarMenu';
 import { RecordingLogs } from '../footer/RecordingLogs';
 import { VideoTimeEstimationsAndStats } from '../footer/VideoTimeEstimationsAndStats';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
-import { LessonCounter } from '../../../../utils/LessonCounter';
 import { useState } from 'react';
-import { GUIMode, ICourse, isCourse } from '@fullstackcraftllc/codevideo-types';
-import { VirtualIDELogs } from '../footer/VirtualIDELogs';
-import { LessonAdder } from '../../../../utils/LessonAdder';
+import { GUIMode, isCourse } from '@fullstackcraftllc/codevideo-types';
+import { VirtualLayerLogs } from '../footer/VirtualLayerLogs';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
-import { setCurrentActionIndex, setIsPlaying } from '../../../../../store/editorSlice';
+import { setCurrentActionIndex, setIsPlaying, setIsSoundOn } from '../../../../../store/editorSlice';
+import { SoundToggleButton } from './SoundToggleButton';
+import { useClerk } from '@clerk/clerk-react';
+import { useIsDesktop } from '../../../../../hooks/useIsDesktop';
+import { ExportDropdown } from '../../../../layout/sidebar/ExportDropdown';
+import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
+import { ProjectInfoCard } from './ProjectInfoCard';
+
+// TODO: ReactMediaRecorder works decently, but we will need user to 1. enable screen recording in browser, 2. allow microphone access, 3. go full full screen
+// this hook literally just records the entire browser screen, tabs and all
+// const ReactMediaRecorder = lazy(() => import('react-media-recorder').then(module => ({ default: module.ReactMediaRecorder })));
 
 export function MainStudio() {
-  const { currentProject, currentActions, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying } = useAppSelector((state) => state.editor);
+  const { currentProject, currentActions, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying, isSoundOn, allowFocusInEditor } = useAppSelector((state) => state.editor);
   const { isRecording } = useAppSelector(state => state.recording);
+  const { theme } = useAppSelector(state => state.theme);
   const dispatch = useAppDispatch();
+  // can't render the monaco editor until clerk is loaded - see https://github.com/clerk/javascript/issues/1643
+  const clerk = useClerk();
   const [editorMode, setEditorMode] = useState("editor");
+  const isDesktop = useIsDesktop();
 
   const defaultLanguage = currentProject && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
 
@@ -66,14 +75,16 @@ export function MainStudio() {
         }}
       >
         <StudioNavigationButtons />
-        {currentProject && <AdvancedEditor
+        {currentProject && clerk.loaded && <AdvancedEditor
+          theme={theme}
           project={currentProject.project}
           mode={mode}
+          allowFocusInEditor={true} // no other options in fullscreen so no conflict of focused elements
           defaultLanguage={defaultLanguage}
           isExternalBrowserStepUrl={isExternalBrowserStepUrl}
-          actions={currentActions}
           currentActionIndex={currentActionIndex}
           currentLessonIndex={currentLessonIndex}
+          isSoundOn={isSoundOn}
           actionFinishedCallback={goToNextAction}
         />}
       </Box>
@@ -81,78 +92,77 @@ export function MainStudio() {
   }
 
   return (
-    <>
-      <SidebarMenu />
-      <Box
-        style={{
-          minHeight: '100vh',
-          padding: '1rem'
-        }}
-        mt="9"
-      >
-        <Grid columns={{ initial: '1', md: '3' }} gap="3">
-          {/* Left Action Editor */}
-          <Box style={{ width: '100%', height: '650px' }}>
-            <Card mb="3">
-              <Flex gap="2" align="center" justify="between">
-                <Flex direction="column">
-                  <Text size="1" mb="1">{(currentProject?.project as ICourse).name}</Text>
-                  <Flex align="center" gap="2">
-                    <Code size="1">{currentProject?.projectType}</Code>
-                    <LessonCounter />
-                    <LessonAdder />
-                  </Flex>
-                </Flex>
-                {/* <LessonCounter />
-                <Button color='mint'>Add Lesson</Button> */}
-                <Flex gap="2" align="center" justify="between">
-                  <Select.Root
-                    value={editorMode}
-                    onValueChange={(value) => setEditorMode(value)}
-                  >
-                    <Select.Trigger />
-                    <Select.Content>
-                      <Select.Item value="editor">GUI Editor</Select.Item>
-                      <Select.Item value="json">JSON Editor</Select.Item>
-                    </Select.Content>
-                  </Select.Root>
-                </Flex>
+    <Box
+      p="1"
+      mt="9"
+    >
+      <Grid columns={{ initial: '1', md: '3' }} gap="3">
+        {/* Left Action Editor */}
+        <Box style={{ width: '100%', overflowY: 'auto' }}>
+          <Flex direction="row" gap="2" justify="between">
+            <ProjectInfoCard />
+            {/* only show editor selector on desktop - on mobile fixed to GUI mode */}
+            <Card mb="3" className={TutorialCSSClassConstants.EDITOR_SELECTOR} style={{ display: isDesktop ? 'block' : 'none' }}>
+              <Flex align="center" justify="center" m="2" mx="5">
+                <Select.Root
+                  value={editorMode}
+                  onValueChange={(value) => setEditorMode(value)}
+                >
+                  <Select.Trigger />
+                  <Select.Content>
+                    <Select.Item value="editor">GUI Editor</Select.Item>
+                    <Select.Item value="json">JSON Editor</Select.Item>
+                  </Select.Content>
+                </Select.Root>
               </Flex>
             </Card>
-            <Card>
-              <ToggleEditor editorMode={editorMode} />
-            </Card>
-          </Box>
+          </Flex>
+          <Card mb="3">
+            <ToggleEditor editorMode={editorMode} />
+          </Card>
+          <Card mb="3">
+            <ExportDropdown />
+          </Card>
+          <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
+            <RecordingLogs />
+          </Card>
+          <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
+            <VideoTimeEstimationsAndStats />
+          </Card>
+          <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
+            <VirtualLayerLogs />
+          </Card>
+        </Box>
 
-          {/* Right IDE Preview */}
-          <Box style={{ width: '100%', gridColumn: 'span 2' }}>
-            <Card>
-              <StudioNavigationButtons />
-              {/* Advanced Editor */}
-              <Box style={{ height: '700px' }}>
-                {currentProject && <AdvancedEditor
+        {/* Right - Navigation Buttons and  IDE Preview */}
+        <Box style={{ width: '100%', gridColumn: 'span 2' }}>
+          <Card>
+            <StudioNavigationButtons />
+            {/* Advanced Editor */}
+            <Box style={{ height: '700px' }}>
+              {currentProject && clerk.loaded &&
+                <AdvancedEditor
+                  theme={theme}
                   project={currentProject.project}
                   mode={mode}
+                  allowFocusInEditor={allowFocusInEditor}
                   defaultLanguage={defaultLanguage}
                   isExternalBrowserStepUrl={isExternalBrowserStepUrl}
-                  actions={currentActions}
                   currentActionIndex={currentActionIndex}
                   currentLessonIndex={currentLessonIndex}
+                  isSoundOn={isSoundOn}
                   actionFinishedCallback={goToNextAction}
-                />}
+                />
+              }
+              {/* Sound Toggle Button */}
+              <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
+                <SoundToggleButton isSoundOn={isSoundOn} setIsSoundOn={(isSoundOn) => dispatch(setIsSoundOn(isSoundOn))} />
               </Box>
-            </Card>
-          </Box>
-        </Grid>
+            </Box>
+          </Card>
+        </Box>
+      </Grid >
+    </Box >
 
-        {/* Under both additional details */}
-        <Flex direction="column" justify="start" align="start" gap="2" mt="4" style={{ width: '100%', gridColumn: 'span 2' }}>
-          <RecordingLogs />
-          <VideoTimeEstimationsAndStats />
-          <VirtualIDELogs />
-        </Flex>
-
-      </Box>
-    </>
   );
 }

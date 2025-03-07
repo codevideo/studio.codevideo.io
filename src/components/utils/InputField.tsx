@@ -11,7 +11,7 @@ interface InputFieldProps {
   required?: boolean;
 }
 
-export const InputField: React.FC<InputFieldProps> = (props: InputFieldProps) => {
+export const InputField = (props: InputFieldProps) => {
     const { label, id, value, onChange, placeholder = '', isTextarea = false, required = false } = props;
   return (
     <div className="mb-4">

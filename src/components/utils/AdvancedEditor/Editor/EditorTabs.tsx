@@ -3,17 +3,17 @@ import { IEditor } from '@fullstackcraftllc/codevideo-types';
 import { Flex, Text, Button, Box } from '@radix-ui/themes';
 
 export interface IEditorTabsProps {
-    currentFile?: IEditor;
     editors: Array<IEditor>;
+    theme: 'light' | 'dark';
 }
 
 export function EditorTabs(props: IEditorTabsProps) {
-    const { editors } = props;
+    const { editors, theme } = props;
 
     // if editors are empty, render fixed height to prevent layout shift
     if (editors.length === 0) {
         return <Box style={{
-            backgroundColor: '#272822',
+            backgroundColor: theme === 'light' ? 'var(--gray-5)' : 'var(--gray-4)',
             height: '30px',
             borderBottom: '1px solid var(--gray-7)',
         }} />;
@@ -22,7 +22,7 @@ export function EditorTabs(props: IEditorTabsProps) {
     return (
         <Flex
             style={{
-                backgroundColor: '#272822',
+                backgroundColor: theme === 'light' ? 'var(--gray-5)' : 'var(--gray-4)',
                 height: '30px',
                 borderBottom: '1px solid var(--gray-7)',
                 pointerEvents: 'none',
@@ -57,7 +57,7 @@ export function EditorTabs(props: IEditorTabsProps) {
                             style={{
                                 width: '8px',
                                 height: '8px',
-                                backgroundColor: 'var(--gray-8)',
+                                backgroundColor: theme === 'light' ? 'var(--gray-5)' : 'var(--gray-4)',
                                 borderRadius: '9999px'
                             }}
                         />

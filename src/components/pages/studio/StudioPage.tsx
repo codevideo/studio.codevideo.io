@@ -1,38 +1,29 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { CreateNewOverlay } from './components/start/CreateNewOverlay';
-import { CourseMetadataForm } from './components/sidebar/CourseMetadataForm';
 import { MainStudio } from './components/main/MainStudio';
-import { ProjectType } from '@fullstackcraftllc/codevideo-types';
-import { LessonMetadataForm } from './components/sidebar/LessonMetadataForm';
+import { CourseMetadataForm } from '../../layout/sidebar/CourseMetadataForm';
+import { LessonMetadataForm } from '../../layout/sidebar/LessonMetadataForm';
 
 export function StudioPage() {
-    const { currentProjectIndex } = useAppSelector(state => state.editor);
-    const [selectedProjectType, setSelectedProjectType] = useState<ProjectType>('');
+    const { locationInStudio: createNewStep } = useAppSelector(state => state.editor);
 
-    const onClickCancelCourse = () => {
-        setSelectedProjectType('');
-    };
-
-    const onClickCancelLesson = () => {
-        setSelectedProjectType('');
-    };
 
     // currently in unselected mode, show start overlay
-    if (currentProjectIndex === -1) {
-        return <CreateNewOverlay setSelectedProjectType={setSelectedProjectType}/>
+    if (createNewStep === 'select') {
+        return <CreateNewOverlay />
     }
 
-    if (selectedProjectType === 'course') {
+    if (createNewStep === 'course') {
         console.log('rendering course metadata form')   
         // form for course metadata
-        return <CourseMetadataForm onClickCancel={onClickCancelCourse}/>
+        return <CourseMetadataForm isEdit={false}/>
     }
 
-    if (selectedProjectType === 'lesson') {
+    if (createNewStep === 'lesson') {
         console.log('rendering lesson metadata form')
         // form for lesson metadata
-        return <LessonMetadataForm forCourse={false} onClickCancel={onClickCancelLesson}/>
+        return <LessonMetadataForm forCourse={false} isEdit={false}/>
     }
 
     // have at least 1 project, show the main studio

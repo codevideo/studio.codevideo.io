@@ -14,6 +14,7 @@ export function ToastContainer() {
     <Toast.Provider swipeDirection="right">
       {toasts.map((toast) => (
         <Toast.Root 
+          style={{ background: 'var(--mint-10)' }}
           key={toast.id} 
           className="ToastRoot" 
           open={true}
@@ -22,7 +23,7 @@ export function ToastContainer() {
           }}
           duration={3000} // Auto dismiss after 3 seconds
         >
-          <Toast.Title className="ToastTitle">{toast.message}</Toast.Title>
+          <Toast.Title style={{color: 'var(--gray-6)'}} className="ToastTitle">{toast.message}</Toast.Title>
         </Toast.Root>
       ))}
       <Toast.Viewport className="ToastViewport" />

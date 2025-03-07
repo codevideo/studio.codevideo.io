@@ -11,12 +11,12 @@ import {
   Code,
   IconButton
 } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon } from '@radix-ui/react-icons';
-import { ICourse, ILesson, IAction, isValidActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
+import { CheckCircledIcon, CrossCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { ICourse, ILesson, IAction, isValidActions, isCourse, isLesson, filterAuthorActions, filterEditorActions, filterExternalActions, filterFileExplorerActions, filterMouseActions, filterTerminalActions } from '@fullstackcraftllc/codevideo-types';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
-import { addNewCourseToProjects, addNewLessonToProjects, addNewActionsToProjects } from '../../../../../store/editorSlice';
+import { addNewCourseToProjects, addNewLessonToProjects, addNewActionsToProjects, setLocationInStudio } from '../../../../../store/editorSlice';
 
-export const JSONPaster: React.FC = () => {
+export const JSONPaster = () => {
   const dispatch = useAppDispatch();
   const [jsonInput, setJsonInput] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -121,6 +121,9 @@ export const JSONPaster: React.FC = () => {
     setJsonInput('');
     setDetectedType(null);
     setParsedData(null);
+
+    // navigate to studio
+    dispatch(setLocationInStudio('studio'));
   };
 
   const closeModal = () => {
@@ -142,6 +145,15 @@ export const JSONPaster: React.FC = () => {
     </svg>
   );
 
+  // filter actions by type
+  const actionsToUseForStats = parsedData && isValidActions(parsedData) ? parsedData : [];
+  const authorActionsCount = filterAuthorActions(actionsToUseForStats).length;
+  const fileExplorerActionsCount = filterFileExplorerActions(actionsToUseForStats).length;
+  const editorActionsCount = filterEditorActions(actionsToUseForStats).length;
+  const terminalActionsCount = filterTerminalActions(actionsToUseForStats).length;
+  const mouseActionsCount = filterMouseActions(actionsToUseForStats).length;
+  const externalActionsCount = filterExternalActions(actionsToUseForStats).length;
+
   return (
     <Box width="full">
 
@@ -158,26 +170,36 @@ export const JSONPaster: React.FC = () => {
       />
 
       <Flex justify="between" align="center" mt="4">
-        <Flex align="center" gap="1">
-          {isValidating ? (
-            <Flex align="center" gap="1">
-              <SpinnerIcon />
-              <Text color="mint" size="1">Validating...</Text>
-            </Flex>
-          ) : detectedType ? (
-            <Flex align="center" gap="1">
-              <CheckCircledIcon width="16" height="16" color="mint" />
-              <Text color="mint" size="1" weight="medium">
-                Detected project of type <Code>{detectedType}</Code>
+        {isValidating ? (
+          <Flex align="center" >
+            <IconButton color="mint" size="1" mr="2" loading={true}>
+              <CheckCircledIcon width="15" height="15" />
+            </IconButton>
+            <Text color="mint" size="2">Validating JSON...</Text>
+          </Flex>
+        ) : validationError ? (
+          <Flex align="center" >
+            <IconButton color='red' size="1" mr="2">
+              <ExclamationTriangleIcon width="15" height="15" />
+            </IconButton>
+            <Text color="red" size="2">{validationError}</Text>
+          </Flex>
+        ) : validationError === '' ? (
+          <Flex align="center" justify="center" >
+            <IconButton color="mint" size="1" mr="2">
+              <CheckCircledIcon width="15" height="15" />
+            </IconButton>
+            <Flex direction="column">
+              <Text color="mint" size="2">
+                Actions JSON is valid; parsed <Text weight="bold">{actionsToUseForStats.length}</Text> actions{" "}
+              </Text>
+              <Text color="mint" size="1" as="span">
+                ({authorActionsCount} author, {fileExplorerActionsCount} file explorer, {editorActionsCount} editor, {terminalActionsCount} terminal, {mouseActionsCount} mouse, {externalActionsCount} external)
               </Text>
             </Flex>
-          ) : jsonInput ? (
-            <Flex align="center" gap="1">
-              <CrossCircledIcon width="16" height="16" color="red" />
-              <Text color="red" size="1" weight="medium">Invalid Format</Text>
-            </Flex>
-          ) : null}
-        </Flex>
+          </Flex>
+        ) : null}
+
 
         <Flex gap="2">
           <Button

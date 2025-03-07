@@ -1,94 +1,23 @@
-import { GUIMode, IAction, IFileStructure, IPoint } from '@fullstackcraftllc/codevideo-types';
+import React, { useRef,  } from 'react';
+import { GUIMode, IPoint } from '@fullstackcraftllc/codevideo-types';
 import { Box } from '@radix-ui/themes';
-import React, { useEffect, useRef, useState } from 'react';
-import { useAppSelector } from '../../../../hooks/useAppSelector';
 
 interface IMouseOverlayProps {
   mode: GUIMode
-  actions: IAction[];
-  actionIndex: number;
+  mousePosition: IPoint;
   mouseVisible: boolean;
-  containerRef: React.RefObject<HTMLDivElement>;
-  actionFinishedCallback: () => void;
 }
 
 export const MouseOverlay = (props: IMouseOverlayProps) => {
-  const { mode, actions, actionIndex, mouseVisible, containerRef, actionFinishedCallback } = props;
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const { mode, mouseVisible, mousePosition } = props;
   const overlayRef = useRef<HTMLDivElement>(null);
-
-  // transition end listener
-  useEffect(() => {
-    if (mode !== 'replay') {
-      return;
-    }
-
-    const currentAction = actions[actionIndex];
-    if (currentAction?.name.startsWith('mouse')) {
-      return;
-    }
-
-    const currentOverlay = overlayRef.current;
-    
-    if (currentOverlay) {
-      const handleTransitionEnd = () => {
-        console.log('Mouse transition finished');
-        // Call the callback passed via props
-        // actionFinishedCallback();
-      };
-
-      currentOverlay.addEventListener('transitionend', handleTransitionEnd);
-      
-      // Clean up event listener when component unmounts
-      return () => {
-        currentOverlay.removeEventListener('transitionend', handleTransitionEnd);
-      };
-    }
-  }, [mode, actionIndex]);
-
-  useEffect(() => {
-    if (!actionIndex) return;
-    const currentAction = actions[actionIndex];
-    if (!currentAction) return;
-
-    let newPosition = { x: mousePosition.x, y: mousePosition.y };
-
-    switch (currentAction.name) {
-      case 'mouse-click-terminal':
-      case 'terminal-open':
-        newPosition = getCoordinatesOfTerminalInput(containerRef)
-        break;
-      case 'mouse-click-editor':
-      case 'editor-type':
-        newPosition = getCoordinatesOfEditor(containerRef)
-        break;
-      case 'file-explorer-create-folder':
-      case 'file-explorer-create-file':
-      case 'file-explorer-open-file':
-      case 'mouse-click-filename':
-        newPosition = getCoordinatesOfFileOrFolder(currentAction.value, containerRef)
-        break;
-      case 'mouse-move':
-        newPosition = parseCoordinatesFromAction(currentAction.value, containerRef)
-        break;
-    }
-
-    setMousePosition(newPosition);
-  }, [actions, actionIndex]);
-
-  // on mount, set the mouse to the center of the editor
-  useEffect(() => {
-    if (!containerRef?.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    setMousePosition({
-      x: rect.width / 2,
-      y: rect.height / 2,
-    });
-  }, []);
 
   if (!mouseVisible) {
     return <></>
   }
+
+  // only animate mouse movement in replay mode - in step mode, we will "jump" from location to location when in step mode
+  const transition = mode === 'replay' ? 'transform 0.75s ease-in-out' : undefined;
 
   return (
     <Box
@@ -96,7 +25,7 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
       ref={overlayRef}
       style={{
         transform: `translate(${mousePosition.x}px, ${mousePosition.y}px) scale(0.8)`,
-        transition: 'transform 0.75s ease-in-out',
+        transition,
         zIndex: 100000000,
         position: 'absolute',
         pointerEvents: 'none',
@@ -114,64 +43,4 @@ export const MouseOverlay = (props: IMouseOverlayProps) => {
       </svg>
     </Box>
   );
-};
-
-const getCoordinatesOfTerminalInput = (containerRef: React.RefObject<HTMLDivElement>): IPoint => {
-  const terminal = document.querySelector('[data-codevideo-id="terminal"]');
-  if (!terminal) return { x: 0, y: 0 };
-  console.log('terminal', terminal);
-  const rect = terminal.getBoundingClientRect();
-  return convertToContainerCoordinates({
-    x: rect.left + 20, // Add padding for prompt
-    y: rect.top + 20   // Position near top of terminal
-  }, containerRef);
-};
-
-const getCoordinatesOfEditor = (containerRef: React.RefObject<HTMLDivElement>): IPoint => {
-  const editor = document.querySelector('[data-codevideo-id="editor"]');
-  if (!editor) return { x: 0, y: 0 };
-  console.log('editor', editor);
-  const rect = editor.getBoundingClientRect();
-  return convertToContainerCoordinates({
-    x: rect.left + 50,  // Position inside editor
-    y: rect.top + 50    // Position inside editor
-  }, containerRef);
-};
-
-const getCoordinatesOfFileOrFolder = (fileOrFolderPath: string, containerRef: React.RefObject<HTMLDivElement>): IPoint => {
-  console.log('fileOrFolderPath', fileOrFolderPath);
-  const fileElement = document.querySelector(`[data-codevideo-id="file-explorer-${fileOrFolderPath}"]`);
-  if (!fileElement) return { x: 0, y: 0 };
-  console.log('fileElement', fileElement);
-  const rect = fileElement.getBoundingClientRect();
-  return convertToContainerCoordinates({
-    x: rect.left + rect.width / 2,
-    y: rect.top + rect.height / 2
-  }, containerRef);
-};
-
-const parseCoordinatesFromAction = (value: string, containerRef: React.RefObject<HTMLDivElement>): IPoint => {
-  // try to get two parts
-  const parts = value.split(',')
-  if (parts.length == 2) {
-    return convertToContainerCoordinates({
-      x: parts[0] ? parseInt(parts[0]) : 0,
-      y: parts[1] ? parseInt(parts[1]) : 0
-    }, containerRef);
-  }
-  return {
-    x: 0,
-    y: 0,
-  }
-}
-
-const convertToContainerCoordinates = (point: IPoint, containerRef: React.RefObject<HTMLDivElement>): IPoint => {
-  if (!containerRef?.current) return point;
-
-  const containerRect = containerRef.current.getBoundingClientRect();
-
-  return {
-    x: point.x - containerRect.left,
-    y: point.y - containerRect.top
-  };
 };
