@@ -2,6 +2,8 @@
 import { IAction, ICourse, ILesson, isValidActions, isCourse, isLesson, Project, ProjectType } from "@fullstackcraftllc/codevideo-types";
 import { createSlice } from "@reduxjs/toolkit";
 import { pythonPrintExample } from "../components/pages/studio/examples/how-to-print-stuff/pythonPrintExample";
+import { persistProjectsToLocalStorage } from "../utils/persistence/persistProjectsToLocalStorage";
+import { fallbackProjects } from "../utils/persistence/loadProjectsFromLocalStorage";
 
 export interface UserProject {
     projectType: ProjectType
@@ -14,7 +16,7 @@ export interface EditorState {
     locationInStudio: 'select' | 'course' | 'lesson' | 'studio';
     projects: Array<UserProject>;
     currentProjectIndex: number;
-    currentProject: UserProject | null;
+    currentProject: UserProject | undefined;
     currentLessonIndex: number;
     currentActions: Array<IAction>;
     draftActionsString: string;
@@ -34,19 +36,9 @@ const now = new Date().toISOString();
 
 export const editorInitialState: EditorState = {
     locationInStudio: 'studio',
-    projects: [{
-        projectType: 'course',
-        project: pythonPrintExample,
-        created: now,
-        modified: now,
-    }],
+    projects: [],
     currentProjectIndex: 0,
-    currentProject: {
-        projectType: 'course',
-        project: pythonPrintExample,
-        created: now,
-        modified: now,
-    },
+    currentProject: undefined,
     currentLessonIndex: 0,
     currentActions: pythonPrintExample?.lessons[0]?.actions || [],
     draftActionsString: JSON.stringify([], null, 2),
@@ -97,14 +89,30 @@ const editorSlice = createSlice({
         setLocationInStudio(state, action) {
             state.locationInStudio = action.payload;
         },
+        setProjects(state, action) {
+            // sort by last changed
+            action.payload.sort((a: UserProject, b: UserProject) => {
+                return new Date(b.modified).getTime() - new Date(a.modified).getTime();
+            });
+
+            state.projects = action.payload;
+            state.currentProject = action.payload[0];
+            state.currentProjectIndex = 0;
+            if (state.currentProject) {
+                setCurrentActions(state, state.currentProject);
+            }
+        },
         setActions(state, action) {
             // set current actions and actions string immediately
             state.currentActions = action.payload;
             state.actionsString = JSON.stringify(action.payload, null, 2);
+            const copyOfProjects = [...state.projects];
+            console.log('state.projects', copyOfProjects)
+            console.log('state.currentProjectIndex', state.currentProjectIndex)
+            console.log('state.currentProjectIndex', copyOfProjects[state.currentProjectIndex])
 
             // update the actions on the current project
             const currentProject = state.projects[state.currentProjectIndex]
-            console.log('currentProject', currentProject)
             if (currentProject) {
                 if (isCourse(currentProject.project)) {
                     const currentLesson = currentProject.project.lessons[state.currentLessonIndex];
@@ -122,6 +130,12 @@ const editorSlice = createSlice({
                     console.log('setting actions to actions project!')
                     currentProject.project = action.payload;
                     state.currentProject = currentProject;
+                }
+                // now make sure the projects array itself is updated and persisted
+                if (copyOfProjects[state.currentProjectIndex]) {
+                    (copyOfProjects[state.currentProjectIndex] as any) = state.currentProject
+                    state.projects = copyOfProjects;
+                    persistProjectsToLocalStorage(copyOfProjects);
                 }
             }
             
@@ -226,7 +240,7 @@ const editorSlice = createSlice({
         },
         createNewProject(state) {
             state.currentProjectIndex = -1;
-            state.currentProject = null;
+            state.currentProject = undefined;
             state.currentLessonIndex = -1;
             state.currentActions = [];
             state.actionsString = JSON.stringify([], null, 2);
@@ -258,6 +272,7 @@ const editorSlice = createSlice({
 
 export const {
     setLocationInStudio,
+    setProjects,
     addNewCourseToProjects,
     addNewLessonToProjects,
     addNewActionsToProjects,

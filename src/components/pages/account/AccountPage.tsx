@@ -175,7 +175,7 @@ export const AccountPage = () => {
             <Flex align="center" gap="2" wrap="wrap">
               <Text color="mint" size="1" weight="bold">{userData.subscriptionPlan}</Text>
               {userData.subscriptionPlan === 'lifetime' && (
-                <Badge size="1" color="mint" variant="soft">Unlimited</Badge>
+                <Badge size="1" color="mint" variant="soft">Unlimited Tokens; You're a Legend!</Badge>
               )}
               {userData.subscriptionPlan !== 'lifetime' && userData.subscriptionPlan !== fallbackValues.subscriptionPlan && (
                 <Badge size="1" color="mint" variant="soft">

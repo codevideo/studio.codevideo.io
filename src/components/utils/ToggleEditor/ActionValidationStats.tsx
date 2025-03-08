@@ -106,8 +106,8 @@ export function ActionValidationStats(props: IActionValidationStatsProps) {
             <CheckCircledIcon width="15" height="15" />
           </IconButton>
           <Flex direction="column">
-            <Text color="mint" size="2">
-              {editorMode ? "Actions are" : "Actions JSON is"} valid; parsed <Text weight="bold">{actionsToUseForStats.length}</Text> actions{" "}
+            <Text color="mint" size="1">
+              Project saved.{' '}{editorMode ? "Actions are" : "Actions JSON is"} valid; parsed <Text weight="bold">{actionsToUseForStats.length}</Text> actions{" "}
             </Text>
             <Text color="mint" size="1" as="span">
               ({authorActionsCount} author, {fileExplorerActionsCount} file explorer, {editorActionsCount} editor, {terminalActionsCount} terminal, {mouseActionsCount} mouse, {externalActionsCount} external)

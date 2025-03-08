@@ -96,7 +96,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
             case 'topup':
                 return 'New tokens';
             case 'lifetime':
-                return 'CodeVideo Lifetime license';
+                return 'CodeVideo Lifetime License';
             default:
                 return 'custom plan';
         }
@@ -128,23 +128,23 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                 <>
                     {tempPassword ? (
                         <Card>
-                        <Flex direction="column" align="center" justify="center" gap="6">
-                            <Text size="4" style={{ marginBottom: '1rem' }}>
-                                Your <Text color="mint" weight="bold">{formattedTier}</Text> CodeVideo account for email {email} has been created!
-                            </Text>
-                            <Text size="3" color="red" style={{ marginBottom: '1rem' }}>
-                                Your temporary password is: <strong>{tempPassword}</strong>
-                            </Text>
-                            <Button onClick={onClickCopyPassword} variant="solid" color="mint" size="3">
-                               {copyPasswordButtonText}
-                            </Button>
-                            <Text size="3" style={{ marginBottom: '1rem' }}>
-                                Copy this password and set a new one after signing in for your security.
-                            </Text>
-                            <Button onClick={onClickSetNewPassword} style={{display: passwordCopied ? 'block' : 'none'}} variant="solid" color="mint" size="3">
-                                Sign In
-                            </Button>
-                        </Flex>
+                            <Flex direction="column" align="center" justify="center" gap="6">
+                                <Text size="4" style={{ marginBottom: '1rem' }}>
+                                    Your <Text color="mint" weight="bold">{formattedTier}</Text> for email {email} has been successfully confirmed!
+                                </Text>
+                                <Text size="3" color="red" style={{ marginBottom: '1rem' }}>
+                                    Your temporary password is: <strong>{tempPassword}</strong>
+                                </Text>
+                                <Button onClick={onClickCopyPassword} variant="solid" color="mint" size="3">
+                                    {copyPasswordButtonText}
+                                </Button>
+                                <Text size="3" style={{ marginBottom: '1rem' }}>
+                                    Copy this password and set a new one after signing in for your security.
+                                </Text>
+                                <Button onClick={onClickSetNewPassword} style={{ display: passwordCopied ? 'block' : 'none' }} variant="solid" color="mint" size="3">
+                                    Sign In
+                                </Button>
+                            </Flex>
                         </Card>
                     ) : (
                         <Text size="4" style={{ marginBottom: '1rem' }}>
@@ -156,13 +156,15 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                     <Confetti
                         numberOfPieces={500}
                         recycle={false}
-                        colors={['var(--mint-9)', 'var(--amber-9)']} // Radix UI theme colors
+                        colors={['#86EAD4', '#FFC53D']} // Radix UI theme colors mint-9 & amber-9
                     />
-                    <Link to="/studio">
-                        <Button variant="solid" style={{display: tempPassword ? 'none' : 'block'}} color="mint" size="3">
-                            Start Creating
-                        </Button>
-                    </Link>
+                    <Flex direction="column" align="center" justify="center" gap="6">
+                        <Link to="/studio">
+                            <Button variant="solid" style={{ display: tempPassword ? 'none' : 'block' }} size="3">
+                                Start Creating
+                            </Button>
+                        </Link>
+                    </Flex>
                 </>
             )}
             {!loading && !verified && (
