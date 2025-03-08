@@ -130,21 +130,6 @@ export const JSONPaster = () => {
     setIsModalOpen(false);
   };
 
-  // Loading spinner SVG as a component
-  const SpinnerIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-      style={{ animation: 'spin 1s linear infinite' }}>
-      <style>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
-      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" opacity="0.25" />
-      <path opacity="0.75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-    </svg>
-  );
-
   // filter actions by type
   const actionsToUseForStats = parsedData && isValidActions(parsedData) ? parsedData : [];
   const authorActionsCount = filterAuthorActions(actionsToUseForStats).length;

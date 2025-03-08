@@ -18,7 +18,6 @@ module.exports = {
     author: `Chris Frewin <hi@fullstackcraft.com>`,
   },
   plugins: [
-    'gatsby-plugin-postcss',
     {
       resolve: `gatsby-plugin-manifest`,
       options: {

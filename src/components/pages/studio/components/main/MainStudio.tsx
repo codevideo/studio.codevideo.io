@@ -6,7 +6,6 @@ import {
   Card,
   Select,
 } from '@radix-ui/themes';
-import { AdvancedEditor } from '../../../../utils/AdvancedEditor/AdvancedEditor';
 import ToggleEditor from '../../../../utils/ToggleEditor/ToggleEditor';
 import { StudioNavigationButtons } from './StudioNavigationButtons';
 import { RecordingLogs } from '../footer/RecordingLogs';
@@ -23,6 +22,7 @@ import { useIsDesktop } from '../../../../../hooks/useIsDesktop';
 import { ExportDropdown } from '../../../../layout/sidebar/ExportDropdown';
 import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 import { ProjectInfoCard } from './ProjectInfoCard';
+import { CodeVideoIDE } from '@fullstackcraftllc/codevideo-ide-react'
 
 // TODO: ReactMediaRecorder works decently, but we will need user to 1. enable screen recording in browser, 2. allow microphone access, 3. go full full screen
 // this hook literally just records the entire browser screen, tabs and all
@@ -75,7 +75,7 @@ export function MainStudio() {
         }}
       >
         <StudioNavigationButtons />
-        {currentProject && clerk.loaded && <AdvancedEditor
+        {currentProject && clerk.loaded && <CodeVideoIDE
           theme={theme}
           project={currentProject.project}
           mode={mode}
@@ -141,7 +141,7 @@ export function MainStudio() {
             {/* Advanced Editor */}
             <Box style={{ height: '700px' }}>
               {currentProject && clerk.loaded &&
-                <AdvancedEditor
+                <CodeVideoIDE
                   theme={theme}
                   project={currentProject.project}
                   mode={mode}

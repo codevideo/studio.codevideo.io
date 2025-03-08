@@ -4,6 +4,7 @@ import mixpanel from 'mixpanel-browser';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { endTutorial } from '../../../store/tutorialSlice';
+import { useEffect, useState } from 'react';
 
 // the class names themselves do not need '.' in react, but in the steps below they do :)
 export const TutorialCSSClassConstants = {
@@ -28,6 +29,7 @@ export const TutorialCSSClassConstants = {
 export function StudioTutorial() {
     const { isTutorialRunning } = useAppSelector(state => state.tutorial);
     const dispatch = useAppDispatch();
+    const [isMounted, setIsMounted] = useState(false);
     const steps = [
         {
             target: `.${TutorialCSSClassConstants.HEADER_SELECTOR}`,
@@ -116,6 +118,16 @@ export function StudioTutorial() {
             disableBeacon: true,
         },
     ]
+
+    useEffect(() => {
+        setIsMounted(true);
+        return () => setIsMounted(false);
+    }, []);
+
+    // apparently joyride can't be hydrated properly with SSR
+    if (!isMounted) {
+        return null;
+    }
 
     return (
         <Joyride
