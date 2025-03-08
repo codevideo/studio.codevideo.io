@@ -487,11 +487,11 @@ export function ActionGUIEditor() {
             {/* series of clickable small badges which add their example action at the current index */}
             <Flex wrap="wrap" gap="1">
               <Text size="1" color="gray">Quick Add:</Text>
-              {quickActions.map(({ action, label, color }) => (
+              {quickActions.map(({ action, label, color }, index) => (
                 <Badge
                   style={{ cursor: 'pointer' }}
                   size="1"
-                  key={label}
+                  key={`${label}-${index}`}
                   color={color as any}
                   variant="soft"
                   onClick={() => {

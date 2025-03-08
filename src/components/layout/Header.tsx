@@ -7,7 +7,8 @@ import {
     IconButton,
     Text,
     Card,
-    Link as RadixLink
+    Link as RadixLink,
+    Badge
 } from '@radix-ui/themes';
 import { HamburgerMenuIcon, PersonIcon } from '@radix-ui/react-icons';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -81,13 +82,14 @@ export function Header() {
                         </a>
 
                         <SignedOut>
-                            <Button
-                                size="1"
+                            <Badge
+                                style={{ display: isDesktop ? 'inline-block' : 'none', cursor: 'pointer' }}
+                                size="2"
                                 variant="soft"
                                 color="mint"
                             >
                                 <SignInButton />
-                            </Button>
+                            </Badge>
                         </SignedOut>
 
                         <SignedIn>

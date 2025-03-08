@@ -1,6 +1,5 @@
 import * as React from "react";
-import Editor, { Monaco, loader } from "@monaco-editor/react";
-import Monokai from "monaco-themes/themes/Monokai.json";
+import Editor, { Monaco } from "@monaco-editor/react";
 import * as monaco from "monaco-editor";
 import { useRef } from "react";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
@@ -8,9 +7,6 @@ import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { setDraftActionsString } from "../../../../store/editorSlice";
 import { Flex } from '@radix-ui/themes';
 import { useClerk } from "@clerk/clerk-react";
-
-// use local static files
-loader.config({ paths: { vs: "/vs" } });
 
 export function ActionJsonEditor() {
   const { actionsString } = useAppSelector((state) => state.editor);
@@ -25,20 +21,20 @@ export function ActionJsonEditor() {
   ) => {
     editorRef.current = _editor;
 
-    monaco.editor.defineTheme(
-      "Monokai",
-      Monokai as monaco.editor.IStandaloneThemeData
-    );
-    setTimeout(() => {
-      monaco.editor.setTheme('Monokai');
-    }, 1);
+    // monaco.editor.defineTheme(
+    //   "Monokai",
+    //   Monokai as monaco.editor.IStandaloneThemeData
+    // );
+    // setTimeout(() => {
+    //   monaco.editor.setTheme('Monokai');
+    // }, 1);
   };
 
   const editor = (
     <Flex 
       direction="column" style={{ height: "600px"}}>
       {clerk.loaded && <Editor
-        theme={theme}
+        theme={theme === "light" ? "vs" : "vs-dark"}
         path={"json/"}
         height="100%"
         defaultLanguage={"json"}

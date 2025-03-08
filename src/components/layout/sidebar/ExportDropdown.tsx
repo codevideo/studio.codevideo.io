@@ -9,7 +9,7 @@ import {
   Text
 } from '@radix-ui/themes';
 import mixpanel from "mixpanel-browser";
-import { SignUp, useAuth, useSignIn, useUser } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useGifRecorder } from '../../../hooks/useGifRecorder';
@@ -25,7 +25,7 @@ import { TokenCosts } from '../../../constants/TokenCosts';
 export const ExportDropdown = () => {
   const { projects, currentProjectIndex, isPlaying } = useAppSelector(state => state.editor);
   const [isExporting, setIsExporting] = useState(false);
-  const [exportType, setExportType] = useState<ExportType | '' | 'gif'>('');
+  const [exportType, setExportType] = useState<ExportType | 'gif'>('json');
   const [exportComplete, setExportComplete] = useState(false);
   const dispatch = useAppDispatch();
   const { getToken } = useAuth()
@@ -51,7 +51,7 @@ export const ExportDropdown = () => {
   const project = projects[currentProjectIndex]?.project;
   
   const handleExportChange = (value: string) => {
-    setExportType(value as ExportType | '');
+    setExportType(value as ExportType);
     setExportComplete(false);
   };
   
@@ -137,10 +137,9 @@ export const ExportDropdown = () => {
         >
           <Select.Trigger 
             variant="surface" 
-            placeholder="Select..."
           />
           <Select.Content>
-          <Select.Item value="json">JSON</Select.Item>
+            <Select.Item value="json">JSON</Select.Item>
             <Select.Item value="markdown">Markdown</Select.Item>
             <Select.Item value="gif">GIF (Slow)</Select.Item>
             <Select.Item value="html">HTML</Select.Item>

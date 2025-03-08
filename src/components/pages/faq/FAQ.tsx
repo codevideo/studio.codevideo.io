@@ -118,7 +118,7 @@ export function FAQs(props: IFAQsProps) {
                         How long does a token last?
                     </Heading>
                     <Text size="3">
-                        Tokens never expire: Monthly subscription tokens roll over at the end of your billing cycle. Even when you already have a subscription, you can purchase additional Pay-as-you-go tokens as needed.
+                        Tokens never expire: tokens from monthly subscriptions roll over at the end of each billing cycle. Even when you already have a subscription, you can always purchase additional tokens if you are running low.
                     </Text>
                 </Box>
 
