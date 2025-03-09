@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ExportType, Project } from '@fullstackcraftllc/codevideo-types';
-import { exportProject } from '@fullstackcraftllc/codevideo-doc-gen';
+import { ExportType } from '@fullstackcraftllc/codevideo-types';
+import { exportProject } from '@fullstackcraftllc/codevideo-exporters';
 import { 
   Flex, 
   Box, 
@@ -18,9 +18,6 @@ import { decrementTokens } from '../../../utils/api/decrementTokens';
 import { setShowSignUpOverlay } from '../../../store/authSlice';
 import { addToast } from '../../../store/toastSlice';
 import { TokenCosts } from '../../../constants/TokenCosts';
-
-
-
 
 export const ExportDropdown = () => {
   const { projects, currentProjectIndex, isPlaying } = useAppSelector(state => state.editor);
@@ -142,9 +139,11 @@ export const ExportDropdown = () => {
             <Select.Item value="json">JSON</Select.Item>
             <Select.Item value="markdown">Markdown</Select.Item>
             <Select.Item value="gif">GIF (Slow)</Select.Item>
+            <Select.Item value="zip">ZIP</Select.Item>
             <Select.Item value="html">HTML</Select.Item>
             <Select.Item value="pdf">PDF</Select.Item>
-            <Select.Item value="zip">ZIP</Select.Item>
+            <Select.Item value="tsx">TSX</Select.Item>
+            <Select.Item value="jsx">JSX</Select.Item>
             <Select.Item value="pptx">PPTX (Beta)</Select.Item>
             {/* TODO: finish that damn API and activate! */}
             {/* <Select.Item value="mp4">Video (Beta)</Select.Item> */}

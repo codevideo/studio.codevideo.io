@@ -1,3 +1,6 @@
-export const formatNameToSafeId = (name: string) => {
-    return name.toLowerCase().replace(/\s/g, '-');
+export const formatNameToSafeId = (name: string | undefined) => {
+  if (!name) {
+    return '';
   }
+  return name.toLowerCase().replace(/\s/g, '-');
+}
