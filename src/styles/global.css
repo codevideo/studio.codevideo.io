@@ -28,21 +28,3 @@
         background-color: var(--mint-2);
     }
 }
-
-.highlight-animation {
-    animation: highlightCard 1.5s ease;
-}
-
-.no-mouse {
-    pointer-events: none;
-    cursor: default;
-    user-select: none;
-}
-
-.display-none {
-    display: none;
-}
-
-.display-block {
-    display: block;
-}

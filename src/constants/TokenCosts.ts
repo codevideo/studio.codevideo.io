@@ -7,7 +7,8 @@ export const TokenCosts = {
     'gif': 1,
     'html': 2,
     'pdf': 3,
-    'react': 4,
+    'tsx': 4,
+    'jsx': 4,
     'pptx': 6,
     'mp4': 10,
   };

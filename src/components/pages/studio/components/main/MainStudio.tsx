@@ -85,7 +85,9 @@ export function MainStudio() {
           currentActionIndex={currentActionIndex}
           currentLessonIndex={currentLessonIndex}
           isSoundOn={isSoundOn}
+          withCaptions={true}
           actionFinishedCallback={goToNextAction}
+          speakActionAudios={[]}
         />}
       </Box>
     );
@@ -151,7 +153,9 @@ export function MainStudio() {
                   currentActionIndex={currentActionIndex}
                   currentLessonIndex={currentLessonIndex}
                   isSoundOn={isSoundOn}
+                  withCaptions={true}
                   actionFinishedCallback={goToNextAction}
+                  speakActionAudios={[]}
                 />
               }
               {/* Sound Toggle Button */}
