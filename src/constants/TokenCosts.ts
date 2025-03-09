@@ -4,6 +4,7 @@ export const TokenCosts = {
     'markdown': 0,
     'complex-markdown': 1,
     'zip': 1,
+    'png': 1,
     'gif': 1,
     'html': 2,
     'pdf': 3,

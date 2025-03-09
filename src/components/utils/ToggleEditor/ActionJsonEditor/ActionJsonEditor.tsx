@@ -14,7 +14,7 @@ export function ActionJsonEditor() {
   const dispatch = useAppDispatch();
   // can't render the monaco editor until clerk is loaded - see https://github.com/clerk/javascript/issues/1643
   const clerk = useClerk();
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
+  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>(undefined);
   const handleOnMount = (
     _editor: monaco.editor.IStandaloneCodeEditor,
     monaco: Monaco
