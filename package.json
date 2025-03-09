@@ -17,8 +17,8 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
     "@clerk/elements": "^0.23.1",
-    "@fullstackcraftllc/codevideo-doc-gen": "^0.0.13",
-    "@fullstackcraftllc/codevideo-ide-react": "^0.0.3",
+    "@fullstackcraftllc/codevideo-exporters": "^0.0.1",
+    "@fullstackcraftllc/codevideo-ide-react": "^0.0.12",
     "@fullstackcraftllc/codevideo-types": "^2.0.32",
     "@fullstackcraftllc/codevideo-virtual-ide": "^1.0.11",
     "@monaco-editor/react": "^4.6.0",

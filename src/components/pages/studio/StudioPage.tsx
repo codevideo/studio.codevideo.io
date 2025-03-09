@@ -8,7 +8,6 @@ import { LessonMetadataForm } from '../../layout/sidebar/LessonMetadataForm';
 export function StudioPage() {
     const { locationInStudio: createNewStep } = useAppSelector(state => state.editor);
 
-
     // currently in unselected mode, show start overlay
     if (createNewStep === 'select') {
         return <CreateNewOverlay />

@@ -3,7 +3,6 @@ import { IAction, ICourse, ILesson, isValidActions, isCourse, isLesson, Project,
 import { createSlice } from "@reduxjs/toolkit";
 import { pythonPrintExample } from "../components/pages/studio/examples/how-to-print-stuff/pythonPrintExample";
 import { persistProjectsToLocalStorage } from "../utils/persistence/persistProjectsToLocalStorage";
-import { fallbackProjects } from "../utils/persistence/loadProjectsFromLocalStorage";
 
 export interface UserProject {
     projectType: ProjectType

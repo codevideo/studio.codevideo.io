@@ -25,18 +25,12 @@ import { TokensButton } from '../../utils/Buttons/TokensButton';
 import { TutorialButton } from '../../utils/Buttons/TutorialButton';
 import { WhitepaperButton } from '../../utils/Buttons/WhitepaperButton';
 
-
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
 
     const onCreateNewProject = () => {
         dispatch(setLocationInStudio('select'));
-        dispatch(setIsSidebarOpen(false));
-    }
-
-    const onClickStartTutorial = () => {
-        dispatch(startTutorial());
         dispatch(setIsSidebarOpen(false));
     }
 

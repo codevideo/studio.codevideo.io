@@ -84,7 +84,8 @@ export const AccountPage = () => {
 
   const htmlsLeft = Math.floor(userData.tokens/TokenCosts['html'])
   const pdfsLeft = Math.floor(userData.tokens/TokenCosts['pdf'])
-  const reactsLeft = Math.floor(userData.tokens/TokenCosts['react'])
+  const tsxsLeft = Math.floor(userData.tokens/TokenCosts['tsx'])
+  const jsxsLeft = Math.floor(userData.tokens/TokenCosts['jsx'])
   const advancedMarkdownsLeft = Math.floor(userData.tokens/TokenCosts['complex-markdown'])
   const videoGenerationsLeft = Math.floor(userData.tokens/TokenCosts['mp4'])
   const pptxsLeft = Math.floor(userData.tokens/TokenCosts['pptx'])
@@ -92,7 +93,8 @@ export const AccountPage = () => {
   const videosPer10 = Math.floor(10/TokenCosts['mp4'])
   const pptxPer10 = Math.floor(10/TokenCosts['pptx'])
   const pdfPer10 = Math.floor(10/TokenCosts['pdf'])
-  const reactPer10 = Math.floor(10/TokenCosts['react'])
+  const tsxPer10 = Math.floor(10/TokenCosts['tsx'])
+  const jsxPer10 = Math.floor(10/TokenCosts['jsx'])
   const htmlPer10 = Math.floor(10/TokenCosts['html'])
   const advancedMarkdownPer10 = Math.floor(10/TokenCosts['complex-markdown'])
 
@@ -132,7 +134,8 @@ export const AccountPage = () => {
             <Text size="1" color="gray">~{advancedMarkdownsLeft} Advanced markdown generations</Text>
             <Text size="1" color="gray">~{htmlsLeft} HTML generations</Text>
             <Text size="1" color="gray">~{pdfsLeft} PDF generations</Text>
-            <Text size="1" color="gray">~{reactsLeft} Interactive React page generations</Text>
+            <Text size="1" color="gray">~{tsxsLeft} Interactive React TypeScript (TSX) page generations</Text>
+            <Text size="1" color="gray">~{jsxsLeft} Interactive React (JSX) page generations</Text>
             <Text size="1" color="gray">~{pptxsLeft} Powerpoint generations</Text>
             <Text size="1" color="gray">~{videoGenerationsLeft} Video generations</Text>
 
@@ -155,7 +158,8 @@ export const AccountPage = () => {
                   {advancedMarkdownPer10} Advanced Markdown<br />
                   {htmlPer10} HTML<br />
                   {pdfPer10} PDF<br />
-                  {reactPer10} React<br />
+                  {tsxPer10} TSX (React TypeScript)<br />
+                  {jsxPer10} JSX (React)<br />
                   {pptxPer10} Powerpoint<br />
                   {videosPer10} Video<br />
                   <br />
