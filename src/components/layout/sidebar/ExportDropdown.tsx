@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ExportType } from '@fullstackcraftllc/codevideo-types';
-import { exportProject } from '@fullstackcraftllc/codevideo-exporters';
+import { ExportType, extractActionsFromProject } from '@fullstackcraftllc/codevideo-types';
+import { exportProject, generatePngsFromActions } from '@fullstackcraftllc/codevideo-exporters';
 import { 
   Flex, 
   Box, 
@@ -18,9 +18,11 @@ import { decrementTokens } from '../../../utils/api/decrementTokens';
 import { setShowSignUpOverlay } from '../../../store/authSlice';
 import { addToast } from '../../../store/toastSlice';
 import { TokenCosts } from '../../../constants/TokenCosts';
+import { CODEVIDEO_IDE_ID } from '@fullstackcraftllc/codevideo-ide-react';
+import { renderCodeVideoIDEToHtmlStringAtActionIndex } from '../../../utils/renderCodeVideoIDEToHtmlStringAtActionIndex';
 
 export const ExportDropdown = () => {
-  const { projects, currentProjectIndex, isPlaying } = useAppSelector(state => state.editor);
+  const { projects, currentProjectIndex, currentLessonIndex, isPlaying } = useAppSelector(state => state.editor);
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState<ExportType | 'gif'>('json');
   const [exportComplete, setExportComplete] = useState(false);
@@ -36,7 +38,7 @@ export const ExportDropdown = () => {
   }, [exportComplete]);
 
   // if we are in gifmode, start recording
-  const { progress } = useGifRecorder('advanced-editor', exportType === 'gif' && isPlaying, 100)
+  const { progress } = useGifRecorder(CODEVIDEO_IDE_ID, exportType === 'gif' && isPlaying, 100)
 
   useEffect(() => {
     if (progress === 100) {
@@ -103,6 +105,17 @@ export const ExportDropdown = () => {
       dispatch(setIsPlaying(true));
       setIsExporting(true);
       return;
+    }
+
+    if (exportType === 'png') {
+      // png export is also slightly different, generate an html string for CodeVideo at every action
+      const htmlStrings = [];
+      const actions = extractActionsFromProject(project, currentLessonIndex);
+      for (let i = 0; i < actions.length; i++) {
+        const htmlString = renderCodeVideoIDEToHtmlStringAtActionIndex(project, i);
+        htmlStrings.push(htmlString);
+      }
+      await generatePngsFromActions(htmlStrings);
     }
 
     setIsExporting(true);

@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react'
 
 export const useDebounce = (callback: (...args: Array<any>) => void, wait: number) => {
   // track args & timeout handle between calls
-  const argsRef = useRef<Array<any>>()
-  const timeout = useRef<ReturnType<typeof setTimeout>>()
+  const argsRef = useRef<Array<any>>(undefined)
+  const timeout = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const clearTimer = () => {
     if (timeout.current) {
