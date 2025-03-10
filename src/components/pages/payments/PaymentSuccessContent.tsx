@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Text, Link as RadixLink, Flex, Card } from '@radix-ui/themes';
 import Confetti from 'react-confetti';
-import { useUser } from '@clerk/clerk-react';
 import { Link } from 'gatsby';
 import { setShowSignInOverlay } from '../../../store/authSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import mixpanel from 'mixpanel-browser';
 
 interface IPaymentSuccessContentProps {
     tier: string; // e.g. "starter", "creator", "enterprise", "topup", "lifetime"
@@ -13,18 +13,16 @@ interface IPaymentSuccessContentProps {
 export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
     const { tier } = props;
     const dispatch = useAppDispatch();
-    const { user, isLoaded } = useUser();
     const [loading, setLoading] = useState(true);
     const [verified, setVerified] = useState(false);
     const [email, setEmail] = useState<string | null>(null);
     const [tempPassword, setTempPassword] = useState<string | null>(null);
     const [passwordCopied, setPasswordCopied] = useState(false);
 
-    const verifyPayment = async (clerkUserId: string, stripeSessionId: string, product: string) => {
+    const verifyPayment = async (stripeSessionId: string, product: string) => {
         try {
             // Build the payload.
             const payload = {
-                clerkUserId,
                 stripeSessionId,
                 product,
             };
@@ -39,12 +37,14 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
             });
 
             if (!res.ok) {
+                mixpanel.track('Payment Verification Error Studio', { tier, status: res.status, statusText: res.statusText });
                 // Get the error response text to help with debugging
                 const errorText = await res.text();
                 console.error('Payment verification error response:', errorText);
                 throw new Error(`Payment verification failed: ${res.status} ${res.statusText}`);
             }
 
+            mixpanel.track('Payment Verified Studio', { tier });
             const data = await res.json();
             setVerified(true);
             if (data.email) {
@@ -60,8 +60,10 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
         }
     };
 
+    // on mount with tier, verify the payment
     useEffect(() => {
-        if (typeof window === 'undefined' || !isLoaded) return;
+        if (typeof window === 'undefined') return;
+        mixpanel.track('Payment Success Page Viewed', { tier });
 
         // Parse the URL query parameters.
         const searchParams = new URLSearchParams(window.location.search);
@@ -74,7 +76,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
 
         const handlePaymentVerification = async () => {
             try {
-                await verifyPayment(user?.id || '', stripeSessionId, tier);
+                await verifyPayment(stripeSessionId, tier);
             } catch (error) {
                 // Error is already logged in verifyPayment
             } finally {
@@ -83,7 +85,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
         };
 
         handlePaymentVerification();
-    }, [isLoaded, user, tier]);
+    }, [tier]);
 
     const formatTierName = () => {
         switch (tier) {
@@ -94,7 +96,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
             case 'enterprise':
                 return 'Enterprise subscription';
             case 'topup':
-                return 'New tokens';
+                return 'token top up';
             case 'lifetime':
                 return 'CodeVideo Lifetime License';
             default:
@@ -118,7 +120,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
     const copyPasswordButtonText = passwordCopied ? 'Copied!' : 'Copy Password';
 
     return (
-        <Box mt="9" style={{ textAlign: 'center', padding: '2rem', height: '80vh' }}>
+        <Box mt="9" style={{ textAlign: 'center', height: '80vh' }}>
             {loading && (
                 <Text size="3" style={{ marginBottom: '1rem' }}>
                     Verifying your payment...
@@ -150,7 +152,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                         <Text size="4" style={{ marginBottom: '1rem' }}>
                             {tier === 'starter' || tier === 'creator' || tier === 'enterprise'
                                 ? `Your ${formattedTier} is active!`
-                                : `Your ${formattedTier} have been applied to your account!`}
+                                : `Your ${formattedTier} has been applied to your account!`}
                         </Text>
                     )}
                     <Confetti

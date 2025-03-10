@@ -15,9 +15,25 @@ import (
 	"github.com/clerk/clerk-sdk-go/v2/user"
 )
 
+var TokenCosts = map[string]int{
+	"":                 0,
+	"json":             0,
+	"markdown":         0,
+	"complex-markdown": 1,
+	"zip":              1,
+	"png":              1,
+	"gif":              1,
+	"html":             2,
+	"pdf":              3,
+	"tsx":              4,
+	"jsx":              4,
+	"pptx":             6,
+	"mp4":              10,
+}
+
 type DecrementRequest struct {
-	ClerkUserToken  string `json:"clerkUserToken"`
-	DecrementAmount int    `json:"decrementAmount"`
+	ClerkUserToken string `json:"clerkUserToken"`
+	ExportType     string `json:"exportType"`
 }
 
 // TODO: this is probably suboptimal, clerk probably has a better way to extract the sub
@@ -68,7 +84,15 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	if decReq.ClerkUserToken == "" {
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Missing clerkUserToken"}, nil
 	}
-	if decReq.DecrementAmount <= 0 {
+	// Validate the export type and get the decrement amount
+	decrementAmount, ok := TokenCosts[decReq.ExportType]
+	if !ok {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 400,
+			Body:       "Invalid export type",
+		}, nil
+	}
+	if decrementAmount <= 0 {
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Invalid tokens value"}, nil
 	}
 
@@ -107,11 +131,11 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		}
 	}
 
-	if currentTokens < decReq.DecrementAmount {
+	if currentTokens < decrementAmount {
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Insufficient tokens"}, nil
 	}
 
-	newTokens := currentTokens - decReq.DecrementAmount
+	newTokens := currentTokens - decrementAmount
 	metadata, _ := json.Marshal(map[string]interface{}{"tokens": newTokens})
 	params := user.UpdateMetadataParams{
 		PublicMetadata: (*json.RawMessage)(&metadata),

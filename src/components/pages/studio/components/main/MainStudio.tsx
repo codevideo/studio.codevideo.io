@@ -11,7 +11,7 @@ import { StudioNavigationButtons } from './StudioNavigationButtons';
 import { RecordingLogs } from '../footer/RecordingLogs';
 import { VideoTimeEstimationsAndStats } from '../footer/VideoTimeEstimationsAndStats';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GUIMode, isCourse } from '@fullstackcraftllc/codevideo-types';
 import { VirtualLayerLogs } from '../footer/VirtualLayerLogs';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
@@ -23,6 +23,7 @@ import { ExportDropdown } from '../../../../layout/sidebar/ExportDropdown';
 import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 import { ProjectInfoCard } from './ProjectInfoCard';
 import { CodeVideoIDE } from '@fullstackcraftllc/codevideo-ide-react'
+import mixpanel from 'mixpanel-browser';
 
 // TODO: ReactMediaRecorder works decently, but we will need user to 1. enable screen recording in browser, 2. allow microphone access, 3. go full full screen
 // this hook literally just records the entire browser screen, tabs and all
@@ -56,6 +57,11 @@ export function MainStudio() {
       }
     }
   }
+
+  // on mount track in mixpanel
+  useEffect(() => {
+    mixpanel.track('MainStudio Page View');
+  }, []);
 
   let mode: GUIMode = 'step'
   if (isPlaying) {

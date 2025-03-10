@@ -4,6 +4,8 @@ import { useEffect, useState } from 'react';
 import { resolveTokensColor } from '../../utils/resolveTokensColor';
 import { useUser } from '@clerk/clerk-react';
 import { useAppSelector } from '../../hooks/useAppSelector';
+import { BuyTokensButton } from './Buttons/BuyTokensButton';
+import { Link } from 'gatsby';
 
 export function TokenCountBadge() {
     const { tokenRefresh } = useAppSelector(state => state.auth);
@@ -21,10 +23,17 @@ export function TokenCountBadge() {
     }, [user]);
 
     return (
-        <Badge size="2" color="amber">
-            <Text size="1" color="amber">Tokens:
-                <Text ml="1" weight="bold" color={tokensColor}>{tokens}</Text>
-            </Text>
-        </Badge>
+        <>
+            <Link to="/account">
+                <Badge size="2" color="amber">
+                    <Text size="1" color="amber">Tokens:
+                        <Text ml="1" weight="bold" color={tokensColor}>{tokens}</Text>
+                    </Text>
+                </Badge>
+            </Link>
+            {tokens === 0 && (
+                <BuyTokensButton />
+            )}
+        </>
     );
 }

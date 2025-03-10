@@ -9,12 +9,18 @@ export const fallbackProjects: Array<UserProject> = [{
     modified: new Date().toISOString(),
 }];
 
-export const loadProjectsFromLocalStorage = () => {
+export const loadProjectsFromLocalStorage = (): Array<UserProject> => {
     try {
         const parsedProjects = JSON.parse(localStorage.getItem(CODEVIDEO_PROJECTS) || '[]');
         if (!Array.isArray(parsedProjects)) {
             throw new Error('Invalid projects in local storage');
         }
+
+        if (parsedProjects.length === 0) {
+            console.log('No projects found in local storage, using fallback projects');
+            return fallbackProjects;
+        }
+
         return parsedProjects;
     }
     catch (e) {

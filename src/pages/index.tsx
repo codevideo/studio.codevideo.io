@@ -15,6 +15,7 @@ export default function Studio() {
   useEffect(() => {
     console.log('loading projects from local storage');
     const projects = loadProjectsFromLocalStorage();
+    console.log('loaded projects:', projects);
     dispatch(setProjects(projects));
   }, [])
 

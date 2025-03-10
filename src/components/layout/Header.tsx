@@ -93,11 +93,10 @@ export function Header() {
                         </SignedOut>
 
                         <SignedIn>
-                            <Link to="/account">
-                                <TokenCountBadge />
-                            </Link>
+                            <TokenCountBadge />
                             <Link to="/account">
                                 <Button
+                                    style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none' }}
                                     size="1"
                                     variant="soft"
                                     color="mint"
@@ -106,7 +105,7 @@ export function Header() {
                                     Account
                                 </Button>
                             </Link>
-                        <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
+                            <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
 
                         </SignedIn>
                         <ThemeToggle />
