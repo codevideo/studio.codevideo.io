@@ -1,15 +1,16 @@
+import { ExportType } from "@fullstackcraftllc/codevideo-types";
 import { AppDispatch } from "../../store";
 import { signalTokenRefresh } from "../../store/authSlice";
 import { addToast } from "../../store/toastSlice";
 
-export const decrementTokens = async (clerkUserToken: string, decrementAmount: number, dispatch: AppDispatch) => {
+export const decrementTokens = async (clerkUserToken: string, exportType: ExportType, dispatch: AppDispatch) => {
     try {
         const response = await fetch("/.netlify/functions/decrementTokens", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ clerkUserToken, decrementAmount }),
+            body: JSON.stringify({ clerkUserToken, exportType }),
         });
 
         if (!response.ok) {
