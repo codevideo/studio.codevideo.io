@@ -6,6 +6,7 @@ import {
 } from '@radix-ui/react-icons';
 import { setIsSidebarOpen } from '../../../store/editorSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import mixpanel from 'mixpanel-browser';
 
 export interface ITokensButtonProps {
     style?: React.CSSProperties;
@@ -62,6 +63,7 @@ export function TokensButton(props: ITokensButtonProps) {
     }, [showReferralModal, isSignedIn, user]);
 
     const handleOnClickGetFreeTokens = () => {
+        mixpanel.track('Get Free Tokens Button Clicked Studio');
         dispatch(setIsSidebarOpen(false));
 
         // Always sign up for now, will be a no op for new tokens if they already have an account

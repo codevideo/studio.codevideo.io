@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ExportType, extractActionsFromProject } from '@fullstackcraftllc/codevideo-types';
 import { exportProject, generatePngsFromActions } from '@fullstackcraftllc/codevideo-exporters';
-import { 
-  Flex, 
-  Box, 
-  Button, 
+import {
+  Flex,
+  Box,
+  Button,
   Select,
   Text
 } from '@radix-ui/themes';
@@ -19,12 +19,15 @@ import { setShowSignUpOverlay } from '../../../store/authSlice';
 import { addToast } from '../../../store/toastSlice';
 import { TokenCosts } from '../../../constants/TokenCosts';
 import { CODEVIDEO_IDE_ID } from '@fullstackcraftllc/codevideo-ide-react';
-import { renderCodeVideoIDEToHtmlStringAtActionIndex } from '../../../utils/renderCodeVideoIDEToHtmlStringAtActionIndex';
+import { exportCodeVideoIDEToDataURL } from '../../../utils/renderCodeVideoIDEToHtmlStringAtActionIndex';
+import { set } from 'react-hook-form';
+import { sleep } from '../../../utils/sleep';
+import JSZip from 'jszip';
 
 export const ExportDropdown = () => {
   const { projects, currentProjectIndex, currentLessonIndex, isPlaying } = useAppSelector(state => state.editor);
   const [isExporting, setIsExporting] = useState(false);
-  const [exportType, setExportType] = useState<ExportType | 'gif'>('json');
+  const [exportType, setExportType] = useState<ExportType>('json');
   const [exportComplete, setExportComplete] = useState(false);
   const dispatch = useAppDispatch();
   const { getToken } = useAuth()
@@ -48,12 +51,12 @@ export const ExportDropdown = () => {
   }, [progress])
 
   const project = projects[currentProjectIndex]?.project;
-  
+
   const handleExportChange = (value: string) => {
     setExportType(value as ExportType);
     setExportComplete(false);
   };
-  
+
   const handleExport = async () => {
     if (!exportType) {
       console.error('No export type selected');
@@ -73,12 +76,12 @@ export const ExportDropdown = () => {
       setIsExporting(true);
       setExportComplete(false);
       try {
-        console.log('exporting project:', project, 'as', exportType);
+        // console.log('exporting project:', project, 'as', exportType);
         await exportProject(project, exportType);
         mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
         setExportComplete(true);
       } catch (error) {
-        console.error('Export failed:', error);
+        // console.error('Export failed:', error);
       } finally {
         setIsExporting(false);
       }
@@ -107,35 +110,83 @@ export const ExportDropdown = () => {
       return;
     }
 
+    // TODO: don't really like how much coupling there is here, but it works for now...
     if (exportType === 'png') {
       // png export is also slightly different, generate an html string for CodeVideo at every action
-      const htmlStrings = [];
+      const pngDataUrls = [];
       const actions = extractActionsFromProject(project, currentLessonIndex);
       for (let i = 0; i < actions.length; i++) {
-        const htmlString = renderCodeVideoIDEToHtmlStringAtActionIndex(project, i);
-        htmlStrings.push(htmlString);
+        dispatch(setCurrentActionIndex(i));
+        await sleep(100);
+        const canvasDataUrl = await exportCodeVideoIDEToDataURL();
+        if (canvasDataUrl) {
+          console.log("adding png to zip", i);
+          pngDataUrls.push(canvasDataUrl);
+        }
       }
-      await generatePngsFromActions(htmlStrings);
+      const zip = new JSZip();
+      // Add each PNG to the ZIP
+      for (let i = 0; i < pngDataUrls.length; i++) {
+        // Extract the base64 data from the data URL
+        const pngDataUrl = pngDataUrls[i];
+        if (!pngDataUrl) {
+          continue;
+        }
+        // Data URLs are formatted like: data:image/png;base64,BASE64_DATA
+        const base64Data = pngDataUrl.split(',')[1];
+        if (!base64Data) {
+          continue;
+        }
+
+        // Convert base64 to binary
+        const binaryData = atob(base64Data);
+
+        // Create a Uint8Array from the binary data
+        const bytes = new Uint8Array(binaryData.length);
+        for (let j = 0; j < binaryData.length; j++) {
+          bytes[j] = binaryData.charCodeAt(j);
+        }
+
+        // Add the PNG to the ZIP with a numbered filename
+        zip.file(`snapshot_${(i + 1).toString().padStart(3, '0')}.png`, bytes, { binary: true });
+      }
+
+      // Generate the ZIP file as a blob
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      // trigger download
+      const downloadUrl = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `codevideo-pngs.zip`;
+      a.click();
+      URL.revokeObjectURL(downloadUrl);
+      return;
     }
 
     setIsExporting(true);
     setExportComplete(false);
-    
+
     try {
-      console.log('exporting project:', project, 'as', exportType);
       await exportProject(project, exportType);
       mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
       setExportComplete(true);
 
       // decrement tokens
-      await decrementTokens(token, TokenCosts[exportType], dispatch);
+      await decrementTokens(token, exportType, dispatch);
     } catch (error) {
       console.error('Export failed:', error);
     } finally {
       setIsExporting(false);
     }
   };
-  
+
+  // console.log('exportType:', exportType);
+  // console.log('isExporting:', isExporting);
+  // console.log('exportComplete:', exportComplete);
+  // console.log('progress:', progress);
+  // console.log('project:', project);
+
   return (
     <Flex align="center" justify="between" gap="2">
       <Box>
@@ -145,8 +196,8 @@ export const ExportDropdown = () => {
           onValueChange={handleExportChange}
           disabled={isExporting}
         >
-          <Select.Trigger 
-            variant="surface" 
+          <Select.Trigger
+            variant="surface"
           />
           <Select.Content>
             <Select.Item value="json">JSON</Select.Item>
@@ -158,6 +209,7 @@ export const ExportDropdown = () => {
             <Select.Item value="tsx">TSX</Select.Item>
             <Select.Item value="jsx">JSX</Select.Item>
             <Select.Item value="pptx">PPTX (Beta)</Select.Item>
+            <Select.Item value="png">PNGs (Beta)</Select.Item>
             {/* TODO: finish that damn API and activate! */}
             {/* <Select.Item value="mp4">Video (Beta)</Select.Item> */}
           </Select.Content>
@@ -167,13 +219,26 @@ export const ExportDropdown = () => {
       {exportType === 'gif' && isExporting && (
         <Text color='mint' size="1" ml="2">{progress === 0 ? 'Recording playback...' : `Building gif ... ${progress}% done`}</Text>
       )}
-      <Button
-        onClick={handleExport}
-        disabled={!exportType || isExporting || !project}
-        variant="solid"
-        color="mint"
-      >
-        {isExporting ? (
+      {/* Default Export Button (renders when !isExporting && !exportComplete) */}
+      {!isExporting && !exportComplete && (
+        <Button
+          onClick={handleExport}
+          disabled={!exportType || !project}
+          variant="solid"
+          color="mint"
+        >
+          Export!
+        </Button>
+      )}
+
+      {/* Loading Export Button (renders when isExporting is true) */}
+      {isExporting && (
+        <Button
+          onClick={handleExport}
+          disabled={true}
+          variant="solid"
+          color="mint"
+        >
           <Flex align="center">
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -181,17 +246,25 @@ export const ExportDropdown = () => {
             </svg>
             Exporting...
           </Flex>
-        ) : exportComplete ? (
+        </Button>
+      )}
+
+      {/* Completed Export Button (renders when !isExporting && exportComplete) */}
+      {!isExporting && exportComplete && (
+        <Button
+          onClick={handleExport}
+          disabled={!exportType || !project}
+          variant="solid"
+          color="mint"
+        >
           <Flex align="center">
             <svg className="h-4 w-4 mr-1 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
             Exported!
           </Flex>
-        ) : (
-          'Export!'
-        )}
-      </Button>
+        </Button>
+      )}
     </Flex>
   );
 };

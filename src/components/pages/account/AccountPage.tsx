@@ -17,6 +17,8 @@ import {
 import { Link } from 'gatsby';
 import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { TokenCosts } from '../../../constants/TokenCosts';
+import mixpanel from 'mixpanel-browser';
+import { BuyTokensButton } from '../../utils/Buttons/BuyTokensButton';
 
 export interface ClerkMetadata {
   tokens: number;
@@ -67,7 +69,20 @@ export const AccountPage = () => {
     };
   };
 
+  const onClickSupportOrFeature = () => {
+    mixpanel.track('Clicked Support or Feature Request Studio');
+  }
+
+  const handleOnClickBuy = (plan: string) => {
+    mixpanel.track('Clicked Buy Plan on Account Page Studio', { plan });
+  }
+
+  const onClickManageInStripe = () => {
+    mixpanel.track('Clicked Manage in Stripe Studio');
+  }
+
   const onClickLogout = () => {
+    mixpanel.track('Clicked Logout Studio');
     signOut();
   }
 
@@ -82,51 +97,41 @@ export const AccountPage = () => {
 
   const userData = getUserData();
 
-  const htmlsLeft = Math.floor(userData.tokens/TokenCosts['html'])
-  const pdfsLeft = Math.floor(userData.tokens/TokenCosts['pdf'])
-  const tsxsLeft = Math.floor(userData.tokens/TokenCosts['tsx'])
-  const jsxsLeft = Math.floor(userData.tokens/TokenCosts['jsx'])
-  const advancedMarkdownsLeft = Math.floor(userData.tokens/TokenCosts['complex-markdown'])
-  const videoGenerationsLeft = Math.floor(userData.tokens/TokenCosts['mp4'])
-  const pptxsLeft = Math.floor(userData.tokens/TokenCosts['pptx'])
+  const htmlsLeft = Math.floor(userData.tokens / TokenCosts['html'])
+  const pdfsLeft = Math.floor(userData.tokens / TokenCosts['pdf'])
+  const tsxsLeft = Math.floor(userData.tokens / TokenCosts['tsx'])
+  const jsxsLeft = Math.floor(userData.tokens / TokenCosts['jsx'])
+  const advancedMarkdownsLeft = Math.floor(userData.tokens / TokenCosts['complex-markdown'])
+  const videoGenerationsLeft = Math.floor(userData.tokens / TokenCosts['mp4'])
+  const pptxsLeft = Math.floor(userData.tokens / TokenCosts['pptx'])
 
-  const videosPer10 = Math.floor(10/TokenCosts['mp4'])
-  const pptxPer10 = Math.floor(10/TokenCosts['pptx'])
-  const pdfPer10 = Math.floor(10/TokenCosts['pdf'])
-  const tsxPer10 = Math.floor(10/TokenCosts['tsx'])
-  const jsxPer10 = Math.floor(10/TokenCosts['jsx'])
-  const htmlPer10 = Math.floor(10/TokenCosts['html'])
-  const advancedMarkdownPer10 = Math.floor(10/TokenCosts['complex-markdown'])
+  const videosPer10 = Math.floor(10 / TokenCosts['mp4'])
+  const pptxPer10 = Math.floor(10 / TokenCosts['pptx'])
+  const pdfPer10 = Math.floor(10 / TokenCosts['pdf'])
+  const tsxPer10 = Math.floor(10 / TokenCosts['tsx'])
+  const jsxPer10 = Math.floor(10 / TokenCosts['jsx'])
+  const htmlPer10 = Math.floor(10 / TokenCosts['html'])
+  const advancedMarkdownPer10 = Math.floor(10 / TokenCosts['complex-markdown'])
 
-  console.log('userData', userData);
+  // console.log('userData', userData);
 
   return (
     <Box mt="4" p="1" pt="9">
       <SignedIn>
-        <Card size="1">
+        <Card size="1" mb="3">
           <Flex direction="column" gap="2">
             <Text size="1" color="gray">Your Account</Text>
-
             {user && (
               <Flex align="center" gap="2">
                 <UserButton />
                 <Text size="1">{user.primaryEmailAddress?.emailAddress}</Text>
               </Flex>
             )}
-
-            <Separator size="1" my="2" />
-
-            <Text size="1" color="gray">Contact</Text>
-            <Flex direction="column" gap="1">
-              <Box>
-                <Link to="/contact">
-                  <Button size="1" color="mint" ml="1">Support or Feature Request</Button>
-                </Link>
-              </Box>
-            </Flex>
-
-            <Separator size="1" my="2" />
-
+          </Flex>
+        </Card>
+        
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
             <Text size="1" color="gray">Available tokens</Text>
             <Flex align="center" gap="1" mx="1">
               <TokenCountBadge />
@@ -138,17 +143,15 @@ export const AccountPage = () => {
             <Text size="1" color="gray">~{jsxsLeft} Interactive React (JSX) page generations</Text>
             <Text size="1" color="gray">~{pptxsLeft} Powerpoint generations</Text>
             <Text size="1" color="gray">~{videoGenerationsLeft} Video generations</Text>
-
-            <Separator size="1" my="2" />
-
+          </Flex>
+        </Card>
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
             <Text size="1" color="gray">Add more tokens</Text>
             <Text size="1" color="gray">10 tokens per $2</Text>
-
             <Flex direction="column" gap="1">
               <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_TOPUP_PAYMENT_LINK}>
-                  <Button size="1" color="mint" ml="1">Buy Tokens</Button>
-                </RadixLink>
+                <BuyTokensButton />
               </Box>
               {/* Info icon with tooltip for generations per token */}
               <Flex>
@@ -170,11 +173,12 @@ export const AccountPage = () => {
                   </Box>
                 </Tooltip>
               </Flex>
-
             </Flex>
+          </Flex>
+        </Card>
 
-            <Separator size="1" my="2" />
-
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
             <Text size="1" color="gray">Plan</Text>
             <Flex align="center" gap="2" wrap="wrap">
               <Text color="mint" size="1" weight="bold">{userData.subscriptionPlan}</Text>
@@ -186,66 +190,85 @@ export const AccountPage = () => {
                   {subscriptionPlansToMonthlyTokens(userData.subscriptionPlan)} tokens/month
                 </Badge>
               )}
-              {userData.subscriptionPlan !== 'No plan found' && 
-              <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK}>
-              <Button size="1" variant="soft" color="red">
-                Cancel
-              </Button></RadixLink>}
+              {userData.subscriptionPlan !== 'No plan found' &&
+                <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK}>
+                  <Button size="1" variant="soft" color="red">
+                    Cancel
+                  </Button>
+                </RadixLink>}
             </Flex>
+          </Flex>
+        </Card>
 
-            <Separator size="1" my="2" />
-
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
             <Text size="1" color="gray">Change Plan</Text>
-
             <Flex direction="column" gap="1">
               {userData.subscriptionPlan !== 'starter' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_STARTER_PAYMENT_LINK}>
-                  <Button size="1" color="mint">Buy Starter</Button>
+                <RadixLink href={process.env.GATSBY_STRIPE_STARTER_PAYMENT_LINK} target="_blank">
+                  <Button size="1" onClick={() => handleOnClickBuy("Starter")} color="mint">Buy Starter</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">50 tokens for $10 / mo.</Text>
               </Box>}
               {userData.subscriptionPlan !== 'creator' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_CREATOR_PAYMENT_LINK}>
-                  <Button size="1" color="mint">Buy Creator</Button>
+                <RadixLink href={process.env.GATSBY_STRIPE_CREATOR_PAYMENT_LINK} target="_blank">
+                  <Button size="1" onClick={() => handleOnClickBuy("Creator")} color="mint">Buy Creator</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">500 tokens for $49 / mo.</Text>
               </Box>}
               {userData.subscriptionPlan !== 'enterprise' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_ENTERPRISE_PAYMENT_LINK}>
-                  <Button size="1" color="mint">Buy Enterprise</Button>
+                <RadixLink href={process.env.GATSBY_STRIPE_ENTERPRISE_PAYMENT_LINK} target="_blank">
+                  <Button size="1" onClick={() => handleOnClickBuy("Enterprise")} color="mint">Buy Enterprise</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">10000 tokens for $499 / mo.</Text>
               </Box>}
               {userData.subscriptionPlan !== 'lifetime' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_LIFETIME_PAYMENT_LINK}>
-                  <Button size="1" color="amber">Buy Lifetime</Button>
+                <RadixLink href={process.env.GATSBY_STRIPE_LIFETIME_PAYMENT_LINK} target="_blank">
+                  <Button size="1" onClick={() => handleOnClickBuy("Lifetime")} color="amber">Buy Lifetime</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">Lifetime usage for $2000</Text>
               </Box>}
             </Flex>
+          </Flex>
+        </Card>
 
-            <Separator size="1" my="2" />
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
+            <Text size="1" color="gray">Contact</Text>
+            <Flex direction="column" gap="1">
+              <Box>
+                <Link to="/contact">
+                  <Button size="1" color="mint" ml="1" onClick={onClickSupportOrFeature}>Request Support or Feature</Button>
+                </Link>
+              </Box>
+            </Flex>
+          </Flex>
+        </Card>
 
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
             <Text size="1" color="gray">Payment Methods</Text>
             <Flex>
-            <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK}>
-              <Button size="1" variant="outline">
-                Manage in Stripe
-              </Button>
+              <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK} target="_blank">
+                <Button size="1" variant="outline" onClick={onClickManageInStripe}>
+                  Manage in Stripe
+                </Button>
               </RadixLink>
             </Flex>
+          </Flex>
+        </Card>
 
-            <Separator size="1" my="2" />
-
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
             <Text size="1" color="gray">Logout</Text>
             <Flex>
               <Button size="1" variant="outline" onClick={onClickLogout}>
                 Logout
               </Button>
             </Flex>
-
           </Flex>
         </Card>
+
       </SignedIn>
       <SignedOut>
         <RedirectToSignIn />

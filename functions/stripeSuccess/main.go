@@ -22,7 +22,6 @@ import (
 
 // StripeSuccessRequest is the payload expected from the client.
 type StripeSuccessRequest struct {
-	ClerkUserId     string `json:"clerkUserId"`
 	StripeSessionId string `json:"stripeSessionId"`
 	Product         string `json:"product"` // e.g. "starter", "creator", "enterprise", "topup", "lifetime"
 }
@@ -85,34 +84,54 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	// Track whether we're creating a new user.
 	var tempPassword string
 	var clerkUserId string
-	if payload.ClerkUserId == "" {
-		// Initialize Stripe.
-		stripeKey := os.Getenv("STRIPE_SECRET_KEY")
-		if stripeKey == "" {
-			log.Fatalf("STRIPE_SECRET_KEY not set")
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       "Server Error",
-			}, nil
-		}
-		stripe.Key = stripeKey
 
-		// Retrieve the checkout session to get the customer's email.
-		session, err := stripeSession.Get(payload.StripeSessionId, nil)
-		if err != nil {
-			log.Printf("Error retrieving stripe session: %v", err)
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       "Error retrieving stripe session",
-			}, nil
-		}
-		if session.CustomerDetails == nil || session.CustomerDetails.Email == "" {
-			log.Println("Stripe session missing customer email")
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusBadRequest,
-				Body:       "No customer email found",
-			}, nil
-		}
+	// Initialize Stripe.
+	stripeKey := os.Getenv("STRIPE_SECRET_KEY")
+	if stripeKey == "" {
+		log.Fatalf("STRIPE_SECRET_KEY not set")
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       "Server Error",
+		}, nil
+	}
+	stripe.Key = stripeKey
+
+	// Retrieve the checkout session to get the customer's email.
+	session, err := stripeSession.Get(payload.StripeSessionId, nil)
+	if err != nil {
+		log.Printf("Error retrieving stripe session: %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       "Error retrieving stripe session",
+		}, nil
+	}
+	if session.CustomerDetails == nil || session.CustomerDetails.Email == "" {
+		log.Println("Stripe session missing customer email")
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusBadRequest,
+			Body:       "No customer email found",
+		}, nil
+	}
+
+	// now for the clerk user: first, try to get a matching clerk user by this email
+	var newUserCreated = false
+	users, err := client.List(context.Background(), &user.ListParams{
+		EmailAddresses: []string{session.CustomerDetails.Email},
+	})
+	if err != nil {
+		log.Printf("Error fetching user: %v", err)
+		return events.APIGatewayProxyResponse{
+			StatusCode: http.StatusInternalServerError,
+			Body:       "Error fetching user",
+		}, nil
+	}
+	if users.TotalCount > 0 {
+		clerkUserId = users.Users[0].ID
+	}
+
+	// If no matching user was found, create a new one.
+	if clerkUserId == "" {
+		newUserCreated = true
 
 		// Generate a temporary password.
 		tempPassword = generateTempPassword()
@@ -131,8 +150,6 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 			}, nil
 		}
 		clerkUserId = newUser.ID
-	} else {
-		clerkUserId = payload.ClerkUserId
 	}
 
 	// Fetch the current clerkUser so we can add to the existing tokens.
@@ -259,7 +276,7 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		Success: true,
 	}
 	// Include the temporary password in the response if a new user was created.
-	if payload.ClerkUserId == "" {
+	if newUserCreated {
 		respData.Email = clerkUser.EmailAddresses[0].EmailAddress
 		respData.TempPassword = tempPassword
 	}
