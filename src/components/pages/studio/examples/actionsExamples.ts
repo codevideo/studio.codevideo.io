@@ -814,16 +814,16 @@ export const pythonExampleActions: Array<IAction> = [
         "value": "python main.py"
     },
     {
+        "name": "terminal-set-output",
+        "value": "5"
+    },
+    {
         "name": "terminal-enter",
         "value": "1"
     },
     {
-        "name": "terminal-type",
-        "value": "Hello, world!"
-    },
-    {
         "name": "author-speak-before",
-        "value": "Perfect, our code is working as expected!"
+        "value": "Perfect, our code is working as expected! I hope you enjoyed this lesson!"
     }
 ];
 

@@ -9,25 +9,26 @@ import {
 } from '@radix-ui/themes';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { ProjectTypeConverter } from './ProjectTypeConverter';
 import { isValidActions, isCourse, isLesson } from '@fullstackcraftllc/codevideo-types';
 import { ProjectSelector } from './ProjectSelector';
 import { MetadataEditor } from './MetadataEditor';
-import { ExportDropdown } from './ExportDropdown';
 import { ProjectRenderer } from './ProjectRenderer';
-import { SignedOut } from '@clerk/clerk-react';
+import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { setLocationInStudio, setIsSidebarOpen } from '../../../store/editorSlice';
-import { startTutorial } from '../../../store/tutorialSlice';
 import { firstCharacterUppercase } from '../../../utils/firstCharacterUppercase';
 import { TokensButton } from '../../utils/Buttons/TokensButton';
 import { TutorialButton } from '../../utils/Buttons/TutorialButton';
 import { WhitepaperButton } from '../../utils/Buttons/WhitepaperButton';
+import { TokenCountBadge } from '../../utils/TokenCountBadge';
+import { AccountButton } from '../../utils/Buttons/AccountButton';
+import { useIsDesktop } from '../../../hooks/useIsDesktop';
 
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
+    const isDesktop = useIsDesktop();
 
     const onCreateNewProject = () => {
         dispatch(setLocationInStudio('select'));
@@ -90,19 +91,28 @@ export function SidebarMenu() {
                             gap="3"
                             mt="6"
                         >
-                            {/* Tokens Button - only shown here in sidebar on mobile */}
+                            {/* Tokens Button - only shown here in sidebar on mobile wen not signed in */}
                             <SignedOut>
                                 <Flex direction="column" gap="2">
-                                    <Heading size="4" mb="3">Get Free Tokens</Heading>
+                                    <Heading size="4" mb="0" mt="5">Get Free Tokens</Heading>
                                     <Flex>
                                         <TokensButton />
                                     </Flex>
                                 </Flex>
                             </SignedOut>
 
+                            <SignedIn>
+                                <Flex direction="column" gap="2">
+                                    <Heading size="4" mb="0" mt="5">Your Tokens</Heading>
+                                    <TokenCountBadge />
+                                    <AccountButton />
+                                    <TokensButton style={{ display: isDesktop ? 'none' : 'inline-block' }} />
+                                </Flex>
+                            </SignedIn>
+
                             {/* Tutorial Button */}
                             <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Tutorial</Heading>
+                                <Heading size="4" mb="0" mt="5">Tutorial</Heading>
                                 <Flex>
                                     <TutorialButton />
                                 </Flex>
@@ -110,7 +120,7 @@ export function SidebarMenu() {
 
                             {/* WhitePaper Button - only shown here in sidebar on mobile */}
                             <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Whitepaper</Heading>
+                                <Heading size="4" mb="0" mt="5">Whitepaper</Heading>
                                 <Flex>
                                     <WhitepaperButton />
                                 </Flex>
@@ -118,7 +128,7 @@ export function SidebarMenu() {
 
                             {/* Project Type Section */}
                             <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Current Project</Heading>
+                                <Heading size="4" mb="0" mt="5">Current Project</Heading>
                                 <ProjectRenderer
                                     userProject={currentProject}
                                     isCurrentProject={true}
@@ -126,42 +136,46 @@ export function SidebarMenu() {
                             </Flex>
 
                             {/* Metadata Section */}
-                            {currentProject.projectType !== 'actions' && (
+                            {/* {currentProject.projectType !== 'actions' && (
                                 <Flex direction="column" gap="2">
-                                    <Heading size="4" mb="3">
+                                    <Heading size="4" mb="0" mt="5">
                                         Edit {firstCharacterUppercase(currentProject.projectType)} Metadata
                                     </Heading>
                                     <MetadataEditor />
                                 </Flex>
-                            )}
+                            )} */}
 
                             {/* Export Section */}
-                            <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Export Project</Heading>
+                            {/* <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">Export Project</Heading>
                                 <ExportDropdown />
-                            </Flex>
+                            </Flex> */}
 
+                            {/* TODO: Feature after launch */}
                             {/* Convert Section */}
-                            <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Convert Project</Heading>
+                            {/* <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">Convert Project</Heading>
                                 <ProjectTypeConverter />
-                            </Flex>
+                            </Flex> */}
 
                             {/* Select Other Project */}
                             <Flex direction="column" gap="2">
-                                <Heading size="4" mb="3">Your Projects</Heading>
+                                <Heading size="4" mb="0" mt="5">Your Projects</Heading>
                                 <ProjectSelector />
                             </Flex>
 
                             {/* Other Actions */}
-                            <Box>
-                                <Button
-                                    onClick={onCreateNewProject}
-                                    size="1"
-                                >
-                                    Create New Project
-                                </Button>
-                            </Box>
+                            <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">Create New Project</Heading>
+                                <Box>
+                                    <Button
+                                        onClick={onCreateNewProject}
+                                        size="1"
+                                    >
+                                        Create new project...
+                                    </Button>
+                                </Box>
+                            </Flex>
                         </Flex>
                     </ScrollArea>
                 </Box>

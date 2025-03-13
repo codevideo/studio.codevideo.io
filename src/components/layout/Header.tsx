@@ -21,6 +21,7 @@ import { useIsDesktop } from '../../hooks/useIsDesktop';
 import { WhitepaperButton } from '../utils/Buttons/WhitepaperButton';
 import { TutorialCSSClassConstants } from './sidebar/StudioTutorial';
 import { TokenCountBadge } from '../utils/TokenCountBadge';
+import { AccountButton } from '../utils/Buttons/AccountButton';
 
 export function Header() {
     const dispatch = useAppDispatch();
@@ -92,21 +93,12 @@ export function Header() {
                             </Badge>
                         </SignedOut>
 
-                        <SignedIn>
-                            <TokenCountBadge />
-                            <Link to="/account">
-                                <Button
-                                    style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none' }}
-                                    size="1"
-                                    variant="soft"
-                                    color="mint"
-                                >
-                                    <PersonIcon height="12" width="12" />
-                                    Account
-                                </Button>
-                            </Link>
+                        <SignedIn >
+                            <Box style={{ display: isDesktop ? 'inline-block' : 'none' }}>
+                                <TokenCountBadge />
+                            </Box>
+                            <AccountButton/>
                             <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
-
                         </SignedIn>
                         <ThemeToggle />
                     </Flex>

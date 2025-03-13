@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Code, Text } from '@radix-ui/themes';
-import { useAppSelector } from '../../hooks/useAppSelector';
 import { isCourse } from '@fullstackcraftllc/codevideo-types';
+import { useAppSelector } from '../../../hooks/useAppSelector';
 
 export function LessonCounter() {
     const { currentProject, currentLessonIndex } = useAppSelector((state) => state.editor);
@@ -20,3 +20,4 @@ export function LessonCounter() {
 
     return <></>
 }
+

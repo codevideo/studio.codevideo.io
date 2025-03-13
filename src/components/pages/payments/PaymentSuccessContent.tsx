@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Button, Text, Link as RadixLink, Flex, Card } from '@radix-ui/themes';
 import Confetti from 'react-confetti';
 import { Link } from 'gatsby';
-import { setShowSignInOverlay } from '../../../store/authSlice';
+import { setShowSignInOverlay, signalTokenRefresh } from '../../../store/authSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import mixpanel from 'mixpanel-browser';
 
@@ -77,6 +77,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
         const handlePaymentVerification = async () => {
             try {
                 await verifyPayment(stripeSessionId, tier);
+                dispatch(signalTokenRefresh());
             } catch (error) {
                 // Error is already logged in verifyPayment
             } finally {
@@ -161,7 +162,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                         colors={['#86EAD4', '#FFC53D']} // Radix UI theme colors mint-9 & amber-9
                     />
                     <Flex direction="column" align="center" justify="center" gap="6">
-                        <Link to="/studio">
+                        <Link to="/" style={{ textDecoration: 'none' }}>
                             <Button variant="solid" style={{ display: tempPassword ? 'none' : 'block' }} size="3">
                                 Start Creating
                             </Button>

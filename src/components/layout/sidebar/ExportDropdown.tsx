@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ExportType, extractActionsFromProject } from '@fullstackcraftllc/codevideo-types';
+import { ExportType, extractActionsFromProject, IAction } from '@fullstackcraftllc/codevideo-types';
 import { exportProject, generatePngsFromActions } from '@fullstackcraftllc/codevideo-exporters';
 import {
   Flex,
@@ -15,17 +15,20 @@ import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useGifRecorder } from '../../../hooks/useGifRecorder';
 import { setCurrentActionIndex, setIsPlaying } from '../../../store/editorSlice';
 import { decrementTokens } from '../../../utils/api/decrementTokens';
-import { setShowSignUpOverlay } from '../../../store/authSlice';
+import { setShowSignUpOverlay, signalTokenRefresh } from '../../../store/authSlice';
 import { addToast } from '../../../store/toastSlice';
 import { TokenCosts } from '../../../constants/TokenCosts';
 import { CODEVIDEO_IDE_ID } from '@fullstackcraftllc/codevideo-ide-react';
 import { exportCodeVideoIDEToDataURL } from '../../../utils/renderCodeVideoIDEToHtmlStringAtActionIndex';
-import { set } from 'react-hook-form';
 import { sleep } from '../../../utils/sleep';
 import JSZip from 'jszip';
+import { openModal } from '../../../store/modalSlice';
+import { estimateVideoDurationInSeconds } from '../../../utils/estimateVideoDurationInSeconds';
+import { formatDuration } from '../../../utils/formatDuration';
 
 export const ExportDropdown = () => {
   const { projects, currentProjectIndex, currentLessonIndex, isPlaying } = useAppSelector(state => state.editor);
+  const { generateVideoOnConfirmSignal } = useAppSelector(state => state.modal);
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState<ExportType>('json');
   const [exportComplete, setExportComplete] = useState(false);
@@ -56,6 +59,65 @@ export const ExportDropdown = () => {
     setExportType(value as ExportType);
     setExportComplete(false);
   };
+
+  const generateVideo = async () => {
+    if (!project) {
+      console.error('No project to export');
+      return;
+    }
+    setIsExporting(true);
+    setExportComplete(false);
+    const actions = extractActionsFromProject(project, currentLessonIndex);
+    const token = await getToken();
+    if (token === null) {
+      // show signup
+      dispatch(setShowSignUpOverlay(true));
+      return;
+    }
+    try {
+      // console.log('exporting project:', project, 'as', exportType);
+      const response = await fetch(`${process.env.GATSBY_CODEVIDEO_API_URL}/create-video-v3`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          actions
+        }),
+      });
+      const data = await response.json();
+      if (data.error) {
+        dispatch(openModal({ modalType: 'alert', title: 'Error Creating CodeVideo', content: <>{data.error}</> }));
+      } else {
+        dispatch(openModal({ modalType: 'standard', title: 'Audio Generated and CodeVideo Queued', content: <>The audio generation step completed successfully and your CodeVideo is being generated! You'll receive an email with a link to download the mp4 as soon as it's uploaded.</> }));
+      }
+      mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
+      setExportComplete(true);
+    } catch (error: any) {
+      dispatch(openModal({ modalType: 'alert', title: 'Error Creating CodeVideo', content: <>{error.toString()}</> }));
+    } finally {
+      setIsExporting(false);
+    }
+    return
+  }
+
+  // whenever the generateVideoOnConfirmSignal changes, generate the video
+  useEffect(() => {
+    if (generateVideoOnConfirmSignal) {
+      generateVideo();
+    }
+  }, [generateVideoOnConfirmSignal])
+
+  // whenever exported is set to true, set everything back to default after 3 seconds
+  useEffect(() => {
+    if (exportComplete) {
+      setTimeout(() => {
+        setExportComplete(false);
+        setIsExporting(false);
+      }, 3000);
+    }
+  }, [exportComplete])
 
   const handleExport = async () => {
     if (!exportType) {
@@ -167,13 +229,29 @@ export const ExportDropdown = () => {
     setIsExporting(true);
     setExportComplete(false);
 
+    // now for the holy mp4 export - use the CodeVideo API
+    if (exportType === 'mp4') {
+      const actions = extractActionsFromProject(project, currentLessonIndex);
+      const { totalDuration } = estimateVideoDurationInSeconds(actions);
+      const estimatedLength = formatDuration(totalDuration)
+      // show modal describing export process
+      dispatch(openModal({ 
+        modalType: 'confirm', 
+        generateVideoOnConfirmSignal: !generateVideoOnConfirmSignal,
+        title: 'CodeVideo Generation', 
+        content: <>Ready to convert your project into a video? Please double check your actions to make sure everything is exactly how you want it!<br/><br/>Your CodeVideo will be generated in two steps:<br/><br/>1. We generate all the audio needed for the video - when this step completes, you'll get a confirmation here in the studio.<br/>2. We create the video with the audio inserted.<br/><br/>Your video has <b>{actions.length}</b> actions and has an estimated length of <b>{estimatedLength}</b>. Video generation will take a similar amount of time - we thank you for your patience!</> }));
+      return;
+    }
+
     try {
       await exportProject(project, exportType);
       mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
       setExportComplete(true);
 
       // decrement tokens
-      await decrementTokens(token, exportType, dispatch);
+      await decrementTokens(token, exportType);
+      dispatch(signalTokenRefresh())
+      dispatch(addToast('Your export has completed successfully and your token balance updated accordingly.'));
     } catch (error) {
       console.error('Export failed:', error);
     } finally {
@@ -210,25 +288,13 @@ export const ExportDropdown = () => {
             <Select.Item value="jsx">JSX</Select.Item>
             <Select.Item value="pptx">PPTX (Beta)</Select.Item>
             <Select.Item value="png">PNGs (Beta)</Select.Item>
-            {/* TODO: finish that damn API and activate! */}
-            {/* <Select.Item value="mp4">Video (Beta)</Select.Item> */}
+            <Select.Item value="mp4">Video (Beta)</Select.Item>
           </Select.Content>
         </Select.Root>
         <Text color="amber" size="1" ml="2">Cost: {(TokenCosts)[exportType] === 0 ? 'FREE' : `${(TokenCosts)[exportType]} tokens`}</Text>
       </Box>
       {exportType === 'gif' && isExporting && (
         <Text color='mint' size="1" ml="2">{progress === 0 ? 'Recording playback...' : `Building gif ... ${progress}% done`}</Text>
-      )}
-      {/* Default Export Button (renders when !isExporting && !exportComplete) */}
-      {!isExporting && !exportComplete && (
-        <Button
-          onClick={handleExport}
-          disabled={!exportType || !project}
-          variant="solid"
-          color="mint"
-        >
-          Export!
-        </Button>
       )}
 
       {/* Loading Export Button (renders when isExporting is true) */}
@@ -249,12 +315,24 @@ export const ExportDropdown = () => {
         </Button>
       )}
 
-      {/* Completed Export Button (renders when !isExporting && exportComplete) */}
-      {!isExporting && exportComplete && (
+      {/* Default Export Button (renders when !isExporting && !exportComplete) */}
+      {!isExporting && !exportComplete && (
         <Button
           onClick={handleExport}
           disabled={!exportType || !project}
           variant="solid"
+          color="mint"
+        >
+          Export!
+        </Button>
+      )}
+
+      {/* 'Exported!' Button (renders when !isExporting && exportComplete) */}
+      {!isExporting && exportComplete && (
+        <Button
+          onClick={handleExport}
+          disabled={true}
+          variant="soft"
           color="mint"
         >
           <Flex align="center">

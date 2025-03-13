@@ -104,7 +104,10 @@ export function MainStudio() {
       p="1"
       mt="9"
     >
-      <Grid columns={{ initial: '1', md: '3' }} gap="3">
+      <Grid 
+      columns={{ initial: '1', md: '3' }} 
+      gap="3"
+      >
         {/* Left Action Editor */}
         <Box style={{ width: '100%', overflowY: 'auto' }}>
           <Flex direction="row" gap="2" justify="between">

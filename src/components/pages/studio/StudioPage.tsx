@@ -16,13 +16,13 @@ export function StudioPage() {
     if (createNewStep === 'course') {
         console.log('rendering course metadata form')   
         // form for course metadata
-        return <CourseMetadataForm isEdit={false}/>
+        return <CourseMetadataForm forEdit={false}/>
     }
 
     if (createNewStep === 'lesson') {
         console.log('rendering lesson metadata form')
         // form for lesson metadata
-        return <LessonMetadataForm forCourse={false} isEdit={false}/>
+        return <LessonMetadataForm forCourse={false} forNewLesson={false} forEdit={false}/>
     }
 
     // have at least 1 project, show the main studio

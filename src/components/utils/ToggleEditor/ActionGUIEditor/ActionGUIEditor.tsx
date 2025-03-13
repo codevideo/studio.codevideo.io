@@ -511,7 +511,7 @@ export function ActionGUIEditor() {
             </Flex>
             <Flex align="center" gap="1">
               {/* Dropdown of 0 to 10 spaces to prepend to any editor-type command */}
-              <Text size="1">Prepend space to each <Badge size="1" color="purple">editor-type</Badge>?</Text>
+              <Text size="1" color="gray">Prepend space to each <Badge size="1" color="purple">editor-type</Badge>?</Text>
               <Select.Root
                 value={prependSpaces.toString()}
                 onValueChange={(value) => setPrependSpaces(parseInt(value))}
