@@ -37,9 +37,9 @@ export const MetadataEditor = () => {
                 <Dialog.Content >
                     <Box>
                         {currentProject?.projectType === 'lesson' ? (
-                            <LessonMetadataForm forCourse={false} isEdit={true} />
+                            <LessonMetadataForm forCourse={false} forNewLesson={false} forEdit={true} />
                         ) : currentProject?.projectType === 'course' ? (
-                            <CourseMetadataForm isEdit={true}/>
+                            <CourseMetadataForm forEdit={true}/>
                         ) : (
                             <Card >
                                 <Flex direction="column" gap="4">

@@ -12,24 +12,25 @@ import {
 } from '@radix-ui/themes';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
-import { addLessonToCourse, addNewLessonToProjects, setLocationInStudio } from '../../../store/editorSlice';
+import { addLessonToCourse, addNewLessonToCourse, addNewLessonToProjects, setLocationInStudio } from '../../../store/editorSlice';
 import { openModal, closeModal } from '../../../store/modalSlice';
-import { ModalTypes } from '../../../types/modal';
 import { formatNameToSafeId } from '../../../utils/formatNameToSafeId';
 
 interface ILessonMetadataFormProps {
   forCourse: boolean;
-  isEdit: boolean;
+  forNewLesson: boolean;
+  forEdit: boolean;
   onCancel?: () => void;
+  onAddLesson?: (lesson: ILesson) => void;
 }
 
 export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
-  const { forCourse, isEdit, onCancel } = props;
-  const dispatch = useAppDispatch();
+  const { forCourse, forNewLesson, forEdit, onCancel, onAddLesson } = props;
   const { projects, currentProjectIndex, currentLessonIndex } = useAppSelector(state => state.editor);
+  const dispatch = useAppDispatch();
   const lesson = projects[currentProjectIndex]?.project as ILesson;
 
-  // Create local state initialized with Redux values
+  // Create local lesson of just empty values
   const [localLesson, setLocalLesson] = useState<ILesson>({
     id: '',
     name: '',
@@ -37,9 +38,9 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
     actions: []
   });
 
-  // Update local state when Redux state changes
+  // Update local state when Redux state changes in edit mode
   useEffect(() => {
-    if (lesson) {
+    if (forEdit && lesson) {
       setLocalLesson({
         id: `${currentLessonIndex + 1}-${formatNameToSafeId(lesson.name)}`,
         name: lesson.name || '',
@@ -47,7 +48,7 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
         actions: lesson.actions || []
       });
     }
-  }, [lesson]);
+  }, [forEdit, lesson]);
 
   const handleChange = (field: keyof ILesson, value: string) => {
     setLocalLesson(prev => ({
@@ -60,17 +61,32 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
     // Validate required fields
     if (!localLesson.name) {
       dispatch(openModal({
-        type: ModalTypes.ALERT,
-        props: {
-          message: 'Please fill in all required fields'
-        }
+        modalType: 'alert',
+        title: 'Error',
+        content: <>Please fill in all required fields</>
       }))
       return;
     }
 
     if (forCourse) {
-      // add lesson to course lessons
-      dispatch(addLessonToCourse(localLesson));
+      // call callback up to course metadataform
+      onAddLesson && onAddLesson(localLesson);
+
+      // reset local lesson
+      setLocalLesson({
+        id: '',
+        name: '',
+        description: '',
+        actions: []
+      });
+
+      return;
+    }
+
+    if (forNewLesson) {
+      dispatch(addNewLessonToCourse(localLesson));
+      // close modal
+      dispatch(closeModal());
       return;
     }
 
@@ -89,6 +105,16 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
     dispatch(setLocationInStudio('studio'));
   };
 
+  const resolveConfirmText = () => {
+    if (forCourse) {
+      return 'Add Lesson to Course';
+    }
+    if (forNewLesson) {
+      return 'Add Lesson';
+    }
+    return 'Save and Go to Studio';
+  };
+
   return (
     <Flex justify="center">
       <Card mt={forCourse ? '0' : '9'} size="3" style={{ maxWidth: '28rem', width: '100%' }}>
@@ -98,7 +124,7 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
 
         <Text mb="3" as="label" htmlFor='lesson-name'>Name</Text>
         <TextField.Root
-        mb="3"
+          mb="3"
           id="lesson-name"
           value={localLesson.name}
           onChange={(e) => handleChange('name', e.target.value)}
@@ -108,7 +134,7 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
 
         <Text mb="3" as="label" htmlFor="lesson-description">Description</Text>
         <TextArea
-        mb="3"
+          mb="3"
           id="lesson-description"
           value={localLesson.description}
           onChange={(e) => handleChange('description', e.target.value)}
@@ -125,7 +151,12 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
                 return;
               }
 
-              isEdit ? dispatch(setLocationInStudio('studio')) : dispatch(setLocationInStudio('select'))
+              // close modal
+              dispatch(closeModal());
+              if (forNewLesson) {
+                return
+              }
+              forEdit ? dispatch(setLocationInStudio('studio')) : dispatch(setLocationInStudio('select'))
             }}
             variant="solid"
             color="red"
@@ -140,10 +171,10 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
             color="mint"
             size="2"
           >
-            {forCourse ? "Add Lesson to Course" : "Save and Go to Studio"}
+            {resolveConfirmText()}
           </Button>
         </Flex>
       </Card>
-      </Flex>
+    </Flex>
   );
 };

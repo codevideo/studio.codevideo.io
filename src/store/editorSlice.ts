@@ -1,7 +1,6 @@
 
 import { IAction, ICourse, ILesson, isValidActions, isCourse, isLesson, Project, ProjectType } from "@fullstackcraftllc/codevideo-types";
-import { createSlice } from "@reduxjs/toolkit";
-import { pythonPrintExample } from "../components/pages/studio/examples/how-to-print-stuff/pythonPrintExample";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { persistProjectsToLocalStorage } from "../utils/persistence/persistProjectsToLocalStorage";
 
 export interface UserProject {
@@ -31,17 +30,15 @@ export interface EditorState {
     allowFocusInEditor: boolean;
 }
 
-const now = new Date().toISOString();
-
 export const editorInitialState: EditorState = {
     locationInStudio: 'studio',
     projects: [],
     currentProjectIndex: 0,
     currentProject: undefined,
     currentLessonIndex: 0,
-    currentActions: pythonPrintExample?.lessons[0]?.actions || [],
+    currentActions: [],
     draftActionsString: JSON.stringify([], null, 2),
-    actionsString: JSON.stringify(pythonPrintExample?.lessons[0]?.actions, null, 2),
+    actionsString: JSON.stringify([], null, 2),
     currentActionIndex: 0,
     jumpFlag: false,
     mousePosition: { x: 20, y: 20 },
@@ -106,9 +103,9 @@ const editorSlice = createSlice({
             state.currentActions = action.payload;
             state.actionsString = JSON.stringify(action.payload, null, 2);
             const copyOfProjects = [...state.projects];
-            console.log('state.projects', copyOfProjects)
+            console.log('copyOfProjects', copyOfProjects)
             console.log('state.currentProjectIndex', state.currentProjectIndex)
-            console.log('state.currentProjectIndex', copyOfProjects[state.currentProjectIndex])
+            console.log('copyOfProjects[state.currentProjectIndex]', copyOfProjects[state.currentProjectIndex])
 
             // update the actions on the current project
             const currentProject = state.projects[state.currentProjectIndex]
@@ -121,15 +118,16 @@ const editorSlice = createSlice({
                     }
                     state.currentProject = currentProject;
                 }
-                if (isLesson(currentProject.project)) {
+                else if (isLesson(currentProject.project)) {
                     currentProject.project.actions = action.payload;
                     state.currentProject = currentProject;
                 }
-                if (isValidActions(action.payload)) {
+                else if (isValidActions(action.payload)) {
                     console.log('setting actions to actions project!')
                     currentProject.project = action.payload;
                     state.currentProject = currentProject;
                 }
+
                 // now make sure the projects array itself is updated and persisted
                 if (copyOfProjects[state.currentProjectIndex]) {
                     (copyOfProjects[state.currentProjectIndex] as any) = state.currentProject
@@ -153,6 +151,21 @@ const editorSlice = createSlice({
                 setCurrentActions(state, currentProject);
             }
         },
+        setCurrentLessonIndex(state, action) {
+            state.currentLessonIndex = action.payload;
+
+            // get actions at this index
+            const currentProject = state.projects[state.currentProjectIndex];
+            if (currentProject) {
+                const currentCourse = currentProject.project as ICourse;
+                const currentLesson = currentCourse.lessons[action.payload];
+                if (currentLesson) {
+                    state.currentActions = currentLesson.actions;
+                    state.currentActionIndex = 0;
+                    state.actionsString = JSON.stringify(currentLesson.actions, null, 2);
+                }
+            }
+        },
         setJumpFlag(state, action) {
             state.jumpFlag = action.payload;
         },
@@ -162,10 +175,21 @@ const editorSlice = createSlice({
         setMouseVisible(state, action) {
             state.mouseVisible = action.payload;
         },
-        addNewCourseToProjects(state, action) {
+        addNewCourseToProjects(state, action: PayloadAction<ICourse>) {
+
+            // ensure there is at least one lesson in this course
+            if (action.payload.lessons.length === 0) {
+                action.payload.lessons.push({
+                    id: '1',
+                    name: 'My First Lesson',
+                    description: 'First lesson in the course',
+                    actions: []
+                });
+            }
+
             state.projects.push({
                 projectType: 'course',
-                project: action.payload as ICourse,
+                project: action.payload,
                 created: new Date().toISOString(),
                 modified: new Date().toISOString(),
             })
@@ -193,6 +217,14 @@ const editorSlice = createSlice({
                 state.currentProject = currentProject;
                 state.currentLessonIndex = 0;
                 setCurrentActions(state, currentProject);
+            }
+        },
+        addNewLessonToCourse(state, action) {
+            const currentProject = state.projects[state.currentProjectIndex];
+            if (currentProject) {
+                const currentCourse = currentProject.project as ICourse;
+                currentCourse.lessons.push(action.payload);
+                state.currentLessonIndex = currentCourse.lessons.length - 1;
             }
         },
         addNewActionsToProjects(state, action) {
@@ -274,11 +306,13 @@ export const {
     setProjects,
     addNewCourseToProjects,
     addNewLessonToProjects,
+    addNewLessonToCourse,
     addNewActionsToProjects,
     setActions,
     setDraftActionsString,
     setCurrentActionIndex,
     setCurrentProjectIndex,
+    setCurrentLessonIndex,
     setJumpFlag,
     setMousePosition,
     setMouseVisible,

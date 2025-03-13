@@ -1,18 +1,17 @@
 import * as React from 'react';
-import { useAppDispatch } from '../../../hooks/useAppDispatch';
-import { closeModal } from '../../../store/modalSlice';
 import { Box, Text } from '@radix-ui/themes';
+import { JSX } from 'react';
 
 export interface AlertModalProps {
-    message: string;
+    content: JSX.Element;
 }
 
 export const AlertModal = (props: AlertModalProps) => {
-    const { message } = props;
+    const { content } = props;
     
     return (
         <Box className="modal-content">
-            <Text>{message}</Text>
+            <Text>{content}</Text>
         </Box>
     );
 };

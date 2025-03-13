@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Card, Flex, Code, Text } from '@radix-ui/themes';
 import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
-import { LessonAdder } from '../../../../utils/LessonAdder';
-import { LessonCounter } from '../../../../utils/LessonCounter';
+import { LessonAdder } from '../../../../utils/Lessons/LessonAdder';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { isCourse, ICourse, isLesson, ILesson } from '@fullstackcraftllc/codevideo-types';
+import { LessonNavigationButtons } from '../../../../utils/Lessons/LessonNavigationButtons';
+import { LessonCounter } from '../../../../utils/Lessons/LessonCounter';
 
 export function ProjectInfoCard() {
     const { currentProject } = useAppSelector((state) => state.editor);
@@ -17,7 +18,7 @@ export function ProjectInfoCard() {
             if (isLesson(currentProject.project)) {
                 return (currentProject.project as ILesson).name;
             }
-            return 'Actions Only Project'
+            return 'Actions Project'
         }
     }
 
@@ -31,6 +32,7 @@ export function ProjectInfoCard() {
                         <LessonCounter />
                         <LessonAdder />
                     </Flex>
+                    <LessonNavigationButtons />
                 </Flex>
             </Flex>
         </Card>

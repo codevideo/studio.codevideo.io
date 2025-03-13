@@ -4,29 +4,47 @@ import {
     Box,
     Flex,
     Button,
-    Card
+    Card,
+    Heading
 } from '@radix-ui/themes';
-import { ConfirmModal } from './ConfirmModal';
 import { AlertModal } from './AlertModal';
 import { closeModal } from '../../../store/modalSlice';
-import { ModalTypes } from '../../../types/modal';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
+import { LessonMetadataForm } from '../sidebar/LessonMetadataForm';
+import { CourseMetadataForm } from '../sidebar/CourseMetadataForm';
 
 export const Modal = () => {
-    const { isOpen, modalType, modalProps } = useAppSelector(state => state.modal);
+    const { isOpen, modalType, title, content } = useAppSelector(state => state.modal);
     const dispatch = useAppDispatch();
 
     if (!isOpen) return null;
 
+    const onClickClose = () => {
+        dispatch(closeModal())
+    }
+
+    const onClickCancel = () => {
+        dispatch(closeModal());
+    }
+
     const renderModalContent = () => {
         switch (modalType) {
-            case ModalTypes.CONFIRM:
-                return <ConfirmModal onConfirm={modalProps?.onConfirm} message={modalProps?.message} />;
-            case ModalTypes.ALERT:
-                return <AlertModal message={modalProps?.message} />;
-            case ModalTypes.CUSTOM:
-                return modalProps?.component;
+            case 'course':
+                return <CourseMetadataForm forEdit={false} />;
+            case 'add-lesson':
+                return <LessonMetadataForm forCourse={false} forNewLesson={true} forEdit={false} />;
+            case 'alert':
+                return <AlertModal content={content} />;
+            case 'standard':
+            case 'confirm':
+                return (
+                    <Flex direction="column" gap="4" align="center" justify="center">
+                        <Box style={{ color: 'var(--mint-9)' }}>
+                            {content}
+                        </Box>
+                    </Flex>
+                )
             default:
                 return null;
         }
@@ -45,22 +63,33 @@ export const Modal = () => {
                     zIndex: 51
                 }}
             >
-
+                <Dialog.Title>{title}</Dialog.Title>
                 <Box style={{ color: 'var(--mint-9)' }}>
                     {renderModalContent()}
                 </Box>
                 <Flex justify="end" mt="4">
                     <Dialog.Close>
+                        <>
+                        {modalType === 'confirm' && (
+                            <Button
+                                onClick={onClickCancel}
+                                variant="soft"
+                                color="red"
+                                mr="2"
+                            >
+                                Cancel
+                            </Button>
+                        )}
                         <Button
-                            onClick={() => dispatch(closeModal())}
+                            onClick={onClickClose}
                             variant="soft"
                             color="mint"
                         >
-                            Close
+                            {modalType === 'confirm' ? 'OK' : 'Close'}
                         </Button>
+                        </>
                     </Dialog.Close>
                 </Flex>
-
             </Dialog.Content>
         </Dialog.Root>
     );

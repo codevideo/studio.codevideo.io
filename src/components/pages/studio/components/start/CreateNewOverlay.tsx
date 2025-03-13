@@ -66,7 +66,7 @@ export function CreateNewOverlay() {
             }}
           >
             <Flex direction="column" align="center" justify="center">
-              <Text>Create Actions Only</Text>
+              <Text>Create Actions</Text>
               <Text size="1">
                 (simplest)
               </Text>
@@ -78,17 +78,18 @@ export function CreateNewOverlay() {
           </Text>
           <ExampleSelector />
 
-          <Text size="1" align="center">
+          <Text size="1" align="center" mt="5">
             Advanced: paste in any course, lesson, or actions JSON to start from an existing project:
           </Text>
           <JSONPaster />
         </Flex>
 
-        <Flex justify="center">
+{/* TODO: activate with project converter feature */}
+        {/* <Flex justify="center">
           <Text size="1" align="center">
             If you don't know which to select, don't worry - all these formats are interchangeable at any time in the studio.
           </Text>
-        </Flex>
+        </Flex> */}
       </Card>
     </Flex>
   );
