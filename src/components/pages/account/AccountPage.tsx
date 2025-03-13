@@ -19,15 +19,7 @@ import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { TokenCosts } from '../../../constants/TokenCosts';
 import mixpanel from 'mixpanel-browser';
 import { BuyTokensButton } from '../../utils/Buttons/BuyTokensButton';
-
-export interface ClerkMetadata {
-  tokens: number;
-  stripeId: string;
-  unlimited: boolean;
-  subscriptionPlan: string;
-  subscriptionStatus: string;
-  tokensPerCycle: number;
-}
+import { ICodeVideoUserMetadata } from '@fullstackcraftllc/codevideo-types';
 
 const subscriptionPlansToMonthlyTokens = (plan: string) => {
   switch (plan) {
@@ -42,7 +34,7 @@ const subscriptionPlansToMonthlyTokens = (plan: string) => {
   }
 }
 
-const fallbackValues: ClerkMetadata = {
+const fallbackValues: ICodeVideoUserMetadata = {
   tokens: 0,
   stripeId: '',
   unlimited: false,
@@ -56,7 +48,7 @@ export const AccountPage = () => {
   const { signOut } = useClerk();
 
   // Get subscription data from Clerk metadata
-  const getUserData = (): ClerkMetadata => {
+  const getUserData = (): ICodeVideoUserMetadata => {
     if (!isLoaded || !user) return fallbackValues;
 
     return {
@@ -124,7 +116,7 @@ export const AccountPage = () => {
             {user && (
               <Flex align="center" gap="2">
                 <UserButton />
-                <Text size="1">{user.primaryEmailAddress?.emailAddress}</Text>
+                <Text weight="bold" size="1">{user.primaryEmailAddress?.emailAddress}</Text>
               </Flex>
             )}
           </Flex>
