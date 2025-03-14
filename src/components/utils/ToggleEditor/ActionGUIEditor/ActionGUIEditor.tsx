@@ -33,6 +33,7 @@ export function ActionGUIEditor() {
   const dispatch = useAppDispatch();
   const [showValueHint, setShowValueHint] = useState<{ open: boolean, content: string }>({ open: false, content: '' });
   const [prependSpaces, setPrependSpaces] = useState<number>(0);
+  const [showMore, setShowMore] = useState<boolean>(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const advancedValueOneTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const advancedValueTwoTextAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -327,15 +328,17 @@ export function ActionGUIEditor() {
           {'<'} Previous
         </Button>
         <ActionCounter />
-        <Button
-          className={TutorialCSSClassConstants.ACTION_GUI_NEXT_BUTTON}
-          color="mint"
-          variant="soft"
-          onClick={() => dispatch(setCurrentActionIndex(currentActionIndex + 1))}
-          disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
-        >
-          Next {'>'}
-        </Button>
+        <Tooltip open={currentActionIndex === 0} content="Click me to get started with the lesson!">
+          <Button
+            className={TutorialCSSClassConstants.ACTION_GUI_NEXT_BUTTON}
+            color="mint"
+            variant="soft"
+            onClick={() => dispatch(setCurrentActionIndex(currentActionIndex + 1))}
+            disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
+          >
+            Next {'>'}
+          </Button>
+        </Tooltip>
       </Flex>
 
       {currentAction && <>
@@ -415,75 +418,75 @@ export function ActionGUIEditor() {
         </Flex>
         <Flex ml="1" gap="2">
           <Flex direction="column" gap="1">
-          <Flex wrap="wrap" gap="1">
-            <Text size="1" color="gray">Utilities:</Text>
-            <Badge
-            style={{ cursor: 'pointer' }}
-            size="1"
-            color="mint"
-            variant="soft"
-            onClick={() => {
-              // add an author-speak-before action at the current index + 1
-              const newActions = currentActions
-                .slice(0, currentActionIndex + 1)
-                .concat([{ name: 'author-speak-before', value: 'My new action...' }, ...currentActions.slice(currentActionIndex + 1)]);
-              dispatch(setActions(newActions));
-              dispatch(setCurrentActionIndex(currentActionIndex + 1));
-              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-            }}
-          >
-            Add New
-          </Badge>
-          <Badge
-            style={{ cursor: 'pointer' }}
-            size="1"
-            color="mint"
-            variant="soft"
-            onClick={() => {
-              // add the current action to the previous index
-              const newActions = currentActions
-                .slice(0, currentActionIndex)
-                .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
-              dispatch(setActions(newActions));
-              dispatch(setCurrentActionIndex(currentActionIndex));
-              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-            }}
-          >
-            Clone to Previous
-          </Badge>
-          <Badge
-            style={{ cursor: 'pointer' }}
-            size="1"
-            className={TutorialCSSClassConstants.ACTION_GUI_CLONE_TO_NEXT}
-            color="mint"
-            variant="soft"
-            onClick={() => {
-              // add the current action to the next index
-              const newActions = currentActions
-                .slice(0, currentActionIndex + 1)
-                .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
-              dispatch(setActions(newActions));
-              dispatch(setCurrentActionIndex(currentActionIndex + 1));
-              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-            }}
-          >
-            Clone to Next
-          </Badge>
-          <Badge
-            style={{ cursor: 'pointer' }}
-            size="1"
-            color="red"
-            variant="soft"
-            onClick={() => {
-              const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
-              dispatch(setActions(newActions));
-              dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
-              dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-            }}
-          >
-            Delete
-          </Badge>
-          </Flex>
+            <Flex wrap="wrap" gap="1">
+              <Text size="1" color="gray">Utilities:</Text>
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="mint"
+                variant="soft"
+                onClick={() => {
+                  // add an author-speak-before action at the current index + 1
+                  const newActions = currentActions
+                    .slice(0, currentActionIndex + 1)
+                    .concat([{ name: 'author-speak-before', value: 'My new action...' }, ...currentActions.slice(currentActionIndex + 1)]);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(currentActionIndex + 1));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Add New
+              </Badge>
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="mint"
+                variant="soft"
+                onClick={() => {
+                  // add the current action to the previous index
+                  const newActions = currentActions
+                    .slice(0, currentActionIndex)
+                    .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(currentActionIndex));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Clone to Previous
+              </Badge>
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                className={TutorialCSSClassConstants.ACTION_GUI_CLONE_TO_NEXT}
+                color="mint"
+                variant="soft"
+                onClick={() => {
+                  // add the current action to the next index
+                  const newActions = currentActions
+                    .slice(0, currentActionIndex + 1)
+                    .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(currentActionIndex + 1));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Clone to Next
+              </Badge>
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="red"
+                variant="soft"
+                onClick={() => {
+                  const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Delete
+              </Badge>
+            </Flex>
             {/* series of clickable small badges which add their example action at the current index */}
             <Flex wrap="wrap" gap="1">
               <Text size="1" color="gray">Quick Add:</Text>
@@ -509,28 +512,49 @@ export function ActionGUIEditor() {
                 </Badge>
               ))}
             </Flex>
-            <Flex align="center" gap="1">
-              {/* Dropdown of 0 to 10 spaces to prepend to any editor-type command */}
-              <Text size="1" color="gray">Prepend space to each <Badge size="1" color="purple">editor-type</Badge>?</Text>
-              <Select.Root
-                value={prependSpaces.toString()}
-                onValueChange={(value) => setPrependSpaces(parseInt(value))}
+            {showMore ? (
+              <>
+              <Text
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="mint"
+                onClick={() => setShowMore(false)}
               >
-                <Select.Trigger>
-                  <Text>{prependSpaces}</Text>
-                </Select.Trigger>
-                <Select.Content>
-                  <Select.Group>
-                    {[...Array(11).keys()].map((i) => (
-                      <Select.Item key={i} value={i.toString()}>
-                        <Badge size="1" color="gray">{i}</Badge>
-                      </Select.Item>
-                    ))}
-                  </Select.Group>
-                </Select.Content>
-              </Select.Root>
-            </Flex>
-            <ActionKeyboard showNumpad={false} prependSpaces={prependSpaces}/>
+                <u>Show less</u>
+              </Text>
+                <Flex align="center" gap="1">
+                  {/* Dropdown of 0 to 10 spaces to prepend to any editor-type command */}
+                  <Text size="1" color="gray">Prepend space to each <Badge size="1" color="purple">editor-type</Badge>?</Text>
+                  <Select.Root
+                    value={prependSpaces.toString()}
+                    onValueChange={(value) => setPrependSpaces(parseInt(value))}
+                  >
+                    <Select.Trigger>
+                      <Text>{prependSpaces}</Text>
+                    </Select.Trigger>
+                    <Select.Content>
+                      <Select.Group>
+                        {[...Array(11).keys()].map((i) => (
+                          <Select.Item key={i} value={i.toString()}>
+                            <Badge size="1" color="gray">{i}</Badge>
+                          </Select.Item>
+                        ))}
+                      </Select.Group>
+                    </Select.Content>
+                  </Select.Root>
+                </Flex>
+                <ActionKeyboard showNumpad={false} prependSpaces={prependSpaces} />
+              </>
+            ) : (
+              <Text
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="mint"
+                onClick={() => setShowMore(true)}
+              >
+                <u>Show more...</u>
+              </Text>
+            )}
           </Flex>
         </Flex>
       </>}
