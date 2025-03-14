@@ -10,6 +10,7 @@ import { ToastContainer } from './toast/ToastContainer';
 import { SidebarMenu } from './sidebar/SidebarMenu';
 import { SignUpOverlay } from './auth/SignUpOverlay';
 import { SignInOverlay } from './auth/SignInOverlay';
+import useUtmTracking from '../../hooks/useUtmTracking';
 
 export interface ILayoutProps {
     withHeader?: boolean;
@@ -36,6 +37,9 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
     useEffect(() => {
         getVoices();
     }, []);
+
+    // use utm tracking for mixpanel
+    useUtmTracking();
 
     if (isFullScreen) {
         return (

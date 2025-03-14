@@ -27,6 +27,8 @@ export function Header() {
     const dispatch = useAppDispatch();
     const isDesktop = useIsDesktop();
 
+    console.log('isDesktop', isDesktop);
+
     return (
         <Box position="fixed" left="0" right="0" style={{ zIndex: 10000, backdropFilter: 'blur(8px)' }} className="z-40" mx="3">
             <Card>
@@ -51,29 +53,49 @@ export function Header() {
                                 </Flex>
                             </Link>
                         </Box>
-                        <Link to="/faq">
-                            <Button size="1" color="mint">
-                                FAQs
-                            </Button>
-                        </Link>
-                        <RadixLink href="https://codevideo.substack.com/" target="_blank">
-                            <Button size="1" color="mint">
-                                Blog
-                            </Button>
-                        </RadixLink>
+                        <Flex gap="3" style={{ display: isDesktop ? 'flex' : 'none' }}>
+                            <Link to="/faq">
+                                <Button size="1" color="mint">
+                                    FAQs
+                                </Button>
+                            </Link>
+                            <RadixLink href="https://codevideo.substack.com/" target="_blank">
+                                <Button size="1" color="mint">
+                                    Blog
+                                </Button>
+                            </RadixLink>
+                        </Flex>
                     </Flex>
 
-                    <Flex justify="end" align="center" gap="2"> {/* Fixed width container for right side */}
-                        <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
-                        <TutorialButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
-                        <WhitepaperButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
+                    {/* tokens button is exception on mobile */}
+                    {!isDesktop && (
+                        <Flex justify="end" align="center" gap="2">
+                            <TokensButton />
+                        </Flex>
+                    )}
+
+                    {/* or, if signed in on mobile the account button*/}
+                    {!isDesktop && (
+                        <SignedIn>
+                            <Flex justify="end" align="center" gap="2">
+                                <AccountButton />
+                            </Flex>
+                        </SignedIn>
+                    )}
+
+                    {/* don't show any of this stuff in mobile */}
+                    <Flex justify="end" align="center" gap="2" style={{ display: isDesktop ? 'flex' : 'none' }}>
+                        <TokensButton />
+                        <TutorialButton />
+                        <WhitepaperButton />
                         <a
                             href="https://github.com/orgs/codevideo/repositories"
                             target="_blank"
                             rel="noreferrer"
+                            style={{ display: isDesktop ? 'inline-block' : 'none' }}
                         >
                             <Button
-                                style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none' }}
+                                style={{ cursor: 'pointer' }}
                                 size="1"
                                 variant="soft"
                                 color="mint"
@@ -94,11 +116,11 @@ export function Header() {
                         </SignedOut>
 
                         <SignedIn >
-                            <Box style={{ display: isDesktop ? 'inline-block' : 'none' }}>
+                            <Box >
                                 <TokenCountBadge />
                             </Box>
-                            <AccountButton/>
-                            <TokensButton style={{ display: isDesktop ? 'inline-block' : 'none' }} />
+                            <AccountButton />
+                            <TokensButton />
                         </SignedIn>
                         <ThemeToggle />
                     </Flex>
