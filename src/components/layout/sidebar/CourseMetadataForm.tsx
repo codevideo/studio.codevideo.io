@@ -27,7 +27,6 @@ export const CourseMetadataForm = (props: ICourseMetadataForm) => {
   const { forEdit } = props;
   const dispatch = useAppDispatch();
   const { projects, currentProjectIndex } = useAppSelector(state => state.editor);
-  const { generateVideoOnConfirmSignal } = useAppSelector(state => state.modal);
   const course = projects[currentProjectIndex]?.project as ICourse;
 
   // State for managing the lesson addition UI
@@ -84,10 +83,8 @@ export const CourseMetadataForm = (props: ICourseMetadataForm) => {
     // Validate required fields
     if (!localCourse.name) {
       dispatch(openModal({
-        modalType: 'alert',
+        modalType: 'alert-fields',
         title: 'Error',
-        content: <>Please fill in all required fields</>,
-        generateVideoOnConfirmSignal
       }))
       return;
     }

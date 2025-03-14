@@ -4,32 +4,26 @@ import { JSX } from 'react';
 
 export interface ModalState {
     isOpen: boolean;
-    modalType: 'course' | 'add-lesson' | 'alert' | 'standard' | 'confirm'
+    modalType: 'course' | 'add-lesson' | 'alert-fields' | 'standard' | 'confirm' | 'confirm-video' | 'video-queued' | 'alert-error-creating-codevideo' | 'confirm-codevideo-generation'
     title: string;
-    content: JSX.Element;
-    generateVideoOnConfirmSignal: boolean;
+    callbackId: string;
 }
 
 const initialState: ModalState = {
     isOpen: false,
     modalType: 'standard',
     title: '',
-    content: <></>,
-    generateVideoOnConfirmSignal: false
+    callbackId: ''
 };
 
 const modalSlice = createSlice({
     name: 'modal',
     initialState,
     reducers: {
-        openModal: (state, action: PayloadAction<{ modalType: 'course' | 'add-lesson' | 'alert' | 'standard' | 'confirm', title: string, content: JSX.Element, generateVideoOnConfirmSignal?: boolean }>) => {
+        openModal: (state, action: PayloadAction<{ modalType: 'course' | 'add-lesson' | 'alert-fields' | 'standard' | 'confirm' | 'video-queued' | 'alert-error-creating-codevideo' | 'confirm-codevideo-generation', title: string}>) => {
             state.isOpen = true;
             state.modalType = action.payload.modalType;
             state.title = action.payload.title;
-            state.content = action.payload.content;
-            if (action.payload.generateVideoOnConfirmSignal !== undefined) {
-             state.generateVideoOnConfirmSignal = action.payload.generateVideoOnConfirmSignal;
-            }
         },
         openCourseModal: (state) => {
             state.isOpen = true;
@@ -43,10 +37,12 @@ const modalSlice = createSlice({
             state.isOpen = false;
             state.modalType = 'standard';
             state.title = "";
-            state.content = <></>;
+        },
+        setCallbackId: (state, action: PayloadAction<string>) => {
+            state.callbackId = action.payload;
         }
     }
 });
 
-export const { openModal, openCourseModal, openLessonModal, closeModal } = modalSlice.actions;
+export const { openModal, openCourseModal, openLessonModal, closeModal, setCallbackId } = modalSlice.actions;
 export default modalSlice.reducer;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ExportType, extractActionsFromProject, IAction } from '@fullstackcraftllc/codevideo-types';
-import { exportProject, generatePngsFromActions } from '@fullstackcraftllc/codevideo-exporters';
+import { exportProject } from '@fullstackcraftllc/codevideo-exporters';
 import {
   Flex,
   Box,
@@ -22,13 +22,13 @@ import { CODEVIDEO_IDE_ID } from '@fullstackcraftllc/codevideo-ide-react';
 import { exportCodeVideoIDEToDataURL } from '../../../utils/renderCodeVideoIDEToHtmlStringAtActionIndex';
 import { sleep } from '../../../utils/sleep';
 import JSZip from 'jszip';
-import { openModal } from '../../../store/modalSlice';
+import { openModal, setCallbackId } from '../../../store/modalSlice';
 import { estimateVideoDurationInSeconds } from '../../../utils/estimateVideoDurationInSeconds';
 import { formatDuration } from '../../../utils/formatDuration';
 
 export const ExportDropdown = () => {
   const { projects, currentProjectIndex, currentLessonIndex, isPlaying } = useAppSelector(state => state.editor);
-  const { generateVideoOnConfirmSignal } = useAppSelector(state => state.modal);
+  const { callbackId } = useAppSelector(state => state.modal);
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState<ExportType>('json');
   const [exportComplete, setExportComplete] = useState(false);
@@ -88,26 +88,27 @@ export const ExportDropdown = () => {
       });
       const data = await response.json();
       if (data.error) {
-        dispatch(openModal({ modalType: 'alert', title: 'Error Creating CodeVideo', content: <>{data.error}</> }));
+        dispatch(openModal({ modalType: 'alert-error-creating-codevideo', title: 'Error Creating CodeVideo' }));
       } else {
-        dispatch(openModal({ modalType: 'standard', title: 'Audio Generated and CodeVideo Queued', content: <>The audio generation step completed successfully and your CodeVideo is being generated! You'll receive an email with a link to download the mp4 as soon as it's uploaded.</> }));
+        dispatch(openModal({ modalType: 'video-queued', title: 'Audio Generated and CodeVideo Queued' }));
       }
       mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
       setExportComplete(true);
     } catch (error: any) {
-      dispatch(openModal({ modalType: 'alert', title: 'Error Creating CodeVideo', content: <>{error.toString()}</> }));
+      dispatch(openModal({ modalType: 'alert-error-creating-codevideo', title: 'Error Creating CodeVideo' }));
     } finally {
       setIsExporting(false);
     }
     return
   }
 
-  // whenever the generateVideoOnConfirmSignal changes, generate the video
+  // whenever callbackid is set to confirm-codevideo-generation, generate the video
   useEffect(() => {
-    if (generateVideoOnConfirmSignal) {
+    if (callbackId === 'confirm-codevideo-generation') {
       generateVideo();
+      dispatch(setCallbackId(''));
     }
-  }, [generateVideoOnConfirmSignal])
+  }, [callbackId])
 
   // whenever exported is set to true, set everything back to default after 3 seconds
   useEffect(() => {
@@ -231,15 +232,12 @@ export const ExportDropdown = () => {
 
     // now for the holy mp4 export - use the CodeVideo API
     if (exportType === 'mp4') {
-      const actions = extractActionsFromProject(project, currentLessonIndex);
-      const { totalDuration } = estimateVideoDurationInSeconds(actions);
-      const estimatedLength = formatDuration(totalDuration)
+      
       // show modal describing export process
-      dispatch(openModal({ 
-        modalType: 'confirm', 
-        generateVideoOnConfirmSignal: !generateVideoOnConfirmSignal,
-        title: 'CodeVideo Generation', 
-        content: <>Ready to convert your project into a video? Please double check your actions to make sure everything is exactly how you want it!<br/><br/>Your CodeVideo will be generated in two steps:<br/><br/>1. We generate all the audio needed for the video - when this step completes, you'll get a confirmation here in the studio.<br/>2. We create the video with the audio inserted.<br/><br/>Your video has <b>{actions.length}</b> actions and has an estimated length of <b>{estimatedLength}</b>. Video generation will take a similar amount of time - we thank you for your patience!</> }));
+      dispatch(openModal({
+        modalType: 'confirm-codevideo-generation',
+        title: 'CodeVideo Generation',
+      }));
       return;
     }
 

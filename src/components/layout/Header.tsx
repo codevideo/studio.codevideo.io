@@ -30,8 +30,8 @@ export function Header() {
     return (
         <Box position="fixed" left="0" right="0" style={{ zIndex: 10000, backdropFilter: 'blur(8px)' }} className="z-40" mx="3">
             <Card>
-                <Flex align="center" justify="between">
-                    <Flex direction="row" gap="3"> {/* Fixed width container for left side */}
+                <Flex direction="row" align="center" justify="between">
+                    <Flex direction="row" align="center" gap="3">
                         <IconButton
                             onClick={() => dispatch(toggleSidebar())}
                             size="1"
