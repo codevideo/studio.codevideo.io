@@ -5,11 +5,9 @@ import { Link } from 'gatsby';
 import { useIsDesktop } from '../../../hooks/useIsDesktop';
 
 export function AccountButton() {
-    const isDesktop = useIsDesktop();
     return (
         <Link to="/account">
             <Button
-                style={{ cursor: 'pointer', display: isDesktop ? 'inline-block' : 'none' }}
                 size="1"
                 variant="soft"
                 color="mint"
