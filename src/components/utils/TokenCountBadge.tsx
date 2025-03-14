@@ -13,6 +13,13 @@ export function TokenCountBadge() {
     const [tokens, setTokens] = useState(user?.publicMetadata.tokens as any || 0);
     const tokensColor = resolveTokensColor(tokens);
 
+    // on mount once user exists, also refresh the token count
+    useEffect(() => {
+        if (user) {
+            user.reload();
+        }
+    }, [user]);
+
     // whenever tokenRefresh or user changes, we need to update the color of the badge
     useEffect(() => {
         user?.reload()
@@ -22,6 +29,15 @@ export function TokenCountBadge() {
         setTokens(user?.publicMetadata.tokens as any || 0);
     }, [user]);
 
+    // also at interval of 5 seconds, refresh the token count
+    useEffect(() => {
+        const interval = setInterval(() => {
+            user?.reload();
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, [user]);
+    
     return (
         <>
             <Link to="/account">
