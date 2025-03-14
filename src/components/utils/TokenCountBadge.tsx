@@ -6,9 +6,12 @@ import { useUser } from '@clerk/clerk-react';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { BuyTokensButton } from './Buttons/BuyTokensButton';
 import { Link } from 'gatsby';
+import { setIsSidebarOpen } from '../../store/editorSlice';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
 
 export function TokenCountBadge() {
     const { tokenRefresh } = useAppSelector(state => state.auth);
+    const dispatch = useAppDispatch();
     const { user } = useUser();
     const [tokens, setTokens] = useState(user?.publicMetadata.tokens as any || 0);
     const tokensColor = resolveTokensColor(tokens);
@@ -37,10 +40,14 @@ export function TokenCountBadge() {
 
         return () => clearInterval(interval);
     }, [user]);
+
+    const onClickTokenCountBadge = () => {
+        dispatch(setIsSidebarOpen(false));
+    }
     
     return (
         <>
-            <Link to="/account">
+            <Link to="/account" onClick={onClickTokenCountBadge}>
                 <Badge size="2" color="amber">
                     <Text size="1" color="amber">Tokens:
                         <Text ml="1" weight="bold" color={tokensColor}>{tokens}</Text>

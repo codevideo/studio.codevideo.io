@@ -24,6 +24,7 @@ import { WhitepaperButton } from '../../utils/Buttons/WhitepaperButton';
 import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { AccountButton } from '../../utils/Buttons/AccountButton';
 import { useIsDesktop } from '../../../hooks/useIsDesktop';
+import { Link } from 'gatsby';
 
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
@@ -107,24 +108,15 @@ export function SidebarMenu() {
                                 <Flex direction="column" gap="2">
                                     <Heading size="4" mb="0" mt="5">Your Tokens</Heading>
                                     <TokenCountBadge />
-                                    <AccountButton />
                                     <TokensButton style={{ display: isDesktop ? 'none' : 'inline-block' }} />
                                 </Flex>
                             </SignedIn>
 
-                            {/* Tutorial Button */}
+                            {/* Tutorial Button - only shown here in sidebar on mobile */}
                             <Flex direction="column" gap="2">
                                 <Heading size="4" mb="0" mt="5">Tutorial</Heading>
                                 <Flex>
                                     <TutorialButton />
-                                </Flex>
-                            </Flex>
-
-                            {/* WhitePaper Button - only shown here in sidebar on mobile */}
-                            <Flex direction="column" gap="2">
-                                <Heading size="4" mb="0" mt="5">Whitepaper</Heading>
-                                <Flex>
-                                    <WhitepaperButton />
                                 </Flex>
                             </Flex>
 
@@ -178,6 +170,53 @@ export function SidebarMenu() {
                                     </Button>
                                 </Box>
                             </Flex>
+
+                            {/* FAQ Button - only shown here in sidebar on mobile */}
+                            {!isDesktop && <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">FAQ</Heading>
+                                <Link to="/faq">
+                                    <Button size="1" color="mint">
+                                        FAQs
+                                    </Button>
+                                </Link>
+                            </Flex>}
+
+                            {/* Blog Button - only shown here in sidebar on mobile */}
+                            {!isDesktop && <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">Blog</Heading>
+                                <Link to="https://codevideo.substack.com/">
+                                    <Button size="1" color="mint">
+                                        Blog
+                                    </Button>
+                                </Link>
+                            </Flex>}
+
+                            {/* WhitePaper Button - only shown here in sidebar on mobile */}
+                            {!isDesktop && <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">Whitepaper</Heading>
+                                <Flex>
+                                    <WhitepaperButton />
+                                </Flex>
+                            </Flex>}
+
+                            {/* GitHub Button - only shown here in sidebar on mobile */}
+                            {!isDesktop && <Flex direction="column" gap="2">
+                                <Heading size="4" mb="0" mt="5">GitHub</Heading>
+                                <a
+                                    href="https://github.com/orgs/codevideo/repositories"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <Button
+                                        style={{ cursor: 'pointer' }}
+                                        size="1"
+                                        variant="soft"
+                                        color="mint"
+                                    >
+                                        GitHub
+                                    </Button>
+                                </a>
+                            </Flex>}
                         </Flex>
                     </ScrollArea>
                 </Box>
