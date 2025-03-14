@@ -4,6 +4,7 @@ import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
 import { startTutorial } from '../../../store/tutorialSlice';
 import mixpanel from 'mixpanel-browser';
+import { setIsSidebarOpen } from '../../../store/editorSlice';
 
 export interface ITutorialButtonProps {
     style?: React.CSSProperties;
@@ -19,6 +20,7 @@ export function TutorialButton(props: ITutorialButtonProps) {
     const handleOnClick = () => {
         mixpanel.track('Tutorial Button Clicked Studio');
         dispatch(startTutorial());
+        dispatch(setIsSidebarOpen(false));
     };
 
     return (

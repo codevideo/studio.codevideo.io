@@ -115,7 +115,7 @@ export function FAQs(props: IFAQsProps) {
 
                 <Box>
                     <Heading size="4" mb="3">
-                        How long does a token last?
+                        How long do tokens last?
                     </Heading>
                     <Text size="3">
                         Tokens never expire: tokens from monthly subscriptions roll over at the end of each billing cycle. Even when you already have a subscription, you can always purchase additional tokens if you are running low.

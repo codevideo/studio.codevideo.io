@@ -50,7 +50,6 @@ export function SidebarMenu() {
 
     return (
         <Dialog.Root open={isSidebarOpen} onOpenChange={(open) => dispatch(setIsSidebarOpen(open))}>
-
             {/* Sidebar content */}
             <Dialog.Content style={{
                 position: 'fixed',
@@ -67,6 +66,9 @@ export function SidebarMenu() {
                 <Dialog.Title >
                     <VisuallyHidden>Project Sidebar</VisuallyHidden>
                 </Dialog.Title>
+                <Dialog.Description>
+                    <VisuallyHidden>Various options and settings for your CodeVideo projects.</VisuallyHidden>
+                </Dialog.Description>
 
                 {/* Close button */}
                 <Dialog.Close>

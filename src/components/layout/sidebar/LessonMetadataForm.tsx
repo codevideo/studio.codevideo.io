@@ -61,9 +61,8 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
     // Validate required fields
     if (!localLesson.name) {
       dispatch(openModal({
-        modalType: 'alert',
+        modalType: 'alert-fields',
         title: 'Error',
-        content: <>Please fill in all required fields</>
       }))
       return;
     }
