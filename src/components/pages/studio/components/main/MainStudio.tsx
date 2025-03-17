@@ -39,7 +39,7 @@ export function MainStudio() {
   const [editorMode, setEditorMode] = useState("editor");
   const isDesktop = useIsDesktop();
 
-  const defaultLanguage = currentProject && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
+  const defaultLanguage = currentProject && currentProject.project && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
 
   // for external browser
   const isExternalBrowserStepUrl = currentActions[currentActionIndex] && currentActions[currentActionIndex].name === 'external-browser' ?
@@ -93,6 +93,7 @@ export function MainStudio() {
           isSoundOn={isSoundOn}
           withCaptions={true}
           actionFinishedCallback={goToNextAction}
+          playBackCompleteCallback={() => { }}
           speakActionAudios={[]}
         />}
       </Box>
@@ -104,9 +105,9 @@ export function MainStudio() {
       p="1"
       mt="9"
     >
-      <Grid 
-      columns={{ initial: '1', md: '3' }} 
-      gap="3"
+      <Grid
+        columns={{ initial: '1', md: '3' }}
+        gap="3"
       >
         {/* Left Action Editor */}
         <Box style={{ width: '100%', overflowY: 'auto' }}>
@@ -164,6 +165,7 @@ export function MainStudio() {
                   isSoundOn={isSoundOn}
                   withCaptions={true}
                   actionFinishedCallback={goToNextAction}
+                  playBackCompleteCallback={() => { }}
                   speakActionAudios={[]}
                 />
               }

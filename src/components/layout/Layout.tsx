@@ -11,6 +11,9 @@ import { SidebarMenu } from './sidebar/SidebarMenu';
 import { SignUpOverlay } from './auth/SignUpOverlay';
 import { SignInOverlay } from './auth/SignInOverlay';
 import useUtmTracking from '../../hooks/useUtmTracking';
+import { useAppDispatch } from '../../hooks/useAppDispatch';
+import { loadProjectsFromLocalStorage } from '../../utils/persistence/loadProjectsFromLocalStorage';
+import { setProjects } from '../../store/editorSlice';
 
 export interface ILayoutProps {
     withHeader?: boolean;
@@ -34,12 +37,20 @@ export function Layout(props: PropsWithChildren<ILayoutProps>) {
         }, 3000);
     }
 
+    // bootstrap: get voices and load projects from local storage on mount 
+    // (should be fine for all pages so we put it here in layout)
     useEffect(() => {
         getVoices();
+        console.log('loading projects from local storage');
+        const projects = loadProjectsFromLocalStorage();
+        console.log('loaded projects:', projects);
+        dispatch(setProjects(projects));
     }, []);
 
     // use utm tracking for mixpanel
     useUtmTracking();
+
+    const dispatch = useAppDispatch();
 
     if (isFullScreen) {
         return (

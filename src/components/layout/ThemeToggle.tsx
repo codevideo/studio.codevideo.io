@@ -35,6 +35,7 @@ export function ThemeToggle() {
 
   return (
     <Button
+      style={{ cursor: 'pointer' }}
       variant="ghost" 
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}

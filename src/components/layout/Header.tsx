@@ -10,7 +10,7 @@ import {
     Link as RadixLink,
     Badge
 } from '@radix-ui/themes';
-import { HamburgerMenuIcon, PersonIcon } from '@radix-ui/react-icons';
+import { HamburgerMenuIcon } from '@radix-ui/react-icons';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { toggleSidebar } from '../../store/editorSlice';
 import { ThemeToggle } from './ThemeToggle';
@@ -35,6 +35,7 @@ export function Header() {
                 <Flex direction="row" align="center" justify="between">
                     <Flex direction="row" align="center" gap="3">
                         <IconButton
+                            style={{ cursor: 'pointer' }}
                             onClick={() => dispatch(toggleSidebar())}
                             size="1"
                             variant="solid"
@@ -54,13 +55,19 @@ export function Header() {
                             </Link>
                         </Box>
                         <Flex gap="3" style={{ display: isDesktop ? 'flex' : 'none' }}>
+                            <TutorialButton />
                             <Link to="/faq">
-                                <Button size="1" color="mint">
+                                <Button size="1" color="mint" style={{ cursor: 'pointer' }}>
                                     FAQs
                                 </Button>
                             </Link>
+                            <Link to="/contact">
+                                <Button size="1" color="mint" style={{ cursor: 'pointer' }}>
+                                    Contact
+                                </Button>
+                            </Link>
                             <RadixLink href="https://codevideo.substack.com/" target="_blank">
-                                <Button size="1" color="mint">
+                                <Button size="1" color="mint" style={{ cursor: 'pointer' }}>
                                     Blog
                                 </Button>
                             </RadixLink>
@@ -86,7 +93,6 @@ export function Header() {
                     {/* don't show any of this stuff in mobile */}
                     <Flex justify="end" align="center" gap="2" style={{ display: isDesktop ? 'flex' : 'none' }}>
                         <TokensButton />
-                        <TutorialButton />
                         <WhitepaperButton />
                         <a
                             href="https://github.com/orgs/codevideo/repositories"
@@ -103,7 +109,6 @@ export function Header() {
                                 GitHub
                             </Button>
                         </a>
-
                         <SignedOut>
                             <Badge
                                 style={{ display: isDesktop ? 'inline-block' : 'none', cursor: 'pointer' }}
@@ -114,7 +119,6 @@ export function Header() {
                                 <SignInButton />
                             </Badge>
                         </SignedOut>
-
                         <SignedIn >
                             <Box >
                                 <TokenCountBadge />

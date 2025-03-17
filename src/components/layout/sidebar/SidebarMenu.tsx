@@ -41,7 +41,7 @@ export function SidebarMenu() {
     }
 
     let currentProjectTitle = '';
-    if (isCourse(currentProject?.project)) {
+    if (currentProject && isCourse(currentProject.project)) {
         currentProjectTitle = currentProject.project.name;
     } else if (isLesson(currentProject?.project)) {
         currentProjectTitle = currentProject.project.name;

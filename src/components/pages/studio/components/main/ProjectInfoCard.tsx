@@ -11,7 +11,7 @@ export function ProjectInfoCard() {
     const { currentProject } = useAppSelector((state) => state.editor);
 
     const resolveProjectName = () => {
-        if (currentProject?.project) {
+        if (currentProject && currentProject.project) {
             if (isCourse(currentProject.project)) {
                 return (currentProject.project as ICourse).name;
             }
