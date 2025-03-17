@@ -61,7 +61,7 @@ const getItemCount = (userProject: UserProject): { count: number, itemName: stri
 
 export function ProjectRenderer(props: IProjectRendererProps) {
     const { userProject, onClickProject, isCurrentProject } = props;
-    const projectName = userProject?.project ? getProjectName(userProject.project) : 'Unknown Project';
+    const projectName = userProject && userProject.project ? getProjectName(userProject.project) : 'Unknown Project';
     const modifiedDate = new Date(userProject?.modified || Date.now());
     const timeAgo = formatDistanceToNow(modifiedDate, { addSuffix: true });
     const { count, itemName } = getItemCount(userProject);

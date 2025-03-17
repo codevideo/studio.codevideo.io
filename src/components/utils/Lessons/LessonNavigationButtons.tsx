@@ -12,8 +12,8 @@ export function LessonNavigationButtons() {
     if (currentProject?.projectType !== 'course') {
         return <></>
     }
-    if ((isCourse(currentProject.project) && currentProject.project.lessons.length === 0) ||
-        (isCourse(currentProject.project) && currentProject.project.lessons.length === 1)) {
+    if (currentProject && currentProject.project && (isCourse(currentProject.project) && currentProject.project.lessons.length === 0) ||
+        (currentProject && currentProject.project && isCourse(currentProject.project) && currentProject.project.lessons.length === 1)) {
         return <></>
     }
 
@@ -36,7 +36,7 @@ export function LessonNavigationButtons() {
             <Badge size="1" style={{ cursor: currentLessonIndex === 0 ? 'not-allowed' : 'pointer' }} color="mint" onClick={handlePreviousLesson} variant='soft'>
                 {'<'} Previous
             </Badge>
-            <Badge size="1" style={{ cursor: isCourse(currentProject.project) && currentLessonIndex === currentProject.project.lessons.length - 1 ? 'not-allowed' : 'pointer' }} color="mint" onClick={handleNextLesson} variant="soft">
+            <Badge size="1" style={{ cursor: currentProject && currentProject.project && isCourse(currentProject.project) && currentLessonIndex === currentProject.project.lessons.length - 1 ? 'not-allowed' : 'pointer' }} color="mint" onClick={handleNextLesson} variant="soft">
                 Next {'>'}
             </Badge>
         </Flex>

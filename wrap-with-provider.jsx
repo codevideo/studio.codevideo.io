@@ -7,7 +7,9 @@ export default ({ element }) => {
   const store = createStore()
   return (
     <ClerkProvider publishableKey={process.env.GATSBY_CLERK_PUBLISHABLE_KEY || ''}>
-      <Provider store={store}>{element}</Provider>
+      <Provider store={store}>
+        {element}
+      </Provider>
     </ClerkProvider>
   )
 }

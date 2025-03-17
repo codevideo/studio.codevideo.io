@@ -109,7 +109,7 @@ const editorSlice = createSlice({
 
             // update the actions on the current project
             const currentProject = state.projects[state.currentProjectIndex]
-            if (currentProject) {
+            if (currentProject && currentProject.project) {
                 if (isCourse(currentProject.project)) {
                     const currentLesson = currentProject.project.lessons[state.currentLessonIndex];
                     if (currentLesson) {

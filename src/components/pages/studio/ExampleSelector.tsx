@@ -21,7 +21,7 @@ export function ExampleSelector() {
 
     useEffect(() => {
         // Initialize with current project ID if available
-        if (currentProject?.project && isCourse(currentProject.project)) {
+        if (currentProject && currentProject.project && isCourse(currentProject.project)) {
             setSelectedId(currentProject.project.id);
         }
     }, [currentProject]);
