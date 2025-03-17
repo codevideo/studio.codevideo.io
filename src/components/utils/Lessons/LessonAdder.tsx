@@ -10,7 +10,7 @@ export function LessonAdder() {
 
   const dispatch = useAppDispatch();
 
-  if (currentProject && isCourse(currentProject?.project)) {
+  if (currentProject && currentProject.project && isCourse(currentProject.project)) {
 
     return (
       <Badge size="1" variant="soft" onClick={() => dispatch(openLessonModal())} style={{cursor: 'pointer'}}>

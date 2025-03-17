@@ -9,7 +9,11 @@ import tutorialSlice from './tutorialSlice'
 import formsSlice from './formsSlice'
 import authSlice from './authSlice'
 
-const createStore = () =>
+// we need preloaded state for the component embedder
+// so we can pass the global state to the store
+// and render the component with the global state
+// in the component embedder
+const createStore = (preloadedState = {}) =>
     configureStore({
         reducer: {
             theme: themeSlice,
@@ -20,7 +24,8 @@ const createStore = () =>
             tutorial: tutorialSlice,
             forms: formsSlice,
             auth: authSlice,
-        }
+        },
+        preloadedState,
     })
 
 

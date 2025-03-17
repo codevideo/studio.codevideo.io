@@ -8,6 +8,7 @@ export function AccountButton() {
     return (
         <Link to="/account">
             <Button
+                style={{ cursor: 'pointer' }}
                 size="1"
                 variant="soft"
                 color="mint"

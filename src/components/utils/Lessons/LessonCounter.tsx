@@ -6,7 +6,7 @@ import { useAppSelector } from '../../../hooks/useAppSelector';
 export function LessonCounter() {
     const { currentProject, currentLessonIndex } = useAppSelector((state) => state.editor);
 
-    if (currentProject && isCourse(currentProject?.project)) {
+    if (currentProject && currentProject.project && isCourse(currentProject.project)) {
         return (
             <Code
                 size="1"
