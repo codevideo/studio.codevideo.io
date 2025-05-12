@@ -26,6 +26,8 @@ import { useState, useEffect, useRef } from "react";
 import ActionKeyboard from "./ActionKeyboard";
 import mixpanel from "mixpanel-browser";
 import { TutorialCSSClassConstants } from "../../../layout/sidebar/StudioTutorial";
+import { NewActionBadge } from "./components/NewActionBadge";
+import { ActionBadge } from '@fullstackcraftllc/codevideo-react-components'
 
 export function ActionGUIEditor() {
   const { currentActions, currentActionIndex, isPlaying } = useAppSelector((state) => state.editor);
@@ -33,6 +35,8 @@ export function ActionGUIEditor() {
   const dispatch = useAppDispatch();
   const [showValueHint, setShowValueHint] = useState<{ open: boolean, content: string }>({ open: false, content: '' });
   const [prependSpaces, setPrependSpaces] = useState<number>(0);
+  const [showNewActions, setShowNewActions] = useState<boolean>(false);
+  const [showQuickActions, setShowQuickActions] = useState<boolean>(false);
   const [showMore, setShowMore] = useState<boolean>(false);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const advancedValueOneTextAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -165,6 +169,20 @@ export function ActionGUIEditor() {
       // terminal suggestions
       case 'terminal-type':
         return 'mycommand myargs';
+      // slide display
+      case 'slide-display':
+        return `# My Cool Slide
+
+## With a Subtitle
+
+and some source code:
+
+\`\`\`ts
+export const wowMyFunction = (someParam: string) => {
+    console.log(someParam);
+    // slides are important for software courses too!
+}
+\`\`\``;
       default:
         return "something"
     }
@@ -205,26 +223,6 @@ export function ActionGUIEditor() {
     // even though we don't deal directly with the draftActionsString in this component, we still need to update it so it triggers the stats component
     dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
   };
-
-
-  const getActionBadge = (actionName: string) => {
-    switch (true) {
-      case actionName.startsWith('author'):
-        return <Badge style={{ fontFamily: 'Fira Code, monospace' }} size="1" color="blue">{actionName}</Badge>
-      case actionName.startsWith('file-explorer'):
-        return <Badge style={{ fontFamily: 'Fira Code, monospace' }} size="1" color="green">{actionName}</Badge>
-      case actionName.startsWith('editor'):
-        return <Badge style={{ fontFamily: 'Fira Code, monospace' }} size="1" color="purple">{actionName}</Badge>
-      case actionName.startsWith('terminal'):
-        return <Badge style={{ fontFamily: 'Fira Code, monospace' }} size="1" color="gray">{actionName}</Badge>
-      case actionName.startsWith('mouse'):
-        return <Badge style={{ fontFamily: 'Fira Code, monospace' }} size="1" color="pink">{actionName}</Badge>
-      case actionName.startsWith('external'):
-        return <Badge style={{ fontFamily: 'Fira Code, monospace' }} size="1" color="orange">{actionName}</Badge>
-      default:
-        return <Text style={{ fontFamily: 'Fira Code, monospace' }}>{actionName}</Text>
-    }
-  }
 
   const quickActions: Array<{
     action: IAction,
@@ -343,23 +341,141 @@ export function ActionGUIEditor() {
 
       {currentAction && <>
         <Flex direction="column" gap="2">
-          <Select.Root
-            value={currentAction.name}
-            onValueChange={(value) => handleSelectChange(currentActionIndex, value)}
-          >
-            <Select.Trigger>
-              {getActionBadge(currentAction.name)}
-            </Select.Trigger>
-            <Select.Content>
-              <Select.Group>
-                {AllActionStrings.map((actionType) => (
-                  <Select.Item key={actionType} value={actionType}>
-                    {getActionBadge(actionType)}
-                  </Select.Item>
-                ))}
-              </Select.Group>
-            </Select.Content>
-          </Select.Root>
+          <Flex direction="row" align="center" justify="between" gap="2">
+            <Select.Root
+              defaultValue="Select action..."
+              value={currentAction.name}
+              onValueChange={(value) => handleSelectChange(currentActionIndex, value)}
+            >
+              <Select.Trigger color="gray">
+                <ActionBadge actionName={currentAction.name} />
+              </Select.Trigger>
+              <Select.Content color="gray">
+                <Flex direction="row" gap="2">
+                  <Flex direction="column" gap="1">
+                    <Text size="1" color="gray">Author:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('author-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                    <Text size="1" color="gray">External:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('external-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                    <Text size="1" color="gray">Slide:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('slide-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </Flex>
+                  <Flex direction="column" gap="1">
+                    <Text size="1" color="gray">File explorer:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('file-explorer-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </Flex>
+                  <Flex direction="column" gap="1">
+                    <Text size="1" color="gray">Editor:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('editor-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                    
+                  </Flex>
+                  <Flex direction="column" gap="1">
+                    <Text size="1" color="gray">Terminal:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('terminal-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </Flex>
+                  <Flex direction="column" gap="1">
+                    <Text size="1" color="gray">Mouse:</Text>
+                    <Select.Group>
+                      {AllActionStrings.filter(a => a.startsWith('mouse-')).map((actionType: any) => (
+                        <Select.Item key={actionType} value={actionType}>
+                          <ActionBadge actionName={actionType} />
+                        </Select.Item>
+                      ))}
+                    </Select.Group>
+                  </Flex>
+                </Flex>
+              </Select.Content>
+            </Select.Root>
+            <Flex direction="row" gap="2">
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="mint"
+                variant="soft"
+                onClick={() => {
+                  // add the current action to the previous index
+                  const newActions = currentActions
+                    .slice(0, currentActionIndex)
+                    .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(currentActionIndex));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Clone to Previous
+              </Badge>
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                className={TutorialCSSClassConstants.ACTION_GUI_CLONE_TO_NEXT}
+                color="mint"
+                variant="soft"
+                onClick={() => {
+                  // add the current action to the next index
+                  const newActions = currentActions
+                    .slice(0, currentActionIndex + 1)
+                    .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(currentActionIndex + 1));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Clone to Next
+              </Badge>
+              <Badge
+                style={{ cursor: 'pointer' }}
+                size="1"
+                color="red"
+                variant="soft"
+                onClick={() => {
+                  const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
+                  dispatch(setActions(newActions));
+                  dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
+                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                }}
+              >
+                Delete
+              </Badge>
+
+            </Flex>
+          </Flex>
+
           <Tooltip align="start" side="top" content={showValueHint.content} open={showValueHint.open}>
             {isAdvancedValueAction(currentAction) ? (
               // advanced value actions have a left and right value, and when submitted, they are combined with the advancedCommandValueSeparator
@@ -418,110 +534,86 @@ export function ActionGUIEditor() {
         </Flex>
         <Flex ml="1" gap="2">
           <Flex direction="column" gap="1">
-            <Flex wrap="wrap" gap="1">
-              <Text size="1" color="gray">Utilities:</Text>
-              <Badge
-                style={{ cursor: 'pointer' }}
-                size="1"
-                color="mint"
-                variant="soft"
-                onClick={() => {
-                  // add an author-speak-before action at the current index + 1
-                  const newActions = currentActions
-                    .slice(0, currentActionIndex + 1)
-                    .concat([{ name: 'author-speak-before', value: 'My new action...' }, ...currentActions.slice(currentActionIndex + 1)]);
-                  dispatch(setActions(newActions));
-                  dispatch(setCurrentActionIndex(currentActionIndex + 1));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-                }}
-              >
-                Add New
-              </Badge>
-              <Badge
-                style={{ cursor: 'pointer' }}
-                size="1"
-                color="mint"
-                variant="soft"
-                onClick={() => {
-                  // add the current action to the previous index
-                  const newActions = currentActions
-                    .slice(0, currentActionIndex)
-                    .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
-                  dispatch(setActions(newActions));
-                  dispatch(setCurrentActionIndex(currentActionIndex));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-                }}
-              >
-                Clone to Previous
-              </Badge>
-              <Badge
-                style={{ cursor: 'pointer' }}
-                size="1"
-                className={TutorialCSSClassConstants.ACTION_GUI_CLONE_TO_NEXT}
-                color="mint"
-                variant="soft"
-                onClick={() => {
-                  // add the current action to the next index
-                  const newActions = currentActions
-                    .slice(0, currentActionIndex + 1)
-                    .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
-                  dispatch(setActions(newActions));
-                  dispatch(setCurrentActionIndex(currentActionIndex + 1));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-                }}
-              >
-                Clone to Next
-              </Badge>
-              <Badge
-                style={{ cursor: 'pointer' }}
-                size="1"
-                color="red"
-                variant="soft"
-                onClick={() => {
-                  const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
-                  dispatch(setActions(newActions));
-                  dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-                }}
-              >
-                Delete
-              </Badge>
-            </Flex>
-            {/* series of clickable small badges which add their example action at the current index */}
-            <Flex wrap="wrap" gap="1">
-              <Text size="1" color="gray">Quick Add:</Text>
-              {quickActions.map(({ action, label, color }, index) => (
-                <Badge
-                  style={{ cursor: 'pointer' }}
-                  size="1"
-                  key={`${label}-${index}`}
-                  color={color as any}
-                  variant="soft"
-                  onClick={() => {
-                    // insert this quick action at currentIndex+1
-                    const newActions = currentActions
-                      .slice(0, currentActionIndex + 1)
-                      .concat([action, ...currentActions.slice(currentActionIndex + 1)]);
-
-                    dispatch(setActions(newActions));
-                    dispatch(setCurrentActionIndex(currentActionIndex + 1));
-                    dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
-                  }}
-                >
-                  {label}
-                </Badge>
-              ))}
-            </Flex>
-            {showMore ? (
-              <>
+            {showNewActions ? (
+              <Flex wrap="wrap" gap="1">
+                <NewActionBadge label="New Author Action" color="blue" name="author-speak-before" value="My new speak action..." />
+                <NewActionBadge label="New File Explorer Action" color="green" name="file-explorer-create-file" value="mynewfile.txt" />
+                <NewActionBadge label="New Editor Action" color="purple" name="editor-type" value="console.log('hello, world!');" />
+                <NewActionBadge label="New Terminal Action" color="gray" name="terminal-open" value="1" />
+                <Text
+                    style={{ cursor: 'pointer' }}
+                    size="1"
+                    color="mint"
+                    onClick={() => setShowNewActions(false)}
+                  >
+                    <u>Show less</u>
+                  </Text>
+              </Flex>
+            ) : (
               <Text
                 style={{ cursor: 'pointer' }}
                 size="1"
                 color="mint"
-                onClick={() => setShowMore(false)}
+                onClick={() => setShowNewActions(true)}
               >
-                <u>Show less</u>
+                <u>Show add actions...</u>
               </Text>
+            )}
+            {/* series of clickable small badges which add their example action at the current index */}
+            {showQuickActions ?
+              (
+                <Flex wrap="wrap" gap="1">
+                  {quickActions.map(({ action, label, color }, index) => (
+                    <Badge
+                      style={{ cursor: 'pointer' }}
+                      size="1"
+                      key={`${label}-${index}`}
+                      color={color as any}
+                      variant="soft"
+                      onClick={() => {
+                        // insert this quick action at currentIndex+1
+                        const newActions = currentActions
+                          .slice(0, currentActionIndex + 1)
+                          .concat([action, ...currentActions.slice(currentActionIndex + 1)]);
+
+                        dispatch(setActions(newActions));
+                        dispatch(setCurrentActionIndex(currentActionIndex + 1));
+                        dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                      }}
+                    >
+                      {label}
+                    </Badge>
+                  ))}
+                  <Text
+                    style={{ cursor: 'pointer' }}
+                    size="1"
+                    color="mint"
+                    onClick={() => setShowQuickActions(false)}
+                  >
+                    <u>Show less</u>
+                  </Text>
+                </Flex>
+              ) : (
+                <Text
+                  style={{ cursor: 'pointer' }}
+                  size="1"
+                  color="mint"
+                  onClick={() => setShowQuickActions(true)}
+                >
+                  <u>Show quick actions...</u>
+                </Text>
+              )
+            }
+            {showMore ? (
+              <>
+                <Text
+                  style={{ cursor: 'pointer' }}
+                  size="1"
+                  color="mint"
+                  onClick={() => setShowMore(false)}
+                >
+                  <u>Show less</u>
+                </Text>
                 <Flex align="center" gap="1">
                   {/* Dropdown of 0 to 10 spaces to prepend to any editor-type command */}
                   <Text size="1" color="gray">Prepend space to each <Badge size="1" color="purple">editor-type</Badge>?</Text>
@@ -552,7 +644,7 @@ export function ActionGUIEditor() {
                 color="mint"
                 onClick={() => setShowMore(true)}
               >
-                <u>Show more...</u>
+                <u>Show advanced controls...</u>
               </Text>
             )}
           </Flex>

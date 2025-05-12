@@ -5,8 +5,9 @@ import { useRef } from "react";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { setDraftActionsString } from "../../../../store/editorSlice";
-import { Flex } from '@radix-ui/themes';
+import { Button, Flex } from '@radix-ui/themes';
 import { useClerk } from "@clerk/clerk-react";
+import jsesc from "jsesc";
 
 export function ActionJsonEditor() {
   const { actionsString } = useAppSelector((state) => state.editor);
@@ -30,9 +31,44 @@ export function ActionJsonEditor() {
     // }, 1);
   };
 
+  const onClickCopy = (mode: 'escaped' | 'normal' = 'normal') => {
+    const editor = editorRef.current;
+    if (!editor) {
+      return;
+    }
+    if (mode === 'escaped') {
+      const escaped = jsesc(actionsString, {
+        // quotes: 'double',
+        // wrap: true  // This wraps the output in double quotes.
+      });
+      console.log(escaped);
+      navigator.clipboard.writeText(JSON.stringify(escaped));
+    } else {
+      navigator.clipboard.writeText(actionsString);
+    }
+  };
+
   const editor = (
-    <Flex 
-      direction="column" style={{ height: "600px"}}>
+    <Flex
+      direction="column" style={{ height: "600px" }}>
+      <Flex direction="row" gap="2" mb="2">
+        <Button
+          color="mint"
+          variant="soft"
+          onClick={() => onClickCopy('normal')}
+
+        >
+          Copy
+        </Button>
+        <Button
+          color="mint"
+          variant="soft"
+          onClick={() => onClickCopy('escaped')}
+        >
+          Copy Escaped for CLI
+        </Button>
+
+      </Flex>
       {clerk.loaded && <Editor
         theme={theme === "light" ? "vs" : "vs-dark"}
         path={"json/"}

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
-import { setActions, setCurrentActionIndex, setIsFullScreen, setIsPlaying } from '../../../../../store/editorSlice';
+import { setActions, setAllowFocusInEditor, setCurrentActionIndex, setIsFullScreen, setIsPlaying } from '../../../../../store/editorSlice';
 import { setIsRecording, turnOffRecording } from '../../../../../store/recordingSlice';
 import { useRecordActions } from '../../../../../hooks/useRecordActions';
 import { Flex, Button } from '@radix-ui/themes';
@@ -17,26 +17,32 @@ export function StudioNavigationButtons() {
     useRecordActions();
 
     const handleFirst = () => {
+        dispatch(setAllowFocusInEditor(true));
         dispatch(setCurrentActionIndex(0));
     }
 
     const handleJumpBackward = () => {
+        dispatch(setAllowFocusInEditor(true));
         dispatch(setCurrentActionIndex(Math.max(0, currentActionIndex - 10)));
     }
 
     const handlePrevious = () => {
+        dispatch(setAllowFocusInEditor(true));
         dispatch(setCurrentActionIndex(Math.max(0, currentActionIndex - 1)));
     };
 
     const handleNext = () => {
+        dispatch(setAllowFocusInEditor(true));
         dispatch(setCurrentActionIndex(Math.min(currentActions.length - 1, currentActionIndex + 1)));
     };
 
     const handleJumpForward = () => {
+        dispatch(setAllowFocusInEditor(true));
         dispatch(setCurrentActionIndex(Math.min(currentActions.length - 1, currentActionIndex + 10)));
     }
 
     const handleLast = () => {
+        dispatch(setAllowFocusInEditor(true));
         dispatch(setCurrentActionIndex(currentActions.length - 1));
     }
 

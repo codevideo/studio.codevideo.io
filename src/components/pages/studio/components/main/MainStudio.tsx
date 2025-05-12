@@ -38,12 +38,25 @@ export function MainStudio() {
   const clerk = useClerk();
   const [editorMode, setEditorMode] = useState("editor");
   const isDesktop = useIsDesktop();
+  const [externalBrowserUrl, setExternalBrowserUrl] = useState<string | null>(null);
 
   const defaultLanguage = currentProject && currentProject.project && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
 
-  // for external browser
-  const isExternalBrowserStepUrl = currentActions[currentActionIndex] && currentActions[currentActionIndex].name === 'external-browser' ?
+  // for external browser - we can keep showing it until any non-author action
+
+
+  // if we are in the external browser step, we need to set the url
+  // to the external browser url, otherwise we need to set it to null
+  // we can keep the external browser while author actions occur (or while other external-browser actions occur)
+  useEffect(() => {
+    const isExternalBrowserStepUrl = currentActions[currentActionIndex] && (currentActions[currentActionIndex].name === 'external-browser') ?
     currentActions[currentActionIndex].value : null;
+    if (isExternalBrowserStepUrl || currentActions[currentActionIndex]?.name.startsWith("external-browser-")) {
+      setExternalBrowserUrl(isExternalBrowserStepUrl);
+    } else if (!currentActions[currentActionIndex]?.name.startsWith("author-")) {
+      setExternalBrowserUrl(null);
+    }
+  }, [currentActionIndex]);
 
   const goToNextAction = () => {
     // if we are playing, move to the next action
@@ -87,7 +100,7 @@ export function MainStudio() {
           mode={mode}
           allowFocusInEditor={true} // no other options in fullscreen so no conflict of focused elements
           defaultLanguage={defaultLanguage}
-          isExternalBrowserStepUrl={isExternalBrowserStepUrl}
+          isExternalBrowserStepUrl={externalBrowserUrl}
           currentActionIndex={currentActionIndex}
           currentLessonIndex={currentLessonIndex}
           isSoundOn={isSoundOn}
@@ -159,7 +172,7 @@ export function MainStudio() {
                   mode={mode}
                   allowFocusInEditor={allowFocusInEditor}
                   defaultLanguage={defaultLanguage}
-                  isExternalBrowserStepUrl={isExternalBrowserStepUrl}
+                  isExternalBrowserStepUrl={externalBrowserUrl}
                   currentActionIndex={currentActionIndex}
                   currentLessonIndex={currentLessonIndex}
                   isSoundOn={isSoundOn}

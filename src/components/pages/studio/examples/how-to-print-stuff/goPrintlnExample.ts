@@ -12,7 +12,24 @@ export const goPrintlnExample: ICourse = {
         name: 'Go fmt.Println Example',
         description: 'Learn how to use fmt.Println in Go',
         initialSnapshot: {
+          isUnsavedChangesDialogOpen: false,
+          unsavedFileName: '',
           fileExplorerSnapshot: {
+            isFileExplorerContextMenuOpen: false,
+            isFileContextMenuOpen: false,
+            isFolderContextMenuOpen: false,
+            isNewFileInputVisible: false,
+            isNewFolderInputVisible: false,
+            isRenameFileInputVisible: false,
+            isRenameFolderInputVisible: false,
+            newFileInputValue: '',
+            newFolderInputValue: '',
+            renameFileInputValue: '',
+            renameFolderInputValue: '',
+            originalFileBeingRenamed: '',
+            originalFolderBeingRenamed: '',
+            newFileParentPath: '',
+            newFolderParentPath: '',
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -30,6 +47,7 @@ export const goPrintlnExample: ICourse = {
             },
           },
           editorSnapshot: {
+            isEditorContextMenuOpen: false,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -47,6 +65,10 @@ export const goPrintlnExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+            location: 'editor',
+            currentHoveredFileName: '',
+            currentHoveredFolderName: '',
+            currentHoveredEditorTabFileName: '',
             x: 0,
             y: 0,
             timestamp: 0,
@@ -68,7 +90,24 @@ export const goPrintlnExample: ICourse = {
           }
         },
         finalSnapshot: {
+          isUnsavedChangesDialogOpen: false,
+          unsavedFileName: '',
           fileExplorerSnapshot: {
+            isFileExplorerContextMenuOpen: false,
+            isFileContextMenuOpen: false,
+            isFolderContextMenuOpen: false,
+            isNewFileInputVisible: false,
+            isNewFolderInputVisible: false,
+            isRenameFileInputVisible: false,
+            isRenameFolderInputVisible: false,
+            newFileInputValue: '',
+            newFolderInputValue: '',
+            renameFileInputValue: '',
+            renameFolderInputValue: '',
+            originalFileBeingRenamed: '',
+            originalFolderBeingRenamed: '',
+            newFileParentPath: '',
+            newFolderParentPath: '',
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -86,6 +125,7 @@ export const goPrintlnExample: ICourse = {
             },
           },
           editorSnapshot: {
+            isEditorContextMenuOpen: false,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -103,6 +143,10 @@ export const goPrintlnExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+            location: 'editor',
+            currentHoveredFileName: '',
+            currentHoveredFolderName: '',
+            currentHoveredEditorTabFileName: '',
             x: 0,
             y: 0,
             timestamp: 0,

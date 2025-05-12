@@ -11,7 +11,24 @@ export const blankPythonExample: ICourse = {
             name: 'Blank Python Project',
             description: 'Start with a blank Python project',
             initialSnapshot: {
+                isUnsavedChangesDialogOpen: false,
+                unsavedFileName: '',
                 fileExplorerSnapshot: {
+                    isFileExplorerContextMenuOpen: false,
+                    isFileContextMenuOpen: false,
+                    isFolderContextMenuOpen: false,
+                    isNewFileInputVisible: false,
+                    isNewFolderInputVisible: false,
+                    isRenameFileInputVisible: false,
+                    isRenameFolderInputVisible: false,
+                    newFileInputValue: '',
+                    newFolderInputValue: '',
+                    renameFileInputValue: '',
+                    renameFolderInputValue: '',
+                    originalFileBeingRenamed: '',
+                    originalFolderBeingRenamed: '',
+                    newFileParentPath: '',
+                    newFolderParentPath: '',
                     fileStructure: {
                         'src': {
                             type: 'directory',
@@ -29,6 +46,7 @@ export const blankPythonExample: ICourse = {
                     },
                 },
                 editorSnapshot: {
+                    isEditorContextMenuOpen: false,
                     editors: [{
                         isActive: true,
                         isSaved: true,
@@ -46,6 +64,10 @@ export const blankPythonExample: ICourse = {
                     ]
                 },
                 mouseSnapshot: {
+                    location: 'editor',
+                    currentHoveredFileName: '',
+                    currentHoveredFolderName: '',
+                    currentHoveredEditorTabFileName: '',
                     x: 0,
                     y: 0,
                     timestamp: 0,
@@ -62,12 +84,29 @@ export const blankPythonExample: ICourse = {
                 },
                 authorSnapshot: {
                     authors: [
-                        {currentSpeechCaption: ''}
+                        { currentSpeechCaption: '' }
                     ]
                 }
             },
             finalSnapshot: {
+                isUnsavedChangesDialogOpen: false,
+                unsavedFileName: '',
                 fileExplorerSnapshot: {
+                    isFileExplorerContextMenuOpen: false,
+                    isFileContextMenuOpen: false,
+                    isFolderContextMenuOpen: false,
+                    isNewFileInputVisible: false,
+                    isNewFolderInputVisible: false,
+                    isRenameFileInputVisible: false,
+                    isRenameFolderInputVisible: false,
+                    newFileInputValue: '',
+                    newFolderInputValue: '',
+                    renameFileInputValue: '',
+                    renameFolderInputValue: '',
+                    originalFileBeingRenamed: '',
+                    originalFolderBeingRenamed: '',
+                    newFileParentPath: '',
+                    newFolderParentPath: '',
                     fileStructure: {
                         'src': {
                             type: 'directory',
@@ -85,6 +124,7 @@ export const blankPythonExample: ICourse = {
                     },
                 },
                 editorSnapshot: {
+                    isEditorContextMenuOpen: false,
                     editors: [{
                         isActive: true,
                         isSaved: true,
@@ -102,6 +142,10 @@ export const blankPythonExample: ICourse = {
                     ]
                 },
                 mouseSnapshot: {
+                    location: 'editor',
+                    currentHoveredFileName: '',
+                    currentHoveredFolderName: '',
+                    currentHoveredEditorTabFileName: '',
                     x: 0,
                     y: 0,
                     timestamp: 0,
@@ -118,7 +162,7 @@ export const blankPythonExample: ICourse = {
                 },
                 authorSnapshot: {
                     authors: [
-                        {currentSpeechCaption: ''}
+                        { currentSpeechCaption: '' }
                     ]
                 }
             },

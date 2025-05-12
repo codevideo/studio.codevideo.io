@@ -360,7 +360,11 @@ export const javaScriptExampleActions: Array<IAction> = [
         "value": "And let's get right into the editor."
     },
     {
-        "name": "mouse-click-editor",
+        "name": "mouse-move-editor",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {
@@ -691,15 +695,31 @@ export const pythonExampleActions: Array<IAction> = [
     },
     {
         "name": "author-speak-before",
-        "value": "First, let's make a Python file."
+        "value": "First, let's make a main.py Python file."
     },
     {
-        "name": "file-explorer-create-file",
+        "name": "mouse-move-file-explorer",
+        "value": "1"
+    },
+    {
+        "name": "mouse-right-click",
+        "value": "1"
+    },
+    {
+        "name": "mouse-move-file-explorer-context-menu-new-file",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
+        "value": "1"
+    },
+    {
+        "name": "file-explorer-type-new-file-input",
         "value": "main.py"
     },
     {
-        "name": "file-explorer-open-file",
-        "value": "main.py"
+        "name": "file-explorer-enter-new-file-input",
+        "value": "1"
     },
     {
         "name": "author-speak-before",
@@ -834,19 +854,35 @@ export const cSharpExampleActions: Array<IAction> = [
     },
     {
         "name": "author-speak-before",
-        "value": "First, to make it clear that this is a C sharp file, I'll just put a comment here"
+        "value": "Let's first make a MyClass.cs file."
     },
     {
-        "name": "editor-type",
-        "value": "// MyClass.cs"
+        "name": "mouse-move-file-explorer",
+        "value": "1"
     },
     {
-        "name": "editor-enter",
-        "value": "2"
+        "name": "mouse-right-click",
+        "value": "1"
+    },
+    {
+        "name": "mouse-move-file-explorer-context-menu-new-file",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
+        "value": "1"
+    },
+    {
+        "name": "file-explorer-type-new-file-input",
+        "value": "MyClass.cs"
+    },
+    {
+        "name": "file-explorer-enter-new-file-input",
+        "value": "1"
     },
     {
         "name": "author-speak-before",
-        "value": "Then, we'll need to use System, so let's add that to the top of the file."
+        "value": "First thing's first: we'll need to use System, so let's add that to the top of the file."
     },
     {
         "name": "editor-type",
@@ -997,14 +1033,30 @@ export const goLangExampleActions: Array<IAction> = [
     },
     {
         "name": "author-speak-before",
-        "value": "First, to make it clear that this is a Go file, I'll just put a comment here"
+        "value": "Let's first make a main.go file."
     },
     {
-        "name": "editor-type",
-        "value": "// main.go"
+        "name": "mouse-move-file-explorer",
+        "value": "1"
     },
     {
-        "name": "editor-enter",
+        "name": "mouse-right-click",
+        "value": "1"
+    },
+    {
+        "name": "mouse-move-file-explorer-context-menu-new-file",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
+        "value": "1"
+    },
+    {
+        "name": "file-explorer-type-new-file-input",
+        "value": "main.go"
+    },
+    {
+        "name": "file-explorer-enter-new-file-input",
         "value": "1"
     },
     {
@@ -1695,7 +1747,11 @@ export const advancedRustExampleActions: Array<IAction> = [
         "value": "And let's run this with cargo run:"
     },
     {
-        "name": "mouse-click-terminal",
+        "name": "mouse-move-terminal",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {
@@ -1707,7 +1763,11 @@ export const advancedRustExampleActions: Array<IAction> = [
         "value": "1"
     },
     {
-        "name": "mouse-click-editor",
+        "name": "mouse-move-editor",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {
@@ -2127,7 +2187,11 @@ export const advancedRustExampleActions: Array<IAction> = [
         "value": "And let's run this with cargo run:"
     },
     {
-        "name": "mouse-click-terminal",
+        "name": "mouse-move-terminal",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {

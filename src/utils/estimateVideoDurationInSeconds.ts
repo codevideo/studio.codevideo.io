@@ -17,24 +17,24 @@ export const estimateVideoDurationInSeconds = (actions: IAction[]): {
             return wordCount / 2.5;
         },
         'editor-type': (text: string) => {
-            // Assume average typing speed of 30 characters per second
-            return text.length / 30;
+            // Assume average typing speed of 10 characters per second
+            return text.length / 10;
         },
         'editor-enter': () => 0.3,  // 300ms for enter key
         'editor-backspace': (amount: string) => {
             // Assume backspace is slightly faster than typing
             // About 40 characters per second
-            return parseInt(amount) / 40;
+            return parseInt(amount) / 30;
         },
         'terminal-type': (text: string) => {
-            // Assume average typing speed of 30 characters per second
-            return text.length / 30;
+            // Assume average typing speed of 10 characters per second
+            return text.length / 10;
         },
         'terminal-enter': () => 0.3,  // 300ms for enter key
         'terminal-backspace': (amount: string) => {
             // Assume backspace is slightly faster than typing
             // About 40 characters per second
-            return parseInt(amount) / 40;
+            return parseInt(amount) / 30;
         },
         'editor-arrow-up': () => 0.2,   // 200ms for arrow key
         'editor-arrow-down': () => 0.2,
@@ -45,8 +45,8 @@ export const estimateVideoDurationInSeconds = (actions: IAction[]): {
     };
 
     let totalDuration = 0;
-    let pauseAfterSpeak = 0.5;  // Half second pause after speaking
-    let pauseAfterTyping = 0.2; // 200ms pause after typing
+    let pauseAfterSpeak = 5;  // Half second pause after speaking
+    let pauseAfterTyping = 5; // 200ms pause after typing
     let longestSpeakActionDuration = 0;
     let longestSpeakActionIndex = 0;
     let longestCodeActionDuration = 0;

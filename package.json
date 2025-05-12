@@ -16,10 +16,11 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
-    "@fullstackcraftllc/codevideo-exporters": "^0.0.6",
-    "@fullstackcraftllc/codevideo-ide-react": "^0.0.32",
-    "@fullstackcraftllc/codevideo-types": "^2.0.40",
-    "@fullstackcraftllc/codevideo-virtual-ide": "^1.0.13",
+    "@fullstackcraftllc/codevideo-exporters": "^0.0.8",
+    "@fullstackcraftllc/codevideo-ide-react": "^0.0.86",
+    "@fullstackcraftllc/codevideo-react-components": "^1.0.1",
+    "@fullstackcraftllc/codevideo-types": "^2.1.16",
+    "@fullstackcraftllc/codevideo-virtual-ide": "^1.0.25",
     "@monaco-editor/react": "^4.6.0",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-icons": "^1.3.2",
@@ -31,6 +32,7 @@
     "gifshot": "^0.4.5",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
+    "jsesc": "^3.1.0",
     "jszip": "^3.10.1",
     "mixpanel-browser": "^2.60.0",
     "monaco-editor": "^0.52.0",
@@ -53,6 +55,7 @@
     "url": "https://github.com/codevideo/studio/issues"
   },
   "devDependencies": {
+    "@types/jsesc": "^3.0.3",
     "@types/loadable__component": "^5.13.9",
     "@types/mixpanel-browser": "^2.51.0",
     "@types/react-dom": "^19.0.4",

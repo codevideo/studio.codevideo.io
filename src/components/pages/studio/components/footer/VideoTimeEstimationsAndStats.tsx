@@ -55,10 +55,10 @@ export function VideoTimeEstimationsAndStats() {
                 <Box style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <Text size="2">Total Actions: <Text size="2" weight="medium">{currentActions.length}</Text></Text>
                     <Text size="2">Estimated Video Length: <Text size="2" weight="medium">{formatDuration(totalDuration)} ({numClips} clips at {formatDuration(avgClipDuration)} / ea.)</Text></Text>
-                    <Text size="2">Estimated Generation Times:</Text>
+                    <Text size="2">Estimated Video Generation Times:</Text>
                     <Flex direction="column" pl="2">
                         <Text size="1">In Production:</Text>
-                        <Text size="1">- 4 GB Intel, CodeVide API v1.0.0: <Text size="1" weight="medium">{formatDuration(totalDuration)}</Text></Text>
+                        <Text size="1">- 8 GB RAM, CodeVide API v1.0.0: <Text size="1" weight="medium">{formatDuration(totalDuration)}</Text></Text>
                         <Text size="1">In development:</Text>
                         <Text size="1">- Parallel cloud arch: <Text size="1" weight="medium">{formatDuration(longestSpeakActionDuration)}</Text> (maximum length of longest action)</Text>
                         <Text size="1">- 512 GB Apple M3 Ultra, parallel: <Text size="1" weight="medium">{formatDuration(generationTimeM4/4)}</Text></Text>

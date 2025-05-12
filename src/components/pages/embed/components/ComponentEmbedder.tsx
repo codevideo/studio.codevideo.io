@@ -1,86 +1,102 @@
-import React, { useState, useCallback } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Card, Button, Box, Heading, Code, Flex } from '@radix-ui/themes';
-import { Provider } from 'react-redux';
-import createStore from '../../../../store';
-import { useAppSelector } from '../../../../hooks/useAppSelector';
+import { Project } from '@fullstackcraftllc/codevideo-types';
 
-export interface IComponentEmbedderProps<T> {
-    Component: React.ComponentType<T>;
-    componentName: string;
-    componentProps: T;
+export interface IComponentEmbedderProps {
+    project: Project;
+    currentActionIndex: number;
+    currentLessonIndex: number;
+    theme: string;
+    mode: string;
 }
 
-export const ComponentEmbedder = <T extends {} = {}>(props: IComponentEmbedderProps<T>) => {
-    const { Component, componentName, componentProps } = props;
+export const ComponentEmbedder = (props: IComponentEmbedderProps) => {
+    const { project, currentActionIndex, currentLessonIndex, theme, mode } = props;
+    const [width, setWidth] = useState(854);
+    const [height, setHeight] = useState(480);
     const [showCopied, setShowCopied] = useState(false);
+    const [embedCode, setEmbedCode] = useState('');
+    const iframeRef = useRef<HTMLIFrameElement>(null);
 
-    // Grab the current global state
-    const globalState = useAppSelector(state => state);
+    // on mount, generate the embed code
+    useEffect(() => {
+        const fullEmbedCode = `
+<!-- @radix-ui/themes stylesheet and @fullstackcraftllc/codevideo-ide-react UMD script -->
+<link rel="stylesheet" href="https://unpkg.com/@radix-ui/themes/styles.css">
+<script src="https://unpkg.com/@fullstackcraftllc/codevideo-ide-react/dist/embeddable.bundle.js"></script>
 
-    const generateEmbedCode = useCallback(() => {
-        // Get the static HTML markup of the component
-        const componentHtml = renderToStaticMarkup(
-            <Provider store={createStore(globalState)}>
-                <Component {...componentProps} />
-            </Provider>
-        );
+<div id="codevideo-embed"></div>
+<script>
+    const props = {
+        width: "${width}px",
+        height: "${height}px",
+        currentActionIndex: ${currentActionIndex},
+        currentLessonIndex: ${currentLessonIndex},
+        theme: "${theme}",
+        mode: "${mode}",
+        project: ${JSON.stringify(project)}
+    };
+    CodeVideoIDEEmbeddable.mountEmbeddableCodeVideoIDE(props, 'codevideo-embed');
+</script>
+`;
+        setEmbedCode(fullEmbedCode);
+    }, [width, height, currentActionIndex, currentLessonIndex, theme, mode, project]);
 
-        console.log("componentHtml is", componentHtml);
-
-        return `<!-- React Component Embed Code -->
-<div id="embedded-component">${componentHtml}</div>
-
-<!-- Dependencies -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/themes@2.0.0/styles.css">
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-<!-- Component Hydration -->
-<script type="text/javascript">
-  // Re-hydrate the component to make it interactive
-  const root = ReactDOM.createRoot(document.getElementById('embedded-component'));
-  root.render(React.createElement(${componentName}));
-</script>`;
-    }, [Component, componentName, componentProps]);
+    // After embedCode is set, write it into the iframe
+    useEffect(() => {
+        if (iframeRef.current && embedCode) {
+            const iframeDoc = iframeRef.current.contentDocument || iframeRef.current.contentWindow?.document;
+            if (!iframeDoc) return;
+            iframeDoc.open();
+            iframeDoc.write(embedCode);
+            iframeDoc.close();
+        }
+    }, [embedCode]);
 
     const copyToClipboard = useCallback(() => {
-        navigator.clipboard.writeText(generateEmbedCode());
+        navigator.clipboard.writeText(embedCode);
         setShowCopied(true);
         setTimeout(() => setShowCopied(false), 2000);
-    }, [generateEmbedCode]);
-
-    console.log("RENDERING, componentProps are", componentProps);
+    }, [embedCode]);
 
     return (
         <Box mt="9">
             <Card mb="4">
                 <Heading size="5" mb="4">Component Preview</Heading>
-                <Box style={{
+                <Flex align="center" justify="center">
+                <Box 
+                    p="4"
+                style={{
                     border: '2px dashed var(--gray-7)',
                     borderRadius: 'var(--radius-4)',
-                    padding: 'var(--space-4)'
+                    
                 }}>
-                    <Component {...componentProps} />
+                    <iframe
+                        ref={iframeRef}
+                        style={{ width: `${width}px`, height: `${height}px`, border: 'none' }}
+                        title="CodeVideoIDE Embed Preview"
+                    />
                 </Box>
+                </Flex>
             </Card>
-
             <Card>
                 <Flex display="flex" justify="between" align="center" mb="4">
                     <Heading size="5">Embed Code</Heading>
-                    <Button
-                        onClick={copyToClipboard}
-                        variant={showCopied ? "soft" : "solid"}
-                    >
-                        {showCopied ? 'Copied!' : 'Copy Code'}
-                    </Button>
+                    <Flex gap="2">
+                        <Button
+                            onClick={copyToClipboard}
+                            variant={showCopied ? "soft" : "solid"}
+                        >
+                            {showCopied ? 'Copied!' : 'Copy Code'}
+                        </Button>
+                    </Flex>
                 </Flex>
                 <Code size="2" style={{ display: 'block', whiteSpace: 'pre', overflowX: 'auto' }}>
-                    {generateEmbedCode()}
+                    {embedCode}
                 </Code>
             </Card>
         </Box>
     );
-}
+};
 
 export default ComponentEmbedder;

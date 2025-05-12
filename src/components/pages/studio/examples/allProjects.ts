@@ -1,4 +1,4 @@
-import { ICourse, Project } from "@fullstackcraftllc/codevideo-types";
+import { ICourse } from "@fullstackcraftllc/codevideo-types";
 import { javascriptCreateRenameDeleteFileExample } from "./advanced/javascriptCreateRenameDeleteFileExample";
 import { blankCSharpExample } from "./blank/blankCSharpExample";
 import { blankJavaScriptExample } from "./blank/blankJavaScriptExample";
@@ -9,7 +9,7 @@ import { blankGoExample } from "./blank/blankGoExample";
 import { csharpConsoleWriteLineExample } from "./how-to-print-stuff/csharpConsoleWriteLineExample";
 import { pythonPrintExample } from "./how-to-print-stuff/pythonPrintExample";
 import { goPrintlnExample } from "./how-to-print-stuff/goPrintlnExample";
-import { mouseMovementExample } from "./advanced/javascriptMouseMovementExample";
+import { mouseMovementExample } from "./advanced/mouseMovementExample";
 import { functionalTerminalExample } from "./advanced/functionalTerminalExample";
 import { typingUnitTestExample } from "./how-to-print-stuff/typingUnitTestExample";
 
