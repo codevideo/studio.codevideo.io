@@ -16,8 +16,8 @@ export const ConfirmModal = (props: IConfirmModalProps) => {
         <Box className="modal-content">
             <Text>{message}</Text>
             <Box className="modal-actions">
-                <Button onClick={onConfirm}>Confirm</Button>
-                <Button onClick={() => dispatch(closeModal())}>Cancel</Button>
+                <Button onClick={onConfirm} size="1">Confirm</Button>
+                <Button onClick={() => dispatch(closeModal())} size="1">Cancel</Button>
             </Box>
         </Box>
     );

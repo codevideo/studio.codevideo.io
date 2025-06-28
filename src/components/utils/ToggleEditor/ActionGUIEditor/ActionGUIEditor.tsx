@@ -12,6 +12,7 @@ import {
   advancedCommandValueSeparator,
   AllActions,
   AllActionStrings,
+  extractActionsFromProject,
   IAction,
   isAdvancedValueAction,
   isAuthorAction,
@@ -20,7 +21,7 @@ import {
 import { InsertStepButton } from "./InsertStepButton";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
-import { setActions, setAllowFocusInEditor, setCurrentActionIndex, setDraftActionsString } from "../../../../store/editorSlice";
+import { setActions, setAllowFocusInEditor, setCurrentActionIndex, setDraftProjectString } from "../../../../store/editorSlice";
 import { ActionCounter } from "../../ActionCounter";
 import { useState, useEffect, useRef } from "react";
 import ActionKeyboard from "./ActionKeyboard";
@@ -30,7 +31,7 @@ import { NewActionBadge } from "./components/NewActionBadge";
 import { ActionBadge } from '@fullstackcraftllc/codevideo-react-components'
 
 export function ActionGUIEditor() {
-  const { currentActions, currentActionIndex, isPlaying } = useAppSelector((state) => state.editor);
+  const { currentProject, currentActionIndex, currentLessonIndex, isPlaying } = useAppSelector((state) => state.editor);
   const { isRecording } = useAppSelector((state) => state.recording);
   const dispatch = useAppDispatch();
   const [showValueHint, setShowValueHint] = useState<{ open: boolean, content: string }>({ open: false, content: '' });
@@ -41,6 +42,7 @@ export function ActionGUIEditor() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const advancedValueOneTextAreaRef = useRef<HTMLTextAreaElement>(null);
   const advancedValueTwoTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const currentActions = extractActionsFromProject(currentProject?.project || [], currentLessonIndex);
   const currentAction = currentActions[currentActionIndex];
 
   // Auto-resize text area when content changes
@@ -79,8 +81,8 @@ export function ActionGUIEditor() {
         return action;
       });
       dispatch(setActions(newActions));
-      // even though we don't deal directly with the draftActionsString in this component, we still need to update it so it triggers the stats component
-      dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+      // even though we don't deal directly with the draftProjectString in this component, we still need to update it so it triggers the stats component
+      dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
       return;
     }
 
@@ -102,8 +104,8 @@ export function ActionGUIEditor() {
       return action;
     });
     dispatch(setActions(newActions));
-    // even though we don't deal directly with the draftActionsString in this component, we still need to update it so it triggers the stats component
-    dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+    // even though we don't deal directly with the draftProjectString in this component, we still need to update it so it triggers the stats component
+    dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
   };
 
   const handleTextAreaChange = (
@@ -148,7 +150,7 @@ export function ActionGUIEditor() {
         return 'myfile.txt';
       case 'file-explorer-rename-folder':
         return 'myfolder';
-      // file explorer suggestions - complex - need to use the seperator
+      // file explorer suggestions - complex - need to use the separator
       case 'file-explorer-move-file':
         return `myfile.txt${advancedCommandValueSeparator}myfolder/myfile.txt`;
       case 'file-explorer-move-folder':
@@ -205,14 +207,29 @@ export const wowMyFunction = (someParam: string) => {
       if (firstPartNewAction !== firstPartOfAction) {
         // switch types, use the suggested value
         suggestedValue = getSuggestValueBasedOnActionName(newValue);
+      } else {
+        // Same category, but check if we're switching between advanced and non-advanced actions
+        const newActionObj = { name: newValue as AllActions, value: action.value };
+        const oldActionObj = { name: action.name, value: action.value };
+        
+        // If switching from non-advanced to advanced action, use suggested value
+        if (isAdvancedValueAction(newActionObj) && !isAdvancedValueAction(oldActionObj)) {
+          suggestedValue = getSuggestValueBasedOnActionName(newValue);
+        }
+        // If switching from advanced to non-advanced action, use first part of current value
+        else if (!isAdvancedValueAction(newActionObj) && isAdvancedValueAction(oldActionObj)) {
+          const valueParts = action.value.split(advancedCommandValueSeparator);
+          suggestedValue = valueParts[0] || getSuggestValueBasedOnActionName(newValue);
+        }
       }
+      
       if (i === index) {
         return {
           ...action,
           name: newValue as AllActions,
           value: isRepeatableAction({
             name: newValue as AllActions,
-            value: action.value,
+            value: suggestedValue,
           }) ? "1" : suggestedValue,
         };
       }
@@ -220,8 +237,8 @@ export const wowMyFunction = (someParam: string) => {
     });
     dispatch(setActions(newActions));
     dispatch(setCurrentActionIndex(index));
-    // even though we don't deal directly with the draftActionsString in this component, we still need to update it so it triggers the stats component
-    dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+    // even though we don't deal directly with the draftProjectString in this component, we still need to update it so it triggers the stats component
+    dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
   };
 
   const quickActions: Array<{
@@ -320,8 +337,15 @@ export const wowMyFunction = (someParam: string) => {
         <Button
           color="mint"
           variant="soft"
-          onClick={() => dispatch(setCurrentActionIndex(currentActionIndex - 1))}
+          onClick={() => {
+            dispatch(setAllowFocusInEditor(true));
+            // Small delay to ensure focus management doesn't interfere with editor caret positioning
+            setTimeout(() => {
+              dispatch(setCurrentActionIndex(currentActionIndex - 1));
+            }, 10);
+          }}
           disabled={currentActionIndex === 0 || isPlaying || isRecording}
+          size="1"
         >
           {'<'} Previous
         </Button>
@@ -331,8 +355,15 @@ export const wowMyFunction = (someParam: string) => {
             className={TutorialCSSClassConstants.ACTION_GUI_NEXT_BUTTON}
             color="mint"
             variant="soft"
-            onClick={() => dispatch(setCurrentActionIndex(currentActionIndex + 1))}
+            onClick={() => {
+              dispatch(setAllowFocusInEditor(true));
+              // Small delay to ensure focus management doesn't interfere with editor caret positioning
+              setTimeout(() => {
+                dispatch(setCurrentActionIndex(currentActionIndex + 1));
+              }, 10);
+            }}
             disabled={currentActionIndex === currentActions.length - 1 || isPlaying || isRecording}
+            size="1"
           >
             Next {'>'}
           </Button>
@@ -397,7 +428,6 @@ export const wowMyFunction = (someParam: string) => {
                         </Select.Item>
                       ))}
                     </Select.Group>
-                    
                   </Flex>
                   <Flex direction="column" gap="1">
                     <Text size="1" color="gray">Terminal:</Text>
@@ -435,7 +465,7 @@ export const wowMyFunction = (someParam: string) => {
                     .concat([currentAction, ...currentActions.slice(currentActionIndex)]);
                   dispatch(setActions(newActions));
                   dispatch(setCurrentActionIndex(currentActionIndex));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                  dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
                 }}
               >
                 Clone to Previous
@@ -453,7 +483,7 @@ export const wowMyFunction = (someParam: string) => {
                     .concat([currentAction, ...currentActions.slice(currentActionIndex + 1)]);
                   dispatch(setActions(newActions));
                   dispatch(setCurrentActionIndex(currentActionIndex + 1));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                  dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
                 }}
               >
                 Clone to Next
@@ -467,7 +497,7 @@ export const wowMyFunction = (someParam: string) => {
                   const newActions = currentActions.filter((_, i) => i !== currentActionIndex);
                   dispatch(setActions(newActions));
                   dispatch(setCurrentActionIndex(Math.min(currentActionIndex, newActions.length - 1)));
-                  dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                  dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
                 }}
               >
                 Delete
@@ -539,15 +569,16 @@ export const wowMyFunction = (someParam: string) => {
                 <NewActionBadge label="New Author Action" color="blue" name="author-speak-before" value="My new speak action..." />
                 <NewActionBadge label="New File Explorer Action" color="green" name="file-explorer-create-file" value="mynewfile.txt" />
                 <NewActionBadge label="New Editor Action" color="purple" name="editor-type" value="console.log('hello, world!');" />
+                <NewActionBadge label="New Mouse Action" color="orange" name="mouse-move-editor" value="1" />
                 <NewActionBadge label="New Terminal Action" color="gray" name="terminal-open" value="1" />
                 <Text
-                    style={{ cursor: 'pointer' }}
-                    size="1"
-                    color="mint"
-                    onClick={() => setShowNewActions(false)}
-                  >
-                    <u>Show less</u>
-                  </Text>
+                  style={{ cursor: 'pointer' }}
+                  size="1"
+                  color="mint"
+                  onClick={() => setShowNewActions(false)}
+                >
+                  <u>Show less</u>
+                </Text>
               </Flex>
             ) : (
               <Text
@@ -578,7 +609,7 @@ export const wowMyFunction = (someParam: string) => {
 
                         dispatch(setActions(newActions));
                         dispatch(setCurrentActionIndex(currentActionIndex + 1));
-                        dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                        dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
                       }}
                     >
                       {label}

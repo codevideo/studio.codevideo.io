@@ -140,7 +140,7 @@ export const Form = (props: IFormProps) => {
                     <Button
                         type="submit"
                         disabled={isSuccessful || isSubmitting}
-                        size="2"
+                        size="1"
                     >
                         {submitButtonText}
                     </Button>

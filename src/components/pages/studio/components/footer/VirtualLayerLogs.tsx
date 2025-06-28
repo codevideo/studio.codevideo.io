@@ -1,18 +1,34 @@
 import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { Box, Grid, Button, Select, Flex, Text, Badge, Code } from '@radix-ui/themes';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { VirtualIDE } from '@fullstackcraftllc/codevideo-virtual-ide';
 import { IVirtualLayerLog, LogType, VirtualLayerLogSource } from '@fullstackcraftllc/codevideo-types';
 import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
 
 export function VirtualLayerLogs() {
-    const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
+    const { currentProject, currentActionIndex } = useAppSelector(state => state.editor);
     // const [allLogsOverAllTime, setAllLogsOverAllTime] = useState<IVirtualLayerLog[]>([]);
     const [isExpanded, setIsExpanded] = useState(false);
     const [minLevel, setMinLevel] = useState<'all' | LogType>('all');
     const [source, setSource] = useState<'all' | VirtualLayerLogSource>('all');
-    const virtualIDE = new VirtualIDE(currentActions, currentActionIndex, true);
+    
+    if (!currentProject?.project) {
+        return (
+            <Box>
+                <Button
+                    className={TutorialCSSClassConstants.VIRTUAL_LAYER_LOGS_BUTTON}
+                    variant="ghost"
+                    color="mint"
+                    disabled
+                >
+                    Virtual Layer Logs (No Project)
+                </Button>
+            </Box>
+        );
+    }
+    
+    const virtualIDE = new VirtualIDE(JSON.parse(JSON.stringify(currentProject.project)), currentActionIndex, true);
     const logs = virtualIDE.getLogs();
 
 

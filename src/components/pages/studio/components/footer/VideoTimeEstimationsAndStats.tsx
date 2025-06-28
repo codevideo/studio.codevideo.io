@@ -5,10 +5,12 @@ import { formatDuration } from '../../../../../utils/formatDuration';
 import { Box, Button, Flex, Grid, Text } from '@radix-ui/themes';
 import { useMemo, useState } from 'react';
 import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTutorial';
+import { extractActionsFromProject } from '@fullstackcraftllc/codevideo-types';
 
 export function VideoTimeEstimationsAndStats() {
     const [isExpanded, setIsExpanded] = useState(false);
-    const { currentActions } = useAppSelector(state => state.editor);
+    const { currentProject, currentLessonIndex } = useAppSelector(state => state.editor);
+    const currentActions = extractActionsFromProject(currentProject?.project || [], currentLessonIndex);
     const {
         totalDuration,
         longestSpeakActionDuration,

@@ -82,6 +82,7 @@ export function SidebarMenu() {
                             right: '16px',
                             cursor: 'pointer'
                         }}
+                        size="1"
                     >
                         <Cross2Icon />
                     </Button>

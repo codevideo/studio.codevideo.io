@@ -2,8 +2,8 @@ import * as React from 'react';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { Badge } from '@radix-ui/themes';
-import { setActions, setCurrentActionIndex, setDraftActionsString } from '../../../../../store/editorSlice';
-import { AllActions } from '@fullstackcraftllc/codevideo-types';
+import { setActions, setCurrentActionIndex, setDraftProjectString } from '../../../../../store/editorSlice';
+import { AllActions, extractActionsFromProject } from '@fullstackcraftllc/codevideo-types';
 
 export interface INewActionBadgeProps {
     label: string;
@@ -14,8 +14,9 @@ export interface INewActionBadgeProps {
 
 export function NewActionBadge(props: INewActionBadgeProps) {
     const { label, color, name, value } = props;
-    const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
+    const { currentProject, currentActionIndex, currentLessonIndex } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
+    const currentActions = extractActionsFromProject(currentProject?.project || [], currentLessonIndex);
     return (
         <Badge
             style={{ cursor: 'pointer' }}
@@ -29,7 +30,7 @@ export function NewActionBadge(props: INewActionBadgeProps) {
                     .concat([{ name, value }, ...currentActions.slice(currentActionIndex + 1)]);
                 dispatch(setActions(newActions));
                 dispatch(setCurrentActionIndex(currentActionIndex + 1));
-                dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+                dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
             }}
         >
             {label}

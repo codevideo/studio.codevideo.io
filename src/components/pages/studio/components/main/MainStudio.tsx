@@ -12,11 +12,10 @@ import { RecordingLogs } from '../footer/RecordingLogs';
 import { VideoTimeEstimationsAndStats } from '../footer/VideoTimeEstimationsAndStats';
 import { useAppSelector } from '../../../../../hooks/useAppSelector';
 import { useEffect, useState } from 'react';
-import { GUIMode, isCourse } from '@fullstackcraftllc/codevideo-types';
+import { extractActionsFromProject, GUIMode, isCourse } from '@fullstackcraftllc/codevideo-types';
 import { VirtualLayerLogs } from '../footer/VirtualLayerLogs';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
-import { setCurrentActionIndex, setIsPlaying, setIsSoundOn } from '../../../../../store/editorSlice';
-import { SoundToggleButton } from './SoundToggleButton';
+import { setCurrentActionIndex, setIsPlaying } from '../../../../../store/editorSlice';
 import { useClerk } from '@clerk/clerk-react';
 import { useIsDesktop } from '../../../../../hooks/useIsDesktop';
 import { ExportDropdown } from '../../../../layout/sidebar/ExportDropdown';
@@ -24,13 +23,14 @@ import { TutorialCSSClassConstants } from '../../../../layout/sidebar/StudioTuto
 import { ProjectInfoCard } from './ProjectInfoCard';
 import { CodeVideoIDE } from '@fullstackcraftllc/codevideo-ide-react'
 import mixpanel from 'mixpanel-browser';
+import { Snapshots } from '../footer/Snapshots';
 
 // TODO: ReactMediaRecorder works decently, but we will need user to 1. enable screen recording in browser, 2. allow microphone access, 3. go full full screen
 // this hook literally just records the entire browser screen, tabs and all
 // const ReactMediaRecorder = lazy(() => import('react-media-recorder').then(module => ({ default: module.ReactMediaRecorder })));
 
 export function MainStudio() {
-  const { currentProject, currentActions, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying, isSoundOn, allowFocusInEditor } = useAppSelector((state) => state.editor);
+  const { currentProject, currentActionIndex, currentLessonIndex, isFullScreen, isPlaying, isSoundOn, allowFocusInEditor, showDevBox } = useAppSelector((state) => state.editor);
   const { isRecording } = useAppSelector(state => state.recording);
   const { theme } = useAppSelector(state => state.theme);
   const dispatch = useAppDispatch();
@@ -42,6 +42,7 @@ export function MainStudio() {
 
   const defaultLanguage = currentProject && currentProject.project && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
 
+  const currentActions = extractActionsFromProject(currentProject?.project || [], currentLessonIndex);
   // for external browser - we can keep showing it until any non-author action
 
 
@@ -50,7 +51,7 @@ export function MainStudio() {
   // we can keep the external browser while author actions occur (or while other external-browser actions occur)
   useEffect(() => {
     const isExternalBrowserStepUrl = currentActions[currentActionIndex] && (currentActions[currentActionIndex].name === 'external-browser') ?
-    currentActions[currentActionIndex].value : null;
+      currentActions[currentActionIndex].value : null;
     if (isExternalBrowserStepUrl || currentActions[currentActionIndex]?.name.startsWith("external-browser-")) {
       setExternalBrowserUrl(isExternalBrowserStepUrl);
     } else if (!currentActions[currentActionIndex]?.name.startsWith("author-")) {
@@ -108,6 +109,8 @@ export function MainStudio() {
           actionFinishedCallback={goToNextAction}
           playBackCompleteCallback={() => { }}
           speakActionAudios={[]}
+          resolution='1080p'
+          showDevBox={showDevBox}
         />}
       </Box>
     );
@@ -149,10 +152,13 @@ export function MainStudio() {
             <ExportDropdown />
           </Card>
           <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
-            <RecordingLogs />
+            <Snapshots />
           </Card>
           <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
             <VideoTimeEstimationsAndStats />
+          </Card>
+          <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
+            <RecordingLogs />
           </Card>
           <Card mb="3" style={{ display: isDesktop ? 'block' : 'none' }}>
             <VirtualLayerLogs />
@@ -180,12 +186,10 @@ export function MainStudio() {
                   actionFinishedCallback={goToNextAction}
                   playBackCompleteCallback={() => { }}
                   speakActionAudios={[]}
+                  resolution='1080p'
+                  showDevBox={showDevBox}
                 />
               }
-              {/* Sound Toggle Button */}
-              <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
-                <SoundToggleButton isSoundOn={isSoundOn} setIsSoundOn={(isSoundOn) => dispatch(setIsSoundOn(isSoundOn))} />
-              </Box>
             </Box>
           </Card>
         </Box>

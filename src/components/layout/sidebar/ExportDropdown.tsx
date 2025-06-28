@@ -23,8 +23,6 @@ import { exportCodeVideoIDEToDataURL } from '../../../utils/renderCodeVideoIDETo
 import { sleep } from '../../../utils/sleep';
 import JSZip from 'jszip';
 import { openModal, setCallbackId } from '../../../store/modalSlice';
-import { estimateVideoDurationInSeconds } from '../../../utils/estimateVideoDurationInSeconds';
-import { formatDuration } from '../../../utils/formatDuration';
 import { Link } from 'gatsby';
 
 export const ExportDropdown = () => {
@@ -304,6 +302,7 @@ export const ExportDropdown = () => {
             disabled={true}
             variant="solid"
             color="mint"
+            size="1"
           >
             <Flex align="center">
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -322,6 +321,7 @@ export const ExportDropdown = () => {
             disabled={!exportType || !project}
             variant="solid"
             color="mint"
+            size="1"
           >
             Export!
           </Button>
@@ -334,6 +334,7 @@ export const ExportDropdown = () => {
             disabled={true}
             variant="soft"
             color="mint"
+            size="1"
           >
             <Flex align="center">
               <svg className="h-4 w-4 mr-1 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">

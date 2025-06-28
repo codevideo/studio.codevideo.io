@@ -121,14 +121,16 @@ export const Modal = () => {
                                     variant="soft"
                                     color="red"
                                     mr="2"
+                                    size="1"
                                 >
                                     Cancel
                                 </Button>
                             )}
                             <Button
                                 onClick={onClickClose}
-                                variant="soft"
+                variant="soft"
                                 color="mint"
+                                size="1"
                             >
                                 {modalType === 'confirm-codevideo-generation' ? 'OK' : 'Close'}
                             </Button>

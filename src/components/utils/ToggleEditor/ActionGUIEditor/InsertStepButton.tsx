@@ -1,12 +1,14 @@
 import * as React from 'react';
 import { useAppDispatch } from '../../../../hooks/useAppDispatch';
-import { setActions, setCurrentActionIndex, setDraftActionsString } from '../../../../store/editorSlice';
+import { setActions, setCurrentActionIndex, setDraftProjectString } from '../../../../store/editorSlice';
 import { Flex, Button, Box } from '@radix-ui/themes';
 import { useAppSelector } from '../../../../hooks/useAppSelector';
+import { extractActionsFromProject } from '@fullstackcraftllc/codevideo-types';
 
 export function InsertStepButton() {
-    const { currentActions, currentActionIndex } = useAppSelector(state => state.editor);
+    const { currentProject, currentActionIndex, currentLessonIndex } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
+    const currentActions = extractActionsFromProject(currentProject?.project || [], currentLessonIndex);
 
     const handleInsertStep = () => {
         const currentAction = currentActions[currentActionIndex];
@@ -19,8 +21,8 @@ export function InsertStepButton() {
             ]);
         dispatch(setActions(newActions));
         dispatch(setCurrentActionIndex(newIndex));
-        // even though we don't deal directly with the draftActionsString in this component, we still need to update it so it triggers the stats component
-        dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+        // even though we don't deal directly with the draftProjectString in this component, we still need to update it so it triggers the stats component
+        dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
     };
 
     return (
@@ -40,6 +42,7 @@ export function InsertStepButton() {
                         variant="soft"
                         color="mint"
                         onClick={handleInsertStep}
+                        size="1"
                     >
                         + Add Action
                     </Button>

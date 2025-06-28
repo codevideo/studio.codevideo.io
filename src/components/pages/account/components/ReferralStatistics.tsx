@@ -151,7 +151,7 @@ export const ReferralStats = () => {
 
                     <Tooltip content={copied ? "Copied!" : "Copy link"}>
                         <Button
-                            size="2"
+                            size="1"
                             variant="soft"
                             color={copied ? "green" : "gray"}
                             onClick={copyReferralLink}
@@ -162,7 +162,7 @@ export const ReferralStats = () => {
 
                     <Tooltip content="Share link">
                         <Button
-                            size="2"
+                            size="1"
                             variant="soft"
                             color="blue"
                             onClick={shareReferralLink}
@@ -177,7 +177,7 @@ export const ReferralStats = () => {
                 </Text>
             </Box>
             <Button
-                size="2"
+                size="1"
                 variant="outline"
                 color="orange"
                 onClick={shareReferralLink}

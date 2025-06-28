@@ -138,13 +138,13 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                                 <Text size="3" color="red" style={{ marginBottom: '1rem' }}>
                                     Your temporary password is: <strong>{tempPassword}</strong>
                                 </Text>
-                                <Button onClick={onClickCopyPassword} variant="solid" color="mint" size="3">
+                                <Button onClick={onClickCopyPassword} variant="solid" color="mint" size="1">
                                     {copyPasswordButtonText}
                                 </Button>
                                 <Text size="3" style={{ marginBottom: '1rem' }}>
                                     Copy this password and set a new one after signing in for your security.
                                 </Text>
-                                <Button onClick={onClickSetNewPassword} style={{ display: passwordCopied ? 'block' : 'none' }} variant="solid" color="mint" size="3">
+                                <Button onClick={onClickSetNewPassword} style={{ display: passwordCopied ? 'block' : 'none' }} variant="solid" color="mint" size="1">
                                     Sign In
                                 </Button>
                             </Flex>
@@ -163,7 +163,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                     />
                     <Flex direction="column" align="center" justify="center" gap="6">
                         <Link to="/" style={{ textDecoration: 'none' }}>
-                            <Button variant="solid" style={{ display: tempPassword ? 'none' : 'block' }} size="3">
+                            <Button variant="solid" style={{ display: tempPassword ? 'none' : 'block' }} size="1">
                                 Start Creating
                             </Button>
                         </Link>
@@ -180,14 +180,14 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                     </Text>
                     <Box>
                         <Link to="/account">
-                            <Button variant="solid" color="mint" size="3">
+                            <Button variant="solid" color="mint" size="1">
                                 Manage Account
                             </Button>
                         </Link>
                     </Box>
                     <Box>
                         <Link to="/studio">
-                            <Button variant="solid" color="mint" size="3">
+                            <Button variant="solid" color="mint" size="1">
                                 Return to Studio
                             </Button>
                         </Link>

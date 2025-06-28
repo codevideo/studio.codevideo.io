@@ -86,6 +86,7 @@ export const ComponentEmbedder = (props: IComponentEmbedderProps) => {
                         <Button
                             onClick={copyToClipboard}
                             variant={showCopied ? "soft" : "solid"}
+                            size="1"
                         >
                             {showCopied ? 'Copied!' : 'Copy Code'}
                         </Button>

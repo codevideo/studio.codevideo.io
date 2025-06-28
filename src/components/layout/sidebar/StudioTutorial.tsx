@@ -19,6 +19,7 @@ export const TutorialCSSClassConstants = {
     EDITOR_SELECTOR: 'EDITOR_SELECTOR',
     FULL_SCREEN_BUTTON: 'FULL_SCREEN_BUTTON',
     SOUND_TOGGLE_BUTTON: 'SOUND_TOGGLE_BUTTON',
+    CODE_TOGGLE_BUTTON: 'CODE_TOGGLE_BUTTON',
     RECORD_BUTTON: 'RECORD_BUTTON',
     RECORDING_LOGS_BUTTON: 'RECORDING_LOGS_BUTTON',
     VIDEO_TIME_ESTIMATION_BUTTON: 'VIDEO_TIME_ESTIMATION_BUTTON',
@@ -85,6 +86,11 @@ export function StudioTutorial() {
         {
             target: `.${TutorialCSSClassConstants.SOUND_TOGGLE_BUTTON}`,
             content: 'Click here to toggle sound on and off. Within the browser, we use the SpeechSynthesis API to read out any speaking actions you have created.',
+            disableBeacon: true,
+        },
+        {
+            target: `.${TutorialCSSClassConstants.CODE_TOGGLE_BUTTON}`,
+            content: 'Click here to toggle the development tools panel on the CodeVideo IDE. This gives you access to additional debugging and development features.',
             disableBeacon: true,
         },
         {

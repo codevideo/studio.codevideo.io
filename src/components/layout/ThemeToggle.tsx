@@ -38,6 +38,7 @@ export function ThemeToggle() {
       style={{ cursor: 'pointer' }}
       variant="ghost" 
       onClick={toggleTheme}
+      size="1"
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} theme`}
     >
       {theme === 'dark' ? <SunIcon /> : <MoonIcon />}

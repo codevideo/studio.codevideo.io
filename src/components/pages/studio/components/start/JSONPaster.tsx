@@ -11,8 +11,8 @@ import {
   Code,
   IconButton
 } from '@radix-ui/themes';
-import { CheckCircledIcon, CrossCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
-import { ICourse, ILesson, IAction, isValidActions, isCourse, isLesson, filterAuthorActions, filterEditorActions, filterExternalActions, filterFileExplorerActions, filterMouseActions, filterTerminalActions } from '@fullstackcraftllc/codevideo-types';
+import { CheckCircledIcon, ExclamationTriangleIcon } from '@radix-ui/react-icons';
+import { ICourse, ILesson, IAction, isValidActions, isCourse, isLesson, filterAuthorActions, filterEditorActions, filterExternalActions, filterFileExplorerActions, filterMouseActions, filterTerminalActions, Project, extractActionsFromProject, filterSlideActions } from '@fullstackcraftllc/codevideo-types';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { addNewCourseToProjects, addNewLessonToProjects, addNewActionsToProjects, setLocationInStudio } from '../../../../../store/editorSlice';
 
@@ -131,13 +131,14 @@ export const JSONPaster = () => {
   };
 
   // filter actions by type
-  const actionsToUseForStats = parsedData && isValidActions(parsedData) ? parsedData : [];
-  const authorActionsCount = filterAuthorActions(actionsToUseForStats).length;
-  const fileExplorerActionsCount = filterFileExplorerActions(actionsToUseForStats).length;
-  const editorActionsCount = filterEditorActions(actionsToUseForStats).length;
-  const terminalActionsCount = filterTerminalActions(actionsToUseForStats).length;
-  const mouseActionsCount = filterMouseActions(actionsToUseForStats).length;
-  const externalActionsCount = filterExternalActions(actionsToUseForStats).length;
+  const actions = extractActionsFromProject(parsedData as Project, null) || [];
+  const authorActionsCount = filterAuthorActions(actions).length;
+  const fileExplorerActionsCount = filterFileExplorerActions(actions).length;
+  const editorActionsCount = filterEditorActions(actions).length;
+  const terminalActionsCount = filterTerminalActions(actions).length;
+  const slideActionsCount = filterSlideActions(actions).length;
+  const mouseActionsCount = filterMouseActions(actions).length;
+  const externalActionsCount = filterExternalActions(actions).length;
 
   return (
     <Box width="full">
@@ -176,10 +177,10 @@ export const JSONPaster = () => {
             </IconButton>
             <Flex direction="column">
               <Text color="mint" size="2">
-                Actions JSON is valid; parsed <Text weight="bold">{actionsToUseForStats.length}</Text> actions{" "}
+                Project type: <Text weight="bold">{detectedType}</Text>; JSON is valid; parsed <Text weight="bold">{actions.length}</Text> actions{" "}
               </Text>
               <Text color="mint" size="1" as="span">
-                ({authorActionsCount} author, {fileExplorerActionsCount} file explorer, {editorActionsCount} editor, {terminalActionsCount} terminal, {mouseActionsCount} mouse, {externalActionsCount} external)
+                ({authorActionsCount} author, {fileExplorerActionsCount} file explorer, {editorActionsCount} editor, {terminalActionsCount} terminal, {slideActionsCount} slide, {mouseActionsCount} mouse, {externalActionsCount} external)
               </Text>
             </Flex>
           </Flex>
@@ -208,7 +209,7 @@ export const JSONPaster = () => {
           <Text color="mint" mb="4">{validationError}</Text>
           <Flex justify="end">
             <Dialog.Close>
-              <Button onClick={closeModal} color="mint" variant="soft">
+              <Button onClick={closeModal} color="mint" variant="soft" size="1">
                 Close
               </Button>
             </Dialog.Close>

@@ -140,12 +140,12 @@ export function ProjectTypeConverter() {
           
           <Flex gap="3" mt="4" justify="end">
             <Dialog.Close>
-              <Button variant="soft" color="gray" onClick={handleModalClose}>
+              <Button variant="soft" color="gray" onClick={handleModalClose} size="1">
                 Cancel
               </Button>
             </Dialog.Close>
             <Dialog.Close>
-              <Button color="mint" onClick={handleConfirmConversion}>
+              <Button color="mint" onClick={handleConfirmConversion} size="1">
                 Convert
               </Button>
             </Dialog.Close>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Badge, Flex, Text } from '@radix-ui/themes';
 import { useAppSelector } from '../../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../../hooks/useAppDispatch';
-import { setActions, setCurrentActionIndex, setDraftActionsString } from '../../../../store/editorSlice';
+import { setActions, setCurrentActionIndex, setDraftProjectString } from '../../../../store/editorSlice';
 import { IAction } from '@fullstackcraftllc/codevideo-types';
 import { useIsDesktop } from '../../../../hooks/useIsDesktop';
 
@@ -133,7 +133,7 @@ const ActionKeyboard: React.FC<ActionKeyboardProps> = (props: ActionKeyboardProp
 
         dispatch(setActions(newActions));
         dispatch(setCurrentActionIndex(currentActionIndex + 1));
-        dispatch(setDraftActionsString(JSON.stringify(newActions, null, 2)));
+        dispatch(setDraftProjectString(JSON.stringify(newActions, null, 2)));
     };
 
     // Set keys sizes for better keyboard appearance

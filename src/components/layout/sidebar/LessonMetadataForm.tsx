@@ -1,5 +1,5 @@
 import React from 'react';
-import { ILesson } from '@fullstackcraftllc/codevideo-types';
+import { getBlankInitialSnapshot, ILesson } from '@fullstackcraftllc/codevideo-types';
 import { useEffect, useState } from "react";
 import {
   Text,
@@ -12,9 +12,10 @@ import {
 } from '@radix-ui/themes';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
-import { addLessonToCourse, addNewLessonToCourse, addNewLessonToProjects, setLocationInStudio } from '../../../store/editorSlice';
+import { addNewLessonToCourse, addNewLessonToProjects, setLocationInStudio } from '../../../store/editorSlice';
 import { openModal, closeModal } from '../../../store/modalSlice';
 import { formatNameToSafeId } from '../../../utils/formatNameToSafeId';
+import { VirtualIDE } from '@fullstackcraftllc/codevideo-virtual-ide';
 
 interface ILessonMetadataFormProps {
   forCourse: boolean;
@@ -83,6 +84,16 @@ export const LessonMetadataForm = (props: ILessonMetadataFormProps) => {
     }
 
     if (forNewLesson) {
+      // if this is not the first lesson, derive the initial snapshot from the previous lesson
+      if (lesson) {
+        const virtualIDE = new VirtualIDE(JSON.parse(JSON.stringify(lesson)), lesson.actions.length - 1);
+        const newInitialSnapshot = virtualIDE.getCourseSnapshot();
+        localLesson.initialSnapshot = newInitialSnapshot;
+      } else {
+        // if this is the first lesson, use the blank initial snapshot object
+        localLesson.initialSnapshot = getBlankInitialSnapshot();
+      }
+
       dispatch(addNewLessonToCourse(localLesson));
       // close modal
       dispatch(closeModal());

@@ -4,13 +4,13 @@ import * as monaco from "monaco-editor";
 import { useRef } from "react";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";
-import { setDraftActionsString } from "../../../../store/editorSlice";
+import { setDraftProjectString } from "../../../../store/editorSlice";
 import { Button, Flex } from '@radix-ui/themes';
 import { useClerk } from "@clerk/clerk-react";
 import jsesc from "jsesc";
 
 export function ActionJsonEditor() {
-  const { actionsString } = useAppSelector((state) => state.editor);
+  const { projectString } = useAppSelector((state) => state.editor);
   const { theme } = useAppSelector((state) => state.theme);
   const dispatch = useAppDispatch();
   // can't render the monaco editor until clerk is loaded - see https://github.com/clerk/javascript/issues/1643
@@ -37,14 +37,14 @@ export function ActionJsonEditor() {
       return;
     }
     if (mode === 'escaped') {
-      const escaped = jsesc(actionsString, {
+      const escaped = jsesc(projectString, {
         // quotes: 'double',
         // wrap: true  // This wraps the output in double quotes.
       });
       console.log(escaped);
       navigator.clipboard.writeText(JSON.stringify(escaped));
     } else {
-      navigator.clipboard.writeText(actionsString);
+      navigator.clipboard.writeText(projectString);
     }
   };
 
@@ -56,7 +56,7 @@ export function ActionJsonEditor() {
           color="mint"
           variant="soft"
           onClick={() => onClickCopy('normal')}
-
+          size="1"
         >
           Copy
         </Button>
@@ -64,10 +64,10 @@ export function ActionJsonEditor() {
           color="mint"
           variant="soft"
           onClick={() => onClickCopy('escaped')}
+          size="1"
         >
           Copy Escaped for CLI
         </Button>
-
       </Flex>
       {clerk.loaded && <Editor
         theme={theme === "light" ? "vs" : "vs-dark"}
@@ -75,7 +75,7 @@ export function ActionJsonEditor() {
         height="100%"
         defaultLanguage={"json"}
         language={"json"}
-        value={actionsString}
+        value={projectString}
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
@@ -93,7 +93,7 @@ export function ActionJsonEditor() {
         onMount={handleOnMount}
         onChange={(newValue) => {
           // Always update the editor value, but validation happens in the effect
-          dispatch(setDraftActionsString(newValue));
+          dispatch(setDraftProjectString(newValue));
         }}
       />}
     </Flex>
