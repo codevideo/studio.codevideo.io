@@ -1,0 +1,38 @@
+# CodeVideo Studio
+
+> A web-based IDE for declarative, action-based video creation. Build educational software videos in minutes, not weeks.
+
+CodeVideo Studio is the editor and project management interface for CodeVideo. It provides a visual IDE where creators define sequences of actions that are then rendered into professional educational content. Studio supports multi-format export (video, markdown, PDF, presentations, web content) from a single source of truth.
+
+## Key pages
+
+- Studio (editor): https://studio.codevideo.io/
+- FAQ: https://studio.codevideo.io/faq
+- Contact: https://studio.codevideo.io/contact
+- Embed a course or lesson: https://studio.codevideo.io/embed
+
+## Parent site (documentation & resources)
+
+- CodeVideo main site: https://codevideo.io/
+- Actions reference: https://codevideo.io/actions
+- Features: https://codevideo.io/features
+- Glossary: https://codevideo.io/glossary
+- Blog: https://codevideo.io/blog
+- Guides: https://codevideo.io/guides
+- API docs: https://api.codevideo.io/swagger
+
+## Getting started
+
+1. Visit https://studio.codevideo.io/
+2. Create a new project or open an existing one
+3. Define action steps in the editor (JSON-based or visual)
+4. Preview and export to video, markdown, PDF, or presentation
+
+## White paper
+
+- CodeVideo Framework White Paper: https://studio.codevideo.io/pdf/CodeVideo_Framework_White_Paper.pdf
+
+## Contact
+
+- Email: hi@fullstackcraft.com
+- Built by Full Stack Craft LLC
