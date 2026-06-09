@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /account
+Disallow: /success-starter
+Disallow: /success-creator
+Disallow: /success-enterprise
+Disallow: /success-lifetime
+Disallow: /success-topup
+
+Sitemap: https://studio.codevideo.io/sitemap-index.xml
