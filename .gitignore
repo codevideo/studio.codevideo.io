@@ -74,6 +74,7 @@ yarn-error.log
 .env
 
 # Rust build artifacts
+/target/
 rust-browser-compiler/target
 
 # any binary 'main' files from our go functions

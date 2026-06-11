@@ -10,40 +10,31 @@ import (
 	"os"
 	"strconv"
 
-	stripe "github.com/stripe/stripe-go/v81"
-	stripeSession "github.com/stripe/stripe-go/v81/checkout/session"
-
+	"codevideo-functions/internal/billing"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/user"
-	utils "github.com/codevideo/go-utils/slack"
+	stripe "github.com/stripe/stripe-go/v81"
+	stripeSession "github.com/stripe/stripe-go/v81/checkout/session"
+	stripeCustomer "github.com/stripe/stripe-go/v81/customer"
 )
 
-// StripeSuccessRequest is the payload expected from the client.
+const TopupTokensPerItem = 10
+
 type StripeSuccessRequest struct {
 	StripeSessionId string `json:"stripeSessionId"`
-	Product         string `json:"product"` // e.g. "starter", "creator", "enterprise", "topup", "lifetime"
+	Product         string `json:"product"`
 }
 
-// ResponseData is returned to the client.
 type ResponseData struct {
 	Success      bool   `json:"success"`
 	Email        string `json:"email,omitempty"`
 	TempPassword string `json:"tempPassword,omitempty"`
 }
 
-// Hardcoded configuration for each product.
-const (
-	StarterTokens      = 50
-	CreatorTokens      = 500
-	EnterpriseTokens   = 10000
-	TopupTokensPerItem = 10
-)
-
-// generateTempPassword creates a temporary password in the format "codevideo_<randomhex>"
 func generateTempPassword() string {
-	b := make([]byte, 8) // 8 bytes = 16 hex characters
+	b := make([]byte, 8)
 	if _, err := rand.Read(b); err != nil {
 		log.Printf("Error generating random bytes: %v", err)
 		return "codevideo_default"
@@ -52,248 +43,313 @@ func generateTempPassword() string {
 }
 
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// Allow only POST requests.
 	if req.HTTPMethod != "POST" {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusMethodNotAllowed,
-			Body:       "Method Not Allowed",
-		}, nil
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusMethodNotAllowed, Body: "Method Not Allowed"}, nil
 	}
 
 	var payload StripeSuccessRequest
 	if err := json.Unmarshal([]byte(req.Body), &payload); err != nil {
 		log.Printf("Error parsing request: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       "Bad Request",
-		}, nil
+		billing.Notify("CodeVideo stripeSuccess parse failed", map[string]string{"error": err.Error()})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}, nil
 	}
 
-	apiKey := os.Getenv("CLERK_SECRET_KEY")
-	if apiKey == "" {
-		log.Println("CLERK_SECRET_KEY not set")
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Server Error",
-		}, nil
-	}
-	config := &clerk.ClientConfig{}
-	config.Key = &apiKey
-	client := user.NewClient(config)
+	billing.Notify("CodeVideo stripeSuccess received", map[string]string{
+		"checkout_session_id": payload.StripeSessionId,
+		"product":             payload.Product,
+	})
 
-	// Track whether we're creating a new user.
-	var tempPassword string
-	var clerkUserId string
-
-	// Initialize Stripe.
 	stripeKey := os.Getenv("STRIPE_SECRET_KEY")
 	if stripeKey == "" {
-		log.Fatalf("STRIPE_SECRET_KEY not set")
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Server Error",
-		}, nil
+		log.Println("STRIPE_SECRET_KEY not set")
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"product":             payload.Product,
+			"reason":              "STRIPE_SECRET_KEY not set",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
 	}
 	stripe.Key = stripeKey
 
-	// Retrieve the checkout session to get the customer's email.
 	session, err := stripeSession.Get(payload.StripeSessionId, nil)
 	if err != nil {
 		log.Printf("Error retrieving stripe session: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Error retrieving stripe session",
-		}, nil
-	}
-	if session.CustomerDetails == nil || session.CustomerDetails.Email == "" {
-		log.Println("Stripe session missing customer email")
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       "No customer email found",
-		}, nil
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"product":             payload.Product,
+			"reason":              "error retrieving Stripe session",
+			"error":               err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error retrieving stripe session"}, nil
 	}
 
-	// now for the clerk user: first, try to get a matching clerk user by this email
-	var newUserCreated = false
-	users, err := client.List(context.Background(), &user.ListParams{
-		EmailAddresses: []string{session.CustomerDetails.Email},
-	})
+	customerEmail, err := customerEmailFromSession(session)
+	if err != nil {
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"product":             payload.Product,
+			"reason":              "error retrieving customer email",
+			"error":               err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error retrieving customer"}, nil
+	}
+	if customerEmail == "" {
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"product":             payload.Product,
+			"reason":              "no customer email",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No customer email found"}, nil
+	}
+
+	client, err := clerkUserClient()
+	if err != nil {
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"email":               customerEmail,
+			"product":             payload.Product,
+			"reason":              err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
+	}
+
+	clerkUserID, newUserCreated, tempPassword, err := findOrCreateClerkUser(client, customerEmail)
+	if err != nil {
+		log.Printf("Error finding or creating Clerk user: %v", err)
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"email":               customerEmail,
+			"product":             payload.Product,
+			"reason":              "error finding or creating Clerk user",
+			"error":               err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error creating user"}, nil
+	}
+
+	clerkUser, err := client.Get(context.Background(), clerkUserID)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Error fetching user",
-		}, nil
-	}
-	if users.TotalCount > 0 {
-		clerkUserId = users.Users[0].ID
-	}
-
-	// If no matching user was found, create a new one.
-	if clerkUserId == "" {
-		newUserCreated = true
-
-		// Generate a temporary password.
-		tempPassword = generateTempPassword()
-
-		// Create a new Clerk user using the Stripe customer email and temporary password.
-		createParams := user.CreateParams{
-			EmailAddresses: &[]string{session.CustomerDetails.Email},
-			Password:       &tempPassword,
-		}
-		newUser, err := client.Create(context.Background(), &createParams)
-		if err != nil {
-			log.Printf("Error creating new Clerk user: %v", err)
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       "Error creating user",
-			}, nil
-		}
-		clerkUserId = newUser.ID
+		billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"email":               customerEmail,
+			"product":             payload.Product,
+			"clerk_user_id":       clerkUserID,
+			"reason":              "error fetching Clerk user",
+			"error":               err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error fetching user"}, nil
 	}
 
-	// Fetch the current clerkUser so we can add to the existing tokens.
-	clerkUser, err := client.Get(context.Background(), clerkUserId)
-	if err != nil {
-		log.Printf("Error fetching user: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Error fetching user",
-		}, nil
-	}
+	publicMeta := billing.MetadataMap(clerkUser.PublicMetadata)
+	privateMeta := billing.MetadataMap(clerkUser.PrivateMetadata)
+	publicMeta["stripeId"] = payload.StripeSessionId
 
-	// Retrieve current tokens from public metadata (default to 0 if not set).
-	currentTokens := 0
-	if clerkUser.PublicMetadata != nil {
-		var meta map[string]interface{}
-		if err := json.Unmarshal(clerkUser.PublicMetadata, &meta); err == nil {
-			if tokensVal, ok := meta["tokens"]; ok {
-				switch v := tokensVal.(type) {
-				case float64:
-					currentTokens = int(v)
-				case string:
-					if i, err := strconv.Atoi(v); err == nil {
-						currentTokens = i
-					}
-				}
-			}
-		}
-	}
-
-	// Prepare new metadata changes.
-	newMetadata := make(map[string]interface{})
-	// Always update the stripeId.
-	newMetadata["stripeId"] = payload.StripeSessionId
-
-	// slack message of the product type that was just purchased
-	err = utils.SendSlackMessage("$$$ A user just purchased the " + payload.Product + " product!!!")
-	if err != nil {
-		log.Printf("Error sending Slack message: %v", err)
-	}
-
+	grantKey := ""
+	tokensAdded := false
+	priceID := ""
 	switch payload.Product {
-	case "starter":
-		newMetadata["subscriptionPlan"] = "starter"
-		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["tokensPerCycle"] = StarterTokens
-		newMetadata["tokens"] = currentTokens + StarterTokens
-	case "creator":
-		newMetadata["subscriptionPlan"] = "creator"
-		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["tokensPerCycle"] = CreatorTokens
-		newMetadata["tokens"] = currentTokens + CreatorTokens
-	case "enterprise":
-		newMetadata["subscriptionPlan"] = "enterprise"
-		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["tokensPerCycle"] = EnterpriseTokens
-		newMetadata["tokens"] = currentTokens + EnterpriseTokens
+	case "starter", "creator", "enterprise":
+		plan, ok := billing.PlanByProduct(payload.Product)
+		if !ok {
+			return unknownProductResponse(payload)
+		}
+		priceID = firstLineItemPriceID(payload.StripeSessionId)
+		publicMeta = billing.ApplySubscriptionMetadata(publicMeta, plan, "active", customerIDFromSession(session), subscriptionIDFromSession(session), priceID)
+		grantKey = billing.CheckoutGrantKey(payload.StripeSessionId, subscriptionIDFromSession(session), invoiceIDFromSession(session))
+		publicMeta, privateMeta, tokensAdded = billing.ApplyGrant(publicMeta, privateMeta, grantKey, plan.TokensPerCycle)
 	case "topup":
-		// Retrieve purchased quantity from Stripe via the checkout session.
-		stripeKey := os.Getenv("STRIPE_SECRET_KEY")
-		if stripeKey == "" {
-			log.Fatalf("STRIPE_SECRET_KEY not set")
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       "Server Error",
-			}, nil
-		}
-		stripe.Key = stripeKey
-
-		params := &stripe.CheckoutSessionListLineItemsParams{
-			Session: stripe.String(payload.StripeSessionId),
-		}
-		iter := stripeSession.ListLineItems(params)
-		totalQuantity := 0
-		for iter.Next() {
-			li := iter.Current()
-			if lineItem, ok := li.(*stripe.LineItem); ok {
-				totalQuantity += int(lineItem.Quantity)
-			}
-		}
-		if err := iter.Err(); err != nil {
+		tokensToAdd, err := topupTokens(payload.StripeSessionId)
+		if err != nil {
 			log.Printf("Error retrieving line items: %v", err)
-			return events.APIGatewayProxyResponse{
-				StatusCode: http.StatusInternalServerError,
-				Body:       "Error retrieving stripe line items",
-			}, nil
+			billing.Notify("CodeVideo stripeSuccess failed", map[string]string{
+				"checkout_session_id": payload.StripeSessionId,
+				"email":               customerEmail,
+				"product":             payload.Product,
+				"clerk_user_id":       clerkUserID,
+				"reason":              "error retrieving Stripe line items",
+				"error":               err.Error(),
+			})
+			return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error retrieving stripe line items"}, nil
 		}
-
-		tokensToAdd := totalQuantity * TopupTokensPerItem
-		newMetadata["tokens"] = currentTokens + tokensToAdd
+		grantKey = billing.CheckoutGrantKey(payload.StripeSessionId, "", "")
+		publicMeta, privateMeta, tokensAdded = billing.ApplyGrant(publicMeta, privateMeta, grantKey, tokensToAdd)
 	case "lifetime":
-		newMetadata["subscriptionPlan"] = "lifetime"
-		newMetadata["subscriptionStatus"] = "active"
-		newMetadata["unlimited"] = true
+		publicMeta["subscriptionPlan"] = "lifetime"
+		publicMeta["subscriptionStatus"] = "active"
+		publicMeta["unlimited"] = true
 	default:
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusBadRequest,
-			Body:       "Unknown product type",
-		}, nil
+		return unknownProductResponse(payload)
 	}
 
-	// Marshal new metadata to JSON.
-	metaJSON, err := json.Marshal(newMetadata)
+	publicRaw, err := billing.MarshalRaw(publicMeta)
 	if err != nil {
-		log.Printf("Error marshaling metadata: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Server Error",
-		}, nil
+		log.Printf("Error marshaling public metadata: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
 	}
-	updateParams := user.UpdateMetadataParams{
-		PublicMetadata: (*json.RawMessage)(&metaJSON),
-	}
-	if _, err := client.UpdateMetadata(context.Background(), clerkUserId, &updateParams); err != nil {
-		log.Printf("Error updating metadata: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Error updating metadata",
-		}, nil
+	privateRaw, err := billing.MarshalRaw(privateMeta)
+	if err != nil {
+		log.Printf("Error marshaling private metadata: %v", err)
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
 	}
 
-	// Build the response.
-	respData := ResponseData{
-		Success: true,
+	if _, err := client.UpdateMetadata(context.Background(), clerkUserID, &user.UpdateMetadataParams{
+		PublicMetadata:  publicRaw,
+		PrivateMetadata: privateRaw,
+	}); err != nil {
+		log.Printf("Error updating metadata: %v", err)
+		billing.Notify("CodeVideo stripeSuccess metadata update failed", map[string]string{
+			"checkout_session_id": payload.StripeSessionId,
+			"email":               customerEmail,
+			"product":             payload.Product,
+			"clerk_user_id":       clerkUserID,
+			"grant_key":           grantKey,
+			"error":               err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error updating metadata"}, nil
 	}
-	// Include the temporary password in the response if a new user was created.
+
+	billing.Notify("CodeVideo stripeSuccess fulfilled", map[string]string{
+		"checkout_session_id": payload.StripeSessionId,
+		"email":               customerEmail,
+		"product":             payload.Product,
+		"clerk_user_id":       clerkUserID,
+		"new_user":            strconv.FormatBool(newUserCreated),
+		"tokens_added":        strconv.FormatBool(tokensAdded),
+		"grant_key":           grantKey,
+		"price_id":            priceID,
+	})
+
+	respData := ResponseData{Success: true}
 	if newUserCreated {
-		respData.Email = clerkUser.EmailAddresses[0].EmailAddress
+		respData.Email = customerEmail
 		respData.TempPassword = tempPassword
 	}
 
 	respJSON, err := json.Marshal(respData)
 	if err != nil {
 		log.Printf("Error marshaling response: %v", err)
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Server Error",
-		}, nil
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
 	}
 
-	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-		Body:       string(respJSON),
-	}, nil
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: string(respJSON)}, nil
+}
+
+func clerkUserClient() (*user.Client, error) {
+	apiKey := os.Getenv("CLERK_SECRET_KEY")
+	if apiKey == "" {
+		log.Println("CLERK_SECRET_KEY not set")
+		return nil, simpleError("CLERK_SECRET_KEY not set")
+	}
+	config := &clerk.ClientConfig{}
+	config.Key = &apiKey
+	return user.NewClient(config), nil
+}
+
+func findOrCreateClerkUser(client *user.Client, email string) (string, bool, string, error) {
+	users, err := client.List(context.Background(), &user.ListParams{EmailAddresses: []string{email}})
+	if err != nil {
+		return "", false, "", err
+	}
+	if users.TotalCount > 0 {
+		return users.Users[0].ID, false, "", nil
+	}
+
+	tempPassword := generateTempPassword()
+	newUser, err := client.Create(context.Background(), &user.CreateParams{
+		EmailAddresses: &[]string{email},
+		Password:       &tempPassword,
+	})
+	if err != nil {
+		return "", false, "", err
+	}
+	return newUser.ID, true, tempPassword, nil
+}
+
+func customerEmailFromSession(session *stripe.CheckoutSession) (string, error) {
+	if session.CustomerDetails != nil && session.CustomerDetails.Email != "" {
+		return session.CustomerDetails.Email, nil
+	}
+	if session.CustomerEmail != "" {
+		return session.CustomerEmail, nil
+	}
+	if session.Customer != nil {
+		if session.Customer.Email != "" {
+			return session.Customer.Email, nil
+		}
+		if session.Customer.ID != "" {
+			cust, err := stripeCustomer.Get(session.Customer.ID, nil)
+			if err != nil {
+				return "", err
+			}
+			return cust.Email, nil
+		}
+	}
+	return "", nil
+}
+
+func customerIDFromSession(session *stripe.CheckoutSession) string {
+	if session.Customer == nil {
+		return ""
+	}
+	return session.Customer.ID
+}
+
+func subscriptionIDFromSession(session *stripe.CheckoutSession) string {
+	if session.Subscription == nil {
+		return ""
+	}
+	return session.Subscription.ID
+}
+
+func invoiceIDFromSession(session *stripe.CheckoutSession) string {
+	if session.Invoice == nil {
+		return ""
+	}
+	return session.Invoice.ID
+}
+
+func topupTokens(stripeSessionID string) (int, error) {
+	params := &stripe.CheckoutSessionListLineItemsParams{Session: stripe.String(stripeSessionID)}
+	iter := stripeSession.ListLineItems(params)
+	totalQuantity := 0
+	for iter.Next() {
+		if lineItem, ok := iter.Current().(*stripe.LineItem); ok {
+			totalQuantity += int(lineItem.Quantity)
+		}
+	}
+	if err := iter.Err(); err != nil {
+		return 0, err
+	}
+	return totalQuantity * TopupTokensPerItem, nil
+}
+
+func firstLineItemPriceID(stripeSessionID string) string {
+	params := &stripe.CheckoutSessionListLineItemsParams{Session: stripe.String(stripeSessionID)}
+	iter := stripeSession.ListLineItems(params)
+	for iter.Next() {
+		if lineItem, ok := iter.Current().(*stripe.LineItem); ok && lineItem.Price != nil {
+			return lineItem.Price.ID
+		}
+	}
+	if err := iter.Err(); err != nil {
+		log.Printf("Error retrieving stripe line item price: %v", err)
+	}
+	return ""
+}
+
+func unknownProductResponse(payload StripeSuccessRequest) (events.APIGatewayProxyResponse, error) {
+	billing.Notify("CodeVideo stripeSuccess ignored", map[string]string{
+		"checkout_session_id": payload.StripeSessionId,
+		"product":             payload.Product,
+		"reason":              "unknown product type",
+	})
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Unknown product type"}, nil
+}
+
+type simpleError string
+
+func (e simpleError) Error() string {
+	return string(e)
 }
 
 func main() {

@@ -2,150 +2,381 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 
+	"codevideo-functions/internal/billing"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/user"
-	utils "github.com/codevideo/go-utils/slack"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/customer"
 )
-
-// StripeEvent represents a minimal Stripe webhook event.
-type StripeEvent struct {
-	Type string `json:"type"`
-	Data struct {
-		Object json.RawMessage `json:"object"`
-	} `json:"data"`
-}
-
-// Subscription represents the relevant parts of a Stripe subscription.
-type Subscription struct {
-	ID            string `json:"id"`
-	Customer      string `json:"customer"`
-	CustomerEmail string `json:"customer_email"`
-	Items         struct {
-		Data []struct {
-			Plan struct {
-				ID string `json:"id"`
-			} `json:"plan"`
-		} `json:"data"`
-	} `json:"items"`
-	Status string `json:"status"`
-}
-
-// Hardcoded configuration for each monthly subscription.
-const (
-	StarterTokens    = 50
-	CreatorTokens    = 500
-	EnterpriseTokens = 10000
-)
-
-// Mapping from Stripe plan ID to our product and tokens per cycle.
-var planMapping = map[string]struct {
-	product        string
-	tokensPerCycle int
-}{
-	"price_starter":    {"starter", StarterTokens},
-	"price_creator":    {"creator", CreatorTokens},
-	"price_enterprise": {"enterprise", EnterpriseTokens},
-}
 
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// Only allow POST.
 	if req.HTTPMethod != "POST" {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusMethodNotAllowed, Body: "Method Not Allowed"}, nil
 	}
 
-	var eventData StripeEvent
-	if err := json.Unmarshal([]byte(req.Body), &eventData); err != nil {
+	eventData, err := billing.ParseStripeEvent(req.Body)
+	if err != nil {
 		log.Printf("Error parsing webhook event: %v", err)
+		billing.Notify("CodeVideo billing webhook parse failed", map[string]string{"error": err.Error()})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}, nil
 	}
 
-	// We only process subscription updated events.
-	if eventData.Type != "customer.subscription.updated" {
+	switch eventData.Type {
+	case "customer.subscription.created", "customer.subscription.updated":
+		return handleSubscriptionEvent(eventData), nil
+	case "invoice.paid":
+		return handleInvoicePaidEvent(eventData), nil
+	default:
+		billing.Notify("CodeVideo billing webhook ignored", map[string]string{"event": eventData.Type, "reason": "unsupported event type"})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}, nil
 	}
+}
 
-	var sub Subscription
-	if err := json.Unmarshal(eventData.Data.Object, &sub); err != nil {
+func handleSubscriptionEvent(eventData billing.StripeEvent) events.APIGatewayProxyResponse {
+	sub, err := billing.ParseSubscription(eventData.Data.Object)
+	if err != nil {
 		log.Printf("Error parsing subscription object: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}, nil
+		billing.Notify("CodeVideo subscription webhook parse failed", map[string]string{"event": eventData.Type, "error": err.Error()})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}
 	}
 
-	// Check that there is at least one subscription item.
-	if len(sub.Items.Data) == 0 {
-		log.Println("No subscription items found")
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No subscription items"}, nil
+	priceID := billing.FirstSubscriptionPriceID(sub)
+	billing.Notify("CodeVideo subscription webhook received", map[string]string{
+		"event":           eventData.Type,
+		"subscription_id": sub.ID,
+		"customer_id":     sub.Customer.ID,
+		"price_id":        priceID,
+		"status":          sub.Status,
+	})
+
+	if priceID == "" {
+		billing.Notify("CodeVideo subscription webhook failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"reason":          "no subscription items or price ID",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No subscription items"}
 	}
 
-	planID := sub.Items.Data[0].Plan.ID
-	mapping, ok := planMapping[planID]
+	priceIDToPlan, missingEnv := billing.PriceIDToPlanFromEnv()
+	notifyMissingPriceEnv(missingEnv)
+	plan, ok := priceIDToPlan[priceID]
 	if !ok {
-		log.Printf("Plan ID %s not recognized for monthly subscription", planID)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}, nil
+		billing.Notify("CodeVideo subscription webhook ignored", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"customer_id":     sub.Customer.ID,
+			"price_id":        priceID,
+			"reason":          "unrecognized price ID",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}
 	}
 
-	// Use the customer email from the subscription.
-	customerEmail := sub.CustomerEmail
+	customerEmail, err := resolveCustomerEmail(sub.CustomerEmail, sub.Customer.ID)
+	if err != nil {
+		billing.Notify("CodeVideo subscription webhook failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"customer_id":     sub.Customer.ID,
+			"price_id":        priceID,
+			"reason":          err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error retrieving customer"}
+	}
 	if customerEmail == "" {
-		log.Println("Subscription missing customer email")
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No customer email"}, nil
+		billing.Notify("CodeVideo subscription webhook failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"customer_id":     sub.Customer.ID,
+			"price_id":        priceID,
+			"reason":          "no customer email",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No customer email"}
 	}
 
-	// Initialize Clerk client.
+	clerkUser, err := findClerkUserByEmail(customerEmail)
+	if err != nil {
+		billing.Notify("CodeVideo subscription Clerk lookup failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"email":           customerEmail,
+			"price_id":        priceID,
+			"error":           err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error finding user"}
+	}
+	billing.Notify("CodeVideo subscription Clerk lookup succeeded", map[string]string{
+		"event":           eventData.Type,
+		"subscription_id": sub.ID,
+		"clerk_user_id":   clerkUser.ID,
+		"email":           customerEmail,
+		"price_id":        priceID,
+	})
+
+	publicMeta := billing.MetadataMap(clerkUser.PublicMetadata)
+	privateMeta := billing.MetadataMap(clerkUser.PrivateMetadata)
+	publicMeta = billing.ApplySubscriptionMetadata(publicMeta, plan, sub.Status, sub.Customer.ID, sub.ID, priceID)
+
+	grantKey := ""
+	granted := false
+	if eventData.Type == "customer.subscription.created" && sub.Status == "active" {
+		grantKey = billing.InitialSubscriptionGrantKey(sub.ID)
+		publicMeta, privateMeta, granted = billing.ApplyGrant(publicMeta, privateMeta, grantKey, plan.TokensPerCycle)
+	}
+
+	if err := updateClerkMetadata(clerkUser.ID, publicMeta, privateMeta); err != nil {
+		billing.Notify("CodeVideo subscription metadata update failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"clerk_user_id":   clerkUser.ID,
+			"email":           customerEmail,
+			"plan":            plan.Product,
+			"grant_key":       grantKey,
+			"error":           err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error updating metadata"}
+	}
+
+	billing.Notify("CodeVideo subscription fulfilled", map[string]string{
+		"event":           eventData.Type,
+		"subscription_id": sub.ID,
+		"clerk_user_id":   clerkUser.ID,
+		"email":           customerEmail,
+		"plan":            plan.Product,
+		"price_id":        priceID,
+		"tokens_added":    strconv.FormatBool(granted),
+		"grant_key":       grantKey,
+	})
+
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Subscription metadata updated"}
+}
+
+func handleInvoicePaidEvent(eventData billing.StripeEvent) events.APIGatewayProxyResponse {
+	invoice, err := billing.ParseInvoice(eventData.Data.Object)
+	if err != nil {
+		log.Printf("Error parsing invoice object: %v", err)
+		billing.Notify("CodeVideo invoice webhook parse failed", map[string]string{"event": eventData.Type, "error": err.Error()})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}
+	}
+
+	priceID := billing.FirstInvoicePriceID(invoice)
+	billing.Notify("CodeVideo invoice webhook received", map[string]string{
+		"event":           eventData.Type,
+		"invoice_id":      invoice.ID,
+		"subscription_id": invoice.Subscription.ID,
+		"customer_id":     invoice.Customer.ID,
+		"price_id":        priceID,
+		"billing_reason":  invoice.BillingReason,
+		"status":          invoice.Status,
+	})
+
+	if !invoice.Paid && invoice.Status != "paid" {
+		billing.Notify("CodeVideo invoice webhook ignored", map[string]string{
+			"event":      eventData.Type,
+			"invoice_id": invoice.ID,
+			"reason":     "invoice is not paid",
+			"status":     invoice.Status,
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}
+	}
+	if priceID == "" {
+		billing.Notify("CodeVideo invoice webhook failed", map[string]string{
+			"event":      eventData.Type,
+			"invoice_id": invoice.ID,
+			"reason":     "no invoice line price ID",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No invoice line price"}
+	}
+
+	priceIDToPlan, missingEnv := billing.PriceIDToPlanFromEnv()
+	notifyMissingPriceEnv(missingEnv)
+	plan, ok := priceIDToPlan[priceID]
+	if !ok {
+		billing.Notify("CodeVideo invoice webhook ignored", map[string]string{
+			"event":       eventData.Type,
+			"invoice_id":  invoice.ID,
+			"customer_id": invoice.Customer.ID,
+			"price_id":    priceID,
+			"reason":      "unrecognized price ID",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}
+	}
+
+	customerEmail, err := resolveCustomerEmail(invoice.CustomerEmail, invoice.Customer.ID)
+	if err != nil {
+		billing.Notify("CodeVideo invoice webhook failed", map[string]string{
+			"event":       eventData.Type,
+			"invoice_id":  invoice.ID,
+			"customer_id": invoice.Customer.ID,
+			"price_id":    priceID,
+			"reason":      err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error retrieving customer"}
+	}
+	if customerEmail == "" {
+		billing.Notify("CodeVideo invoice webhook failed", map[string]string{
+			"event":       eventData.Type,
+			"invoice_id":  invoice.ID,
+			"customer_id": invoice.Customer.ID,
+			"price_id":    priceID,
+			"reason":      "no customer email",
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No customer email"}
+	}
+
+	clerkUser, err := findClerkUserByEmail(customerEmail)
+	if err != nil {
+		billing.Notify("CodeVideo invoice Clerk lookup failed", map[string]string{
+			"event":      eventData.Type,
+			"invoice_id": invoice.ID,
+			"email":      customerEmail,
+			"price_id":   priceID,
+			"error":      err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error finding user"}
+	}
+	billing.Notify("CodeVideo invoice Clerk lookup succeeded", map[string]string{
+		"event":         eventData.Type,
+		"invoice_id":    invoice.ID,
+		"clerk_user_id": clerkUser.ID,
+		"email":         customerEmail,
+		"price_id":      priceID,
+	})
+
+	publicMeta := billing.MetadataMap(clerkUser.PublicMetadata)
+	privateMeta := billing.MetadataMap(clerkUser.PrivateMetadata)
+	publicMeta = billing.ApplySubscriptionMetadata(publicMeta, plan, "active", invoice.Customer.ID, invoice.Subscription.ID, priceID)
+	publicMeta["lastStripeInvoiceId"] = invoice.ID
+
+	grantKey := billing.InvoiceGrantKey(invoice.ID, invoice.Subscription.ID, invoice.BillingReason)
+	publicMeta, privateMeta, granted := billing.ApplyGrant(publicMeta, privateMeta, grantKey, plan.TokensPerCycle)
+
+	if err := updateClerkMetadata(clerkUser.ID, publicMeta, privateMeta); err != nil {
+		billing.Notify("CodeVideo invoice metadata update failed", map[string]string{
+			"event":         eventData.Type,
+			"invoice_id":    invoice.ID,
+			"clerk_user_id": clerkUser.ID,
+			"email":         customerEmail,
+			"plan":          plan.Product,
+			"grant_key":     grantKey,
+			"error":         err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error updating metadata"}
+	}
+
+	billing.Notify("CodeVideo invoice fulfilled", map[string]string{
+		"event":           eventData.Type,
+		"invoice_id":      invoice.ID,
+		"subscription_id": invoice.Subscription.ID,
+		"clerk_user_id":   clerkUser.ID,
+		"email":           customerEmail,
+		"plan":            plan.Product,
+		"price_id":        priceID,
+		"tokens_added":    strconv.FormatBool(granted),
+		"grant_key":       grantKey,
+	})
+
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Invoice metadata updated"}
+}
+
+func resolveCustomerEmail(eventEmail string, customerID string) (string, error) {
+	if strings.TrimSpace(eventEmail) != "" {
+		return eventEmail, nil
+	}
+	if customerID == "" {
+		return "", nil
+	}
+
+	stripeKey := os.Getenv("STRIPE_SECRET_KEY")
+	if stripeKey == "" {
+		return "", errMissingStripeKey()
+	}
+	stripe.Key = stripeKey
+
+	cust, err := customer.Get(customerID, nil)
+	if err != nil {
+		return "", err
+	}
+	return cust.Email, nil
+}
+
+func findClerkUserByEmail(email string) (*clerk.User, error) {
 	apiKey := os.Getenv("CLERK_SECRET_KEY")
 	if apiKey == "" {
-		log.Println("CLERK_SECRET_KEY not set")
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Server Error",
-		}, nil
+		return nil, errMissingClerkKey()
 	}
 	config := &clerk.ClientConfig{}
 	config.Key = &apiKey
 	client := user.NewClient(config)
 
-	// Lookup Clerk user by email.
-	listParams := &user.ListParams{
-		EmailAddresses: []string{customerEmail},
-	}
-	userList, err := client.List(context.Background(), listParams)
-	if err != nil || len(userList.Users) == 0 {
-		log.Printf("Error finding Clerk user by email: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error finding user"}, nil
-	}
-	clerkUser := userList.Users[0]
-
-	// Prepare metadata update.
-	newMetadata := map[string]interface{}{
-		"subscriptionPlan":   mapping.product,
-		"subscriptionStatus": sub.Status, // e.g., "active"
-		"tokensPerCycle":     mapping.tokensPerCycle,
-	}
-
-	metaJSON, err := json.Marshal(newMetadata)
+	userList, err := client.List(context.Background(), &user.ListParams{EmailAddresses: []string{email}})
 	if err != nil {
-		log.Printf("Error marshaling metadata: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
+		return nil, err
 	}
-	updateParams := user.UpdateMetadataParams{PublicMetadata: (*json.RawMessage)(&metaJSON)}
-	if _, err := client.UpdateMetadata(context.Background(), clerkUser.ID, &updateParams); err != nil {
-		log.Printf("Error updating Clerk metadata: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error updating metadata"}, nil
+	if len(userList.Users) == 0 {
+		return nil, errClerkUserNotFound(email)
 	}
+	return userList.Users[0], nil
+}
 
-	// Send Slack notification.
-	err = utils.SendSlackMessage("Subscription update for " + customerEmail + ": new plan " + mapping.product)
+func updateClerkMetadata(clerkUserID string, publicMeta map[string]interface{}, privateMeta map[string]interface{}) error {
+	apiKey := os.Getenv("CLERK_SECRET_KEY")
+	if apiKey == "" {
+		return errMissingClerkKey()
+	}
+	config := &clerk.ClientConfig{}
+	config.Key = &apiKey
+	client := user.NewClient(config)
+
+	publicRaw, err := billing.MarshalRaw(publicMeta)
 	if err != nil {
-		log.Printf("Error sending Slack message: %v", err)
+		return err
+	}
+	privateRaw, err := billing.MarshalRaw(privateMeta)
+	if err != nil {
+		return err
 	}
 
-	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Subscription metadata updated"}, nil
+	_, err = client.UpdateMetadata(context.Background(), clerkUserID, &user.UpdateMetadataParams{
+		PublicMetadata:  publicRaw,
+		PrivateMetadata: privateRaw,
+	})
+	return err
+}
+
+func notifyMissingPriceEnv(missingEnv []string) {
+	if len(missingEnv) == 0 {
+		return
+	}
+	billing.Notify("CodeVideo billing price config incomplete", map[string]string{
+		"missing_env": strings.Join(missingEnv, ", "),
+	})
+}
+
+func errMissingStripeKey() error {
+	return simpleError("STRIPE_SECRET_KEY not set")
+}
+
+func errMissingClerkKey() error {
+	return simpleError("CLERK_SECRET_KEY not set")
+}
+
+func errClerkUserNotFound(email string) error {
+	return simpleError("no Clerk user found for " + email)
+}
+
+type simpleError string
+
+func (e simpleError) Error() string {
+	return string(e)
 }
 
 func main() {

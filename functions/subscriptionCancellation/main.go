@@ -2,136 +2,223 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
+	"codevideo-functions/internal/billing"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/clerk/clerk-sdk-go/v2"
 	"github.com/clerk/clerk-sdk-go/v2/user"
-	utils "github.com/codevideo/go-utils/slack"
+	stripe "github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/customer"
 )
 
-type StripeEvent struct {
-	Type string `json:"type"`
-	Data struct {
-		Object json.RawMessage `json:"object"`
-	} `json:"data"`
-}
-
-type Subscription struct {
-	ID            string `json:"id"`
-	Customer      string `json:"customer"`
-	CustomerEmail string `json:"customer_email"`
-	Items         struct {
-		Data []struct {
-			Plan struct {
-				ID string `json:"id"`
-			} `json:"plan"`
-		} `json:"data"`
-	} `json:"items"`
-	Status string `json:"status"`
-}
-
 func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	// Only allow POST.
 	if req.HTTPMethod != "POST" {
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusMethodNotAllowed, Body: "Method Not Allowed"}, nil
 	}
 
-	var eventData StripeEvent
-	if err := json.Unmarshal([]byte(req.Body), &eventData); err != nil {
+	eventData, err := billing.ParseStripeEvent(req.Body)
+	if err != nil {
 		log.Printf("Error parsing webhook event: %v", err)
+		billing.Notify("CodeVideo cancellation webhook parse failed", map[string]string{"error": err.Error()})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}, nil
 	}
 
-	// Process only subscription cancellation events.
 	if eventData.Type != "customer.subscription.deleted" {
+		billing.Notify("CodeVideo cancellation webhook ignored", map[string]string{"event": eventData.Type, "reason": "unsupported event type"})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}, nil
 	}
 
-	var sub Subscription
-	if err := json.Unmarshal(eventData.Data.Object, &sub); err != nil {
+	sub, err := billing.ParseSubscription(eventData.Data.Object)
+	if err != nil {
 		log.Printf("Error parsing subscription object: %v", err)
+		billing.Notify("CodeVideo cancellation webhook parse failed", map[string]string{"event": eventData.Type, "error": err.Error()})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "Bad Request"}, nil
 	}
 
-	// Check that there is at least one subscription item.
-	if len(sub.Items.Data) == 0 {
-		log.Println("No subscription items found")
+	priceID := billing.FirstSubscriptionPriceID(sub)
+	billing.Notify("CodeVideo cancellation webhook received", map[string]string{
+		"event":           eventData.Type,
+		"subscription_id": sub.ID,
+		"customer_id":     sub.Customer.ID,
+		"price_id":        priceID,
+		"status":          sub.Status,
+	})
+
+	if priceID == "" {
+		billing.Notify("CodeVideo cancellation webhook failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"reason":          "no subscription items or price ID",
+		})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No subscription items"}, nil
 	}
-	planID := sub.Items.Data[0].Plan.ID
 
-	// Process only monthly subscriptions.
-	monthlyPlans := map[string]bool{
-		"price_starter":    true,
-		"price_creator":    true,
-		"price_enterprise": true,
-	}
-	if !monthlyPlans[planID] {
-		log.Printf("Plan ID %s is not a monthly subscription", planID)
+	priceIDToPlan, missingEnv := billing.PriceIDToPlanFromEnv()
+	notifyMissingPriceEnv(missingEnv)
+	plan, ok := priceIDToPlan[priceID]
+	if !ok {
+		billing.Notify("CodeVideo cancellation webhook ignored", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"customer_id":     sub.Customer.ID,
+			"price_id":        priceID,
+			"reason":          "unrecognized price ID",
+		})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Ignored"}, nil
 	}
 
-	// Use customer email.
-	customerEmail := sub.CustomerEmail
+	customerEmail, err := resolveCustomerEmail(sub.CustomerEmail, sub.Customer.ID)
+	if err != nil {
+		billing.Notify("CodeVideo cancellation webhook failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"customer_id":     sub.Customer.ID,
+			"price_id":        priceID,
+			"reason":          err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error retrieving customer"}, nil
+	}
 	if customerEmail == "" {
-		log.Println("Subscription missing customer email")
+		billing.Notify("CodeVideo cancellation webhook failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"customer_id":     sub.Customer.ID,
+			"price_id":        priceID,
+			"reason":          "no customer email",
+		})
 		return events.APIGatewayProxyResponse{StatusCode: http.StatusBadRequest, Body: "No customer email"}, nil
 	}
 
-	// Initialize Clerk client.
+	clerkUser, err := findClerkUserByEmail(customerEmail)
+	if err != nil {
+		billing.Notify("CodeVideo cancellation Clerk lookup failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"email":           customerEmail,
+			"price_id":        priceID,
+			"error":           err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error finding user"}, nil
+	}
+	billing.Notify("CodeVideo cancellation Clerk lookup succeeded", map[string]string{
+		"event":           eventData.Type,
+		"subscription_id": sub.ID,
+		"clerk_user_id":   clerkUser.ID,
+		"email":           customerEmail,
+		"price_id":        priceID,
+	})
+
+	publicMeta := billing.MetadataMap(clerkUser.PublicMetadata)
+	privateMeta := billing.MetadataMap(clerkUser.PrivateMetadata)
+	publicMeta = billing.ApplyCancellationMetadata(publicMeta, sub.Customer.ID, sub.ID, priceID)
+
+	if err := updateClerkMetadata(clerkUser.ID, publicMeta, privateMeta); err != nil {
+		billing.Notify("CodeVideo cancellation metadata update failed", map[string]string{
+			"event":           eventData.Type,
+			"subscription_id": sub.ID,
+			"clerk_user_id":   clerkUser.ID,
+			"email":           customerEmail,
+			"plan":            plan.Product,
+			"error":           err.Error(),
+		})
+		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error updating metadata"}, nil
+	}
+
+	billing.Notify("CodeVideo subscription canceled", map[string]string{
+		"event":           eventData.Type,
+		"subscription_id": sub.ID,
+		"clerk_user_id":   clerkUser.ID,
+		"email":           customerEmail,
+		"plan":            plan.Product,
+		"price_id":        priceID,
+	})
+
+	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Cancellation processed and metadata updated"}, nil
+}
+
+func resolveCustomerEmail(eventEmail string, customerID string) (string, error) {
+	if strings.TrimSpace(eventEmail) != "" {
+		return eventEmail, nil
+	}
+	if customerID == "" {
+		return "", nil
+	}
+
+	stripeKey := os.Getenv("STRIPE_SECRET_KEY")
+	if stripeKey == "" {
+		return "", simpleError("STRIPE_SECRET_KEY not set")
+	}
+	stripe.Key = stripeKey
+
+	cust, err := customer.Get(customerID, nil)
+	if err != nil {
+		return "", err
+	}
+	return cust.Email, nil
+}
+
+func findClerkUserByEmail(email string) (*clerk.User, error) {
 	apiKey := os.Getenv("CLERK_SECRET_KEY")
 	if apiKey == "" {
-		log.Println("CLERK_SECRET_KEY not set")
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       "Server Error",
-		}, nil
+		return nil, simpleError("CLERK_SECRET_KEY not set")
 	}
 	config := &clerk.ClientConfig{}
 	config.Key = &apiKey
 	client := user.NewClient(config)
 
-	// Lookup Clerk user by email.
-	listParams := &user.ListParams{
-		EmailAddresses: []string{customerEmail},
-	}
-	userList, err := client.List(context.Background(), listParams)
-	if err != nil || len(userList.Users) == 0 {
-		log.Printf("Error finding Clerk user by email: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error finding user"}, nil
-	}
-	clerkUser := userList.Users[0]
-
-	// Prepare metadata update: clear subscriptionPlan, mark as canceled.
-	newMetadata := map[string]interface{}{
-		"subscriptionPlan":   "",
-		"subscriptionStatus": "canceled",
-		"tokensPerCycle":     0,
-	}
-
-	metaJSON, err := json.Marshal(newMetadata)
+	userList, err := client.List(context.Background(), &user.ListParams{EmailAddresses: []string{email}})
 	if err != nil {
-		log.Printf("Error marshaling metadata: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Server Error"}, nil
+		return nil, err
 	}
-	updateParams := user.UpdateMetadataParams{PublicMetadata: (*json.RawMessage)(&metaJSON)}
-	if _, err := client.UpdateMetadata(context.Background(), clerkUser.ID, &updateParams); err != nil {
-		log.Printf("Error updating metadata: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: http.StatusInternalServerError, Body: "Error updating metadata"}, nil
+	if len(userList.Users) == 0 {
+		return nil, simpleError("no Clerk user found for " + email)
 	}
+	return userList.Users[0], nil
+}
 
-	// Send a Slack notification.
-	err = utils.SendSlackMessage("Subscription cancelled for " + customerEmail)
+func updateClerkMetadata(clerkUserID string, publicMeta map[string]interface{}, privateMeta map[string]interface{}) error {
+	apiKey := os.Getenv("CLERK_SECRET_KEY")
+	if apiKey == "" {
+		return simpleError("CLERK_SECRET_KEY not set")
+	}
+	config := &clerk.ClientConfig{}
+	config.Key = &apiKey
+	client := user.NewClient(config)
+
+	publicRaw, err := billing.MarshalRaw(publicMeta)
 	if err != nil {
-		log.Printf("Error sending Slack message: %v", err)
+		return err
+	}
+	privateRaw, err := billing.MarshalRaw(privateMeta)
+	if err != nil {
+		return err
 	}
 
-	return events.APIGatewayProxyResponse{StatusCode: http.StatusOK, Body: "Cancellation processed and metadata updated"}, nil
+	_, err = client.UpdateMetadata(context.Background(), clerkUserID, &user.UpdateMetadataParams{
+		PublicMetadata:  publicRaw,
+		PrivateMetadata: privateRaw,
+	})
+	return err
+}
+
+func notifyMissingPriceEnv(missingEnv []string) {
+	if len(missingEnv) == 0 {
+		return
+	}
+	billing.Notify("CodeVideo billing price config incomplete", map[string]string{
+		"missing_env": strings.Join(missingEnv, ", "),
+	})
+}
+
+type simpleError string
+
+func (e simpleError) Error() string {
+	return string(e)
 }
 
 func main() {

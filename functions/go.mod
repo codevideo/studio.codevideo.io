@@ -7,7 +7,7 @@ require (
 	github.com/clerk/clerk-sdk-go/v2 v2.2.0
 )
 
-require github.com/codevideo/go-utils v0.0.2
+require github.com/codevideo/go-utils v0.0.3
 
 require (
 	github.com/go-jose/go-jose/v3 v3.0.3 // indirect
