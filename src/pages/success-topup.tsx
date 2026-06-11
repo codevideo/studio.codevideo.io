@@ -6,7 +6,7 @@ import { PaymentSuccessContent } from "../components/pages/payments/PaymentSucce
 export default function SuccessTopUp() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo Top Up Payment Success" />
+      <SEO title="CodeVideo Top Up Payment Success" pathname="/success-topup" noIndex={true} />
       <PaymentSuccessContent tier="topup" />
     </Layout>
   )
