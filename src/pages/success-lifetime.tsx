@@ -6,7 +6,7 @@ import { PaymentSuccessContent } from "../components/pages/payments/PaymentSucce
 export default function SuccessLifetime() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo Lifetime Payment Success" />
+      <SEO title="CodeVideo Lifetime Payment Success" pathname="/success-lifetime" noIndex={true} />
       <PaymentSuccessContent tier="lifetime" />
     </Layout>
   )

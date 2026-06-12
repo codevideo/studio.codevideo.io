@@ -28,6 +28,7 @@
     "@reduxjs/toolkit": "^2.3.0",
     "gatsby": "^5.13.7",
     "gatsby-plugin-manifest": "^5.14.0",
+    "gatsby-plugin-sitemap": "^6.16.0",
     "gifshot": "^0.4.5",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
