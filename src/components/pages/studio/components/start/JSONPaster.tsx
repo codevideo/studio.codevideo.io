@@ -71,7 +71,7 @@ export const JSONPaster = () => {
         setDetectedType('lesson');
         setParsedData(parsed as ILesson);
         setValidationError('');
-      } else if (isValidActions(parsed)) {
+      } else if (isValidActions(parsed).isValid) {
         // we require at least one action to be present
         if ((parsed as IAction[]).length === 0) {
           setDetectedType(null);
@@ -130,8 +130,10 @@ export const JSONPaster = () => {
     setIsModalOpen(false);
   };
 
-  // filter actions by type
-  const actionsToUseForStats = parsedData && isValidActions(parsedData) ? parsedData : [];
+  // filter actions by type. isValidActions no longer narrows the type (it
+  // returns a result object since codevideo-types 2.1.33), so cast explicitly
+  // once .isValid has confirmed parsedData is an actions array.
+  const actionsToUseForStats: IAction[] = parsedData && isValidActions(parsedData).isValid ? (parsedData as IAction[]) : [];
   const authorActionsCount = filterAuthorActions(actionsToUseForStats).length;
   const fileExplorerActionsCount = filterFileExplorerActions(actionsToUseForStats).length;
   const editorActionsCount = filterEditorActions(actionsToUseForStats).length;

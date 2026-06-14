@@ -45,7 +45,7 @@ export function SidebarMenu() {
         currentProjectTitle = currentProject.project.name;
     } else if (isLesson(currentProject?.project)) {
         currentProjectTitle = currentProject.project.name;
-    } else if (isValidActions(currentProject?.project)) {
+    } else if (isValidActions(currentProject?.project).isValid) {
         currentProjectTitle = '';
     }
 
