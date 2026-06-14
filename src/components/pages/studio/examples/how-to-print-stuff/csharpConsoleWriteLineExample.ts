@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 import { cSharpExampleActions } from "../actionsExamples";
 
 export const csharpConsoleWriteLineExample: ICourse = {
@@ -12,7 +14,9 @@ export const csharpConsoleWriteLineExample: ICourse = {
         name: 'C# Console.WriteLine Example',
         description: 'Learn how to use Console.WriteLine in C#',
         initialSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -30,6 +34,7 @@ export const csharpConsoleWriteLineExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -47,6 +52,7 @@ export const csharpConsoleWriteLineExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,
@@ -68,7 +74,9 @@ export const csharpConsoleWriteLineExample: ICourse = {
           }
         },
         finalSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -86,6 +94,7 @@ export const csharpConsoleWriteLineExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -103,6 +112,7 @@ export const csharpConsoleWriteLineExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,

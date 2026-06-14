@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 import { javascriptCreateRenameDeleteFileExampleActions } from "../actionsExamples";
 
 export const javascriptCreateRenameDeleteFileExample: ICourse = {
@@ -12,7 +14,9 @@ export const javascriptCreateRenameDeleteFileExample: ICourse = {
         name: 'JavaScript Create, Rename, and Delete File Example',
         description: 'Learn how to create, rename, and delete files in JavaScript within the CodeVideo framework',
         initialSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -30,6 +34,7 @@ export const javascriptCreateRenameDeleteFileExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -46,6 +51,7 @@ export const javascriptCreateRenameDeleteFileExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,

@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 
 export const blankPythonExample: ICourse = {
     id: 'blank-python',
@@ -11,7 +13,9 @@ export const blankPythonExample: ICourse = {
             name: 'Blank Python Project',
             description: 'Start with a blank Python project',
             initialSnapshot: {
+                ...blankSnap,
                 fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
                     fileStructure: {
                         'src': {
                             type: 'directory',
@@ -29,6 +33,7 @@ export const blankPythonExample: ICourse = {
                     },
                 },
                 editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
                     editors: [{
                         isActive: true,
                         isSaved: true,
@@ -46,6 +51,7 @@ export const blankPythonExample: ICourse = {
                     ]
                 },
                 mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
                     x: 0,
                     y: 0,
                     timestamp: 0,
@@ -67,7 +73,9 @@ export const blankPythonExample: ICourse = {
                 }
             },
             finalSnapshot: {
+                ...blankSnap,
                 fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
                     fileStructure: {
                         'src': {
                             type: 'directory',
@@ -85,6 +93,7 @@ export const blankPythonExample: ICourse = {
                     },
                 },
                 editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
                     editors: [{
                         isActive: true,
                         isSaved: true,
@@ -102,6 +111,7 @@ export const blankPythonExample: ICourse = {
                     ]
                 },
                 mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
                     x: 0,
                     y: 0,
                     timestamp: 0,

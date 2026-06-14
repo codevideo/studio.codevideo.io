@@ -33,6 +33,7 @@ export function StaticCodeVideoIDE() {
             allowFocusInEditor={allowFocusInEditor}
             defaultLanguage={"javascript"}
             isExternalBrowserStepUrl={""}
+            resolution="1080p"
             currentActionIndex={currentActionIndex}
             currentLessonIndex={currentLessonIndex}
             isSoundOn={isSoundOn}
