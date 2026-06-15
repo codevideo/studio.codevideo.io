@@ -7,7 +7,7 @@ import { Embed } from "../components/pages/embed/Embed"
 export default function ContactPage() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo: Embed Course or Lesson" />
+      <SEO title="Embed Course or Lesson — CodeVideo Studio" description="Embed CodeVideo courses and lessons directly into your website or learning management system." pathname="/embed" />
       <Embed/>
     </Layout>
   )

@@ -30,5 +30,21 @@ module.exports = {
         icon: `src/images/favicon.svg`,
       },
     },
+    {
+      resolve: `gatsby-plugin-sitemap`,
+      options: {
+        excludes: [
+          `/dev-404-page/`,
+          `/404/`,
+          `/offline-plugin-app-shell-fallback/`,
+          `/account/`,
+          `/success-starter/`,
+          `/success-creator/`,
+          `/success-enterprise/`,
+          `/success-lifetime/`,
+          `/success-topup/`,
+        ],
+      },
+    },
   ],
 }

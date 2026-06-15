@@ -7,7 +7,7 @@ import { AccountPage } from "../components/pages/account/AccountPage"
 export default function Account() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo Studio Account" />
+      <SEO title="CodeVideo Studio Account" pathname="/account" noIndex={true} />
       <SignedIn>
           <AccountPage />
         </SignedIn>

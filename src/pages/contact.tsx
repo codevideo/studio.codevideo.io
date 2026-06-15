@@ -6,7 +6,7 @@ import { Contact } from "../components/contact/Contact"
 export default function ContactPage() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo: Contact" />
+      <SEO title="Contact — CodeVideo Studio" description="Get in touch with the CodeVideo team for any questions, concerns, or ideas to make CodeVideo better." pathname="/contact" />
       <Contact/>
     </Layout>
   )

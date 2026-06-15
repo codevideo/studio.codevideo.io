@@ -6,7 +6,7 @@ import { PaymentSuccessContent } from "../components/pages/payments/PaymentSucce
 export default function SuccessEnterprise() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo Enterprise Payment Success" />
+      <SEO title="CodeVideo Enterprise Payment Success" pathname="/success-enterprise" noIndex={true} />
       <PaymentSuccessContent tier="enterprise" />
     </Layout>
   )

@@ -6,7 +6,7 @@ import { PaymentSuccessContent } from "../components/pages/payments/PaymentSucce
 export default function SuccessCreator() {
   return (
     <Layout withHeader={true}>
-      <SEO title="CodeVideo Creator Payment Success" />
+      <SEO title="CodeVideo Creator Payment Success" pathname="/success-creator" noIndex={true} />
       <PaymentSuccessContent tier="creator" />
     </Layout>
   )
