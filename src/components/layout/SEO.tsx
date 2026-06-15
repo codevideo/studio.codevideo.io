@@ -2,7 +2,7 @@ import * as React from "react"
 import { Helmet } from "react-helmet"
 import config from "../../../gatsby-config"
   
-const siteUrl = config.siteMetadata?.siteUrl as string || "https://codevideo.io"
+const siteUrl = config.siteMetadata?.siteUrl as string || "https://studio.codevideo.io"
 const defaultDescription = config.siteMetadata?.description as string || "Make educational software videos in minutes, not weeks"
 const defaultOgImage = `${siteUrl}/og.png`
 
