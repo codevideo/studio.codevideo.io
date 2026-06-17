@@ -79,3 +79,6 @@ rust-browser-compiler/target
 
 # any binary 'main' files from our go functions
 functions/*/main
+
+# Sentry Config File
+.sentryclirc
