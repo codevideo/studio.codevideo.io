@@ -360,7 +360,11 @@ export const javaScriptExampleActions: Array<IAction> = [
         "value": "And let's get right into the editor."
     },
     {
-        "name": "mouse-click-editor",
+        "name": "mouse-move-editor",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {
@@ -1695,7 +1699,11 @@ export const advancedRustExampleActions: Array<IAction> = [
         "value": "And let's run this with cargo run:"
     },
     {
-        "name": "mouse-click-terminal",
+        "name": "mouse-move-terminal",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {
@@ -1707,7 +1715,11 @@ export const advancedRustExampleActions: Array<IAction> = [
         "value": "1"
     },
     {
-        "name": "mouse-click-editor",
+        "name": "mouse-move-editor",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {
@@ -2127,7 +2139,11 @@ export const advancedRustExampleActions: Array<IAction> = [
         "value": "And let's run this with cargo run:"
     },
     {
-        "name": "mouse-click-terminal",
+        "name": "mouse-move-terminal",
+        "value": "1"
+    },
+    {
+        "name": "mouse-left-click",
         "value": "1"
     },
     {

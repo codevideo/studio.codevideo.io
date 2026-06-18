@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 import { blankJavaScriptExampleActions } from "../actionsExamples";
 
 // Blank JavaScript Example
@@ -13,7 +15,9 @@ export const blankJavaScriptExample: ICourse = {
         name: 'Blank JavaScript Project',
         description: 'Start with a blank JavaScript project',
         initialSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -31,6 +35,7 @@ export const blankJavaScriptExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -48,6 +53,7 @@ export const blankJavaScriptExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,
@@ -69,7 +75,9 @@ export const blankJavaScriptExample: ICourse = {
           }
         },
         finalSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -87,6 +95,7 @@ export const blankJavaScriptExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -104,6 +113,7 @@ export const blankJavaScriptExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,

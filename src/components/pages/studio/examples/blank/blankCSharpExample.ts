@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 
 export const blankCSharpExample: ICourse = {
     id: 'blank-csharp',
@@ -11,7 +13,9 @@ export const blankCSharpExample: ICourse = {
         name: 'Blank C# Project',
         description: 'Start with a blank C# project',
         initialSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -29,6 +33,7 @@ export const blankCSharpExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -46,6 +51,7 @@ export const blankCSharpExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,
@@ -67,7 +73,9 @@ export const blankCSharpExample: ICourse = {
           }
         },
         finalSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -85,6 +93,7 @@ export const blankCSharpExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -102,6 +111,7 @@ export const blankCSharpExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,

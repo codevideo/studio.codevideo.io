@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 import { goLangExampleActions } from "../actionsExamples";
 
 export const goPrintlnExample: ICourse = {
@@ -12,7 +14,9 @@ export const goPrintlnExample: ICourse = {
         name: 'Go fmt.Println Example',
         description: 'Learn how to use fmt.Println in Go',
         initialSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -30,6 +34,7 @@ export const goPrintlnExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -47,6 +52,7 @@ export const goPrintlnExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,
@@ -68,7 +74,9 @@ export const goPrintlnExample: ICourse = {
           }
         },
         finalSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -86,6 +94,7 @@ export const goPrintlnExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -103,6 +112,7 @@ export const goPrintlnExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,

@@ -1,4 +1,6 @@
-import { ICourse } from "@fullstackcraftllc/codevideo-types";
+import { ICourse, getBlankInitialSnapshot } from "@fullstackcraftllc/codevideo-types";
+
+const blankSnap = getBlankInitialSnapshot();
 import { javaScriptExampleActions } from "../actionsExamples";
 
 export const javascriptConsoleLogExample: ICourse = {
@@ -12,7 +14,9 @@ export const javascriptConsoleLogExample: ICourse = {
         name: 'JavaScript Console.log Example',
         description: 'Learn how to use console.log in JavaScript',
         initialSnapshot: {
+                ...blankSnap,
           fileExplorerSnapshot: {
+                    ...blankSnap.fileExplorerSnapshot,
             fileStructure: {
               'src': {
                 type: 'directory',
@@ -30,6 +34,7 @@ export const javascriptConsoleLogExample: ICourse = {
             },
           },
           editorSnapshot: {
+                    ...blankSnap.editorSnapshot,
             editors: [{
               isActive: true,
               isSaved: true,
@@ -47,6 +52,7 @@ export const javascriptConsoleLogExample: ICourse = {
             ]
           },
           mouseSnapshot: {
+                    ...blankSnap.mouseSnapshot,
             x: 0,
             y: 0,
             timestamp: 0,

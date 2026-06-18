@@ -19,7 +19,7 @@ const getProjectName = (project: Project) => {
     if (isLesson(project)) {
         return project.name || `<Unnamed Lesson>`;
     }
-    if (isValidActions(project)) {
+    if (isValidActions(project).isValid) {
         return `Actions Project`;
     }
     return 'Unknown Project';

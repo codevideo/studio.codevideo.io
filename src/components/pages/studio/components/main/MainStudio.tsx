@@ -86,6 +86,7 @@ export function MainStudio() {
           project={currentProject.project}
           mode={mode}
           allowFocusInEditor={true} // no other options in fullscreen so no conflict of focused elements
+          resolution="1080p"
           defaultLanguage={defaultLanguage}
           isExternalBrowserStepUrl={isExternalBrowserStepUrl}
           currentActionIndex={currentActionIndex}
@@ -158,6 +159,7 @@ export function MainStudio() {
                   project={currentProject.project}
                   mode={mode}
                   allowFocusInEditor={allowFocusInEditor}
+                  resolution="1080p"
                   defaultLanguage={defaultLanguage}
                   isExternalBrowserStepUrl={isExternalBrowserStepUrl}
                   currentActionIndex={currentActionIndex}

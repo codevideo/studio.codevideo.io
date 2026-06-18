@@ -67,8 +67,10 @@ const setCurrentActions = (state: EditorState, currentProject: UserProject) => {
     if (isLesson(currentProject.project)) {
         state.currentActions = currentProject.project.actions;
     }
-    if (isValidActions(currentProject.project)) {
-        state.currentActions = currentProject.project;
+    if (isValidActions(currentProject.project).isValid) {
+        // isValidActions no longer narrows (returns a result object since
+        // codevideo-types 2.1.33); cast now that .isValid confirmed an actions array
+        state.currentActions = currentProject.project as IAction[];
     }
 
     // also update the action index to start at the beginning
@@ -122,7 +124,7 @@ const editorSlice = createSlice({
                     currentProject.project.actions = action.payload;
                     state.currentProject = currentProject;
                 }
-                else if (isValidActions(action.payload)) {
+                else if (isValidActions(action.payload).isValid) {
                     console.log('setting actions to actions project!')
                     currentProject.project = action.payload;
                     state.currentProject = currentProject;
