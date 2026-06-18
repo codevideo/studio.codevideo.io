@@ -19,6 +19,7 @@ import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { TokenCosts } from '../../../constants/TokenCosts';
 import mixpanel from 'mixpanel-browser';
 import { BuyTokensButton } from '../../utils/Buttons/BuyTokensButton';
+import { ApiKeysSection } from './components/ApiKeysSection';
 import { ICodeVideoUserMetadata } from '@fullstackcraftllc/codevideo-types';
 
 const subscriptionPlansToMonthlyTokens = (plan: string) => {
@@ -221,6 +222,13 @@ export const AccountPage = () => {
                 <Text size="1" color="gray" ml="1">Lifetime usage for $2000</Text>
               </Box>}
             </Flex>
+          </Flex>
+        </Card>
+
+        <Card size="1" mb="3">
+          <Flex direction="column" gap="2">
+            <Text size="1" color="gray">API Access</Text>
+            <ApiKeysSection />
           </Flex>
         </Card>
 
