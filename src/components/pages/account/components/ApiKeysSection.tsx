@@ -123,7 +123,7 @@ export const ApiKeysSection = () => {
       <Flex gap="2">
         <TextField.Root
           style={{ flexGrow: 1 }}
-          placeholder="Key name (e.g. CI, Gary's integration)"
+          placeholder="Key name (e.g. CI, production)"
           value={name}
           onChange={(e) => setName(e.target.value)}
           size="2"

@@ -55,6 +55,18 @@ When making changes related to SEO, crawling, indexing, social previews, or AI/a
   - FAQ: `FAQPage`
 - Only add schemas when the content genuinely matches the schema type.
 
+## Written Content Attribution
+
+- If Markdown/blog content is added to this repo, every absolute owned-product link in that content must include GrowthKit-friendly UTM parameters:
+  - `utm_source=studio.codevideo.io`
+  - `utm_medium=blog`, `guide`, `feature`, or `learn`
+  - `utm_campaign=<content-slug>`
+  - `utm_content=<anchor-or-target>`
+- Owned product domains include `fullstackcraft.com`, `wheelscreener.com`, `vannacharm.com`, `leapsscreener.com`, `option-screener.com`, `codevideo.io`, `studio.codevideo.io`, `genie.codevideo.io`, `chatvideolab.com`, and `amtjoy.com`.
+- Preserve existing query parameters and append UTMs with `&`.
+- For new-tab links, use `target="_blank" rel="noopener"`. Do not rely on `target="_blank"` for attribution; GrowthKit reads URL/referrer/UTM data on page landing.
+- Do not rely on same-domain internal UTMs as click tracking. GrowthKit records one landing event per product per tab session.
+
 ## Checks 
 
 - Sanity-check:
