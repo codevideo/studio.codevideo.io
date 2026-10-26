@@ -93,8 +93,7 @@ export const ApiKeysSection = () => {
   return (
     <Flex direction="column" gap="3">
       <Text size="1" color="gray">
-        Call the CodeVideo API directly: send your key as the <Code>x-api-key</Code> header on{' '}
-        <Code>POST /create-video-v3</Code>. Keys draw on your account's allowance.
+        Keys let you call the CodeVideo API directly; requests draw on your account's tokens.
       </Text>
 
       {newKey && (

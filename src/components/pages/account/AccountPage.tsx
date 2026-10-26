@@ -20,6 +20,7 @@ import { TokenCosts } from '../../../constants/TokenCosts';
 import mixpanel from 'mixpanel-browser';
 import { BuyTokensButton } from '../../utils/Buttons/BuyTokensButton';
 import { ApiKeysSection } from './components/ApiKeysSection';
+import { ApiQuickStart } from './components/ApiQuickStart';
 import { ICodeVideoUserMetadata } from '@fullstackcraftllc/codevideo-types';
 
 const subscriptionPlansToMonthlyTokens = (plan: string) => {
@@ -229,6 +230,8 @@ export const AccountPage = () => {
           <Flex direction="column" gap="2">
             <Text size="1" color="gray">API Access</Text>
             <ApiKeysSection />
+            <Separator size="4" my="2" />
+            <ApiQuickStart />
           </Flex>
         </Card>
 
