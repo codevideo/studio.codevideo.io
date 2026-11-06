@@ -5,6 +5,7 @@ import { ClerkProvider } from "@clerk/clerk-react"
 import mixpanel from "mixpanel-browser"
 import createStore from "../store/index"
 import "../styles/global.css"
+import "../styles/editor.css"
 import "@radix-ui/themes/styles.css"
 import "../styles/toast.css"
 

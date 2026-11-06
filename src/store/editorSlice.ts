@@ -78,6 +78,7 @@ const setCurrentActions = (state: EditorState, currentProject: UserProject) => {
 
     // and update the actions string to reflect the current actions
     state.actionsString = JSON.stringify(state.currentActions, null, 2);
+    state.draftActionsString = state.actionsString;
 }
 
 const editorSlice = createSlice({
@@ -89,12 +90,12 @@ const editorSlice = createSlice({
         },
         setProjects(state, action) {
             // sort by last changed
-            action.payload.sort((a: UserProject, b: UserProject) => {
+            const sortedProjects = [...action.payload].sort((a: UserProject, b: UserProject) => {
                 return new Date(b.modified).getTime() - new Date(a.modified).getTime();
             });
 
-            state.projects = action.payload;
-            state.currentProject = action.payload[0];
+            state.projects = sortedProjects;
+            state.currentProject = sortedProjects[0];
             state.currentProjectIndex = 0;
             if (state.currentProject) {
                 setCurrentActions(state, state.currentProject);
@@ -146,7 +147,9 @@ const editorSlice = createSlice({
             state.currentActionIndex = action.payload;
         },
         setCurrentProjectIndex(state, action) {
+            state.isPlaying = false;
             state.currentProjectIndex = action.payload;
+            state.currentLessonIndex = 0;
             const currentProject = state.projects[action.payload];
             if (currentProject) {
                 state.currentProject = currentProject;
@@ -154,6 +157,7 @@ const editorSlice = createSlice({
             }
         },
         setCurrentLessonIndex(state, action) {
+            state.isPlaying = false;
             state.currentLessonIndex = action.payload;
 
             // get actions at this index
@@ -165,6 +169,7 @@ const editorSlice = createSlice({
                     state.currentActions = currentLesson.actions;
                     state.currentActionIndex = 0;
                     state.actionsString = JSON.stringify(currentLesson.actions, null, 2);
+                    state.draftActionsString = state.actionsString;
                 }
             }
         },
@@ -277,6 +282,7 @@ const editorSlice = createSlice({
             state.currentLessonIndex = -1;
             state.currentActions = [];
             state.actionsString = JSON.stringify([], null, 2);
+            state.draftActionsString = state.actionsString;
             state.currentActionIndex = -1;
             state.jumpFlag = false;
             state.mousePosition = { x: 20, y: 20 };

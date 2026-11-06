@@ -7,6 +7,7 @@ import toastSlice from './toastSlice'
 import themeSlice from './themeSlice'
 import tutorialSlice from './tutorialSlice'
 import formsSlice from './formsSlice'
+import speechSlice from './speechSlice'
 import authSlice from './authSlice'
 
 // we need preloaded state for the component embedder
@@ -24,6 +25,7 @@ const createStore = (preloadedState = {}) =>
             tutorial: tutorialSlice,
             forms: formsSlice,
             auth: authSlice,
+            speech: speechSlice,
         },
         preloadedState,
     })

@@ -1,3 +1,5 @@
+import { createPortal } from 'react-dom';
+import { useSpeechTakes } from '../../../hooks/useSpeechTakes';
 import React, { useEffect, useState } from 'react';
 import { ExportType, extractActionsFromProject, IAction, isValidAction, Project } from '@fullstackcraftllc/codevideo-types';
 import { exportProject } from '@fullstackcraftllc/codevideo-exporters';
@@ -55,13 +57,14 @@ const getInvalidActionsWarning = (invalidActions: Array<string>) => {
   return `Exported, but the project has ${count} (${listed}). It won't work in other CodeVideo tools until that's fixed.`;
 };
 
-export const ExportDropdown = () => {
+export const ExportDropdown = ({ portalTarget }: { portalTarget?: HTMLElement | null } = {}) => {
   const { projects, currentProjectIndex, currentLessonIndex, isPlaying } = useAppSelector(state => state.editor);
   const { callbackId } = useAppSelector(state => state.modal);
   const [isExporting, setIsExporting] = useState(false);
   const [exportType, setExportType] = useState<ExportType>('json');
   const [exportComplete, setExportComplete] = useState(false);
   const dispatch = useAppDispatch();
+  const speech = useSpeechTakes();
   const { getToken } = useAuth()
   const { user } = useUser();
 
@@ -106,14 +109,14 @@ export const ExportDropdown = () => {
     setIsExporting(true);
     setExportComplete(false);
     const actions = extractActionsFromProject(project, currentLessonIndex);
-    const token = await getToken();
-    if (token === null) {
-      // show signup
-      dispatch(setShowSignUpOverlay(true));
-      return;
-    }
     try {
-      // console.log('exporting project:', project, 'as', exportType);
+      const token = await getToken();
+      if (token === null) {
+        dispatch(setShowSignUpOverlay(true));
+        return;
+      }
+      const hasTakes = actions.some(a => a.name.startsWith('author-speak-') && speech.takeFor(a.value));
+      const audioItems = hasTakes ? await speech.generateMissing(actions) : undefined;
       const response = await fetch(`${process.env.NEXT_PUBLIC_CODEVIDEO_API_URL}/create-video-v3`, {
         method: 'POST',
         headers: {
@@ -121,7 +124,8 @@ export const ExportDropdown = () => {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          actions
+          actions,
+          ...(audioItems ? { audioItems } : {})
         }),
       });
       const data = await response.json();
@@ -133,6 +137,7 @@ export const ExportDropdown = () => {
       mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
       setExportComplete(true);
     } catch (error: any) {
+      dispatch(addToast(error instanceof Error ? error.message : 'Video export failed.'));
       dispatch(openModal({ modalType: 'alert-error-creating-codevideo', title: 'Error Creating CodeVideo' }));
     } finally {
       setIsExporting(false);
@@ -315,7 +320,7 @@ export const ExportDropdown = () => {
   // console.log('progress:', progress);
   // console.log('project:', project);
 
-  return (
+  const content = (
     <Flex align="center" justify="between" gap="2">
       <Box>
         <Text size="1" mr="2">Export to...</Text>
@@ -395,4 +400,5 @@ export const ExportDropdown = () => {
       )}
     </Flex>
   );
+  return portalTarget === undefined ? content : portalTarget ? createPortal(content, portalTarget) : null;
 };

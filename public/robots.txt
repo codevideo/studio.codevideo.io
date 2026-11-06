@@ -8,3 +8,5 @@ Disallow: /success-lifetime
 Disallow: /success-topup
 
 Sitemap: https://studio.codevideo.io/sitemap-index.xml
+
+Disallow: /editor

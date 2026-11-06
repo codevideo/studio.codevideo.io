@@ -2,7 +2,7 @@ import { IAction, estimateActionDurationsMs, isAuthorAction, isEditorAction } fr
 
 // Videos render on the API's worker through codevideo-cli's /v3 page, which
 // sets these pauses instead of the IDE component's defaults (50ms and 1000ms).
-const RENDER_PAUSES = { keyboardTypingPauseMs: 40, standardPauseMs: 200 };
+export const RENDER_PAUSES = { keyboardTypingPauseMs: 40, standardPauseMs: 200 };
 
 // returns estimated video duration, estimated longest action, and the action index of the longest action
 export const estimateVideoDurationInSeconds = (actions: IAction[]): {
