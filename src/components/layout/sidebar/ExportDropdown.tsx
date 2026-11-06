@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ExportType, extractActionsFromProject, IAction } from '@fullstackcraftllc/codevideo-types';
+import { ExportType, extractActionsFromProject, IAction, isValidAction, Project } from '@fullstackcraftllc/codevideo-types';
 import { exportProject } from '@fullstackcraftllc/codevideo-exporters';
 import {
   Flex,
@@ -25,6 +25,35 @@ import JSZip from 'jszip';
 import { openModal, setCallbackId } from '../../../store/modalSlice';
 import { estimateVideoDurationInSeconds } from '../../../utils/estimateVideoDurationInSeconds';
 import { formatDuration } from '../../../utils/formatDuration';
+
+// turns an exportProject rejection into a message the user can act on
+const getExportErrorMessage = (exportType: ExportType, error: unknown) => {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes('Failed to open print window')) {
+    return 'Your browser blocked the PDF print window. Allow pop-ups for this site and try again.';
+  }
+  return `The ${exportType} export failed (${message}).`;
+};
+
+// where the project's invalid actions are, numbered from 1 like the action editor's validation message
+const findInvalidActions = (project: Project): Array<string> => {
+  const invalidIn = (actions: Array<IAction>, prefix: string) =>
+    actions.flatMap((action, i) => (action && isValidAction(action) ? [] : [`${prefix}action ${i + 1}`]));
+  if (Array.isArray(project)) {
+    return invalidIn(project, '');
+  }
+  if ('lessons' in project) {
+    return project.lessons.flatMap((lesson, l) => invalidIn(lesson.actions, `lesson ${l + 1}, `));
+  }
+  return invalidIn(project.actions, '');
+};
+
+// exports go through with invalid actions, but the file won't work elsewhere in CodeVideo until they're fixed
+const getInvalidActionsWarning = (invalidActions: Array<string>) => {
+  const listed = invalidActions.slice(0, 3).join('; ') + (invalidActions.length > 3 ? `; and ${invalidActions.length - 3} more` : '');
+  const count = invalidActions.length === 1 ? '1 invalid action' : `${invalidActions.length} invalid actions`;
+  return `Exported, but the project has ${count} (${listed}). It won't work in other CodeVideo tools until that's fixed.`;
+};
 
 export const ExportDropdown = () => {
   const { projects, currentProjectIndex, currentLessonIndex, isPlaying } = useAppSelector(state => state.editor);
@@ -54,6 +83,15 @@ export const ExportDropdown = () => {
   }, [progress])
 
   const project = projects[currentProjectIndex]?.project;
+
+  // after a successful export, say so if the file contains invalid actions
+  const warnAboutInvalidActions = (exportedProject: Project) => {
+    const invalidActions = findInvalidActions(exportedProject);
+    if (invalidActions.length > 0) {
+      console.warn('Exported project has invalid actions:', invalidActions);
+      dispatch(addToast(getInvalidActionsWarning(invalidActions)));
+    }
+  };
 
   const handleExportChange = (value: string) => {
     setExportType(value as ExportType);
@@ -143,8 +181,10 @@ export const ExportDropdown = () => {
         await exportProject(project, exportType);
         mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
         setExportComplete(true);
+        warnAboutInvalidActions(project);
       } catch (error) {
-        // console.error('Export failed:', error);
+        console.error('Export failed:', error);
+        dispatch(addToast(getExportErrorMessage(exportType, error)));
       } finally {
         setIsExporting(false);
       }
@@ -243,18 +283,30 @@ export const ExportDropdown = () => {
 
     try {
       await exportProject(project, exportType);
-      mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
-      setExportComplete(true);
+    } catch (error) {
+      // exportProject rejects before anything is downloaded, so there is nothing to charge for
+      console.error('Export failed:', error);
+      dispatch(addToast(`${getExportErrorMessage(exportType, error)} No tokens were used.`));
+      setIsExporting(false);
+      return;
+    }
 
-      // decrement tokens
+    mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
+    setExportComplete(true);
+
+    // the user already has the file at this point, so a failed charge must not read as a failed export
+    try {
       await decrementTokens(token, exportType);
       dispatch(signalTokenRefresh())
       dispatch(addToast('Your export has completed successfully and your token balance updated accordingly.'));
     } catch (error) {
-      console.error('Export failed:', error);
+      console.error('Error decrementing tokens:', error);
+      mixpanel.track('Token Decrement Failed Studio', { exportType });
+      dispatch(addToast('Your export has completed, but we could not update your token balance.'));
     } finally {
       setIsExporting(false);
     }
+    warnAboutInvalidActions(project);
   };
 
   // console.log('exportType:', exportType);

@@ -9,10 +9,12 @@ export interface IComponentEmbedderProps<T> {
     Component: React.ComponentType<T>;
     componentName: string;
     componentProps: T;
+    // false holds back the live preview; the embed code still renders
+    showPreview?: boolean;
 }
 
 export const ComponentEmbedder = <T extends {} = {}>(props: IComponentEmbedderProps<T>) => {
-    const { Component, componentName, componentProps } = props;
+    const { Component, componentName, componentProps, showPreview = true } = props;
     const [showCopied, setShowCopied] = useState(false);
 
     // Grab the current global state
@@ -61,7 +63,7 @@ export const ComponentEmbedder = <T extends {} = {}>(props: IComponentEmbedderPr
                     borderRadius: 'var(--radius-4)',
                     padding: 'var(--space-4)'
                 }}>
-                    <Component {...componentProps} />
+                    {showPreview && <Component {...componentProps} />}
                 </Box>
             </Card>
 

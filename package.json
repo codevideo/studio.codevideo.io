@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
-    "@fullstackcraftllc/codevideo-exporters": "^0.0.15",
+    "@fullstackcraftllc/codevideo-exporters": "^0.0.18",
     "@fullstackcraftllc/codevideo-ide-react": "^0.0.181",
     "@fullstackcraftllc/codevideo-types": "^2.6.0",
     "@fullstackcraftllc/codevideo-virtual-ide": "^1.0.43",
