@@ -3,7 +3,6 @@ import { useAppSelector } from '../../../hooks/useAppSelector';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import * as Toast from '@radix-ui/react-toast';
 import { removeToast } from '../../../store/toastSlice';
-import "../../../styles/toast.css";
 
 export function ToastContainer() {
   const { toasts } = useAppSelector(state => state.toast);

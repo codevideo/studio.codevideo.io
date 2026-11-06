@@ -5,7 +5,7 @@ import { resolveTokensColor } from '../../utils/resolveTokensColor';
 import { useUser } from '@clerk/clerk-react';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { BuyTokensButton } from './Buttons/BuyTokensButton';
-import { Link } from 'gatsby';
+import Link from 'next/link';
 import { setIsSidebarOpen } from '../../store/editorSlice';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 
@@ -47,7 +47,7 @@ export function TokenCountBadge() {
     
     return (
         <>
-            <Link to="/account" onClick={onClickTokenCountBadge}>
+            <Link href="/account" onClick={onClickTokenCountBadge}>
                 <Badge size="2" color="amber">
                     <Text size="1" color="amber">Tokens:
                         <Text ml="1" weight="bold" color={tokensColor}>{tokens}</Text>

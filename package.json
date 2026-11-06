@@ -5,14 +5,13 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "gatsby build",
-    "develop": "gatsby develop",
-    "start": "gatsby develop",
-    "serve": "gatsby serve",
-    "clean": "gatsby clean",
-    "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1",
+    "build": "next build",
+    "dev": "next dev -p 8001",
+    "start": "next dev -p 8001",
+    "serve": "npx --yes serve out -l 9000",
+    "clean": "rm -rf .next out",
     "type-check": "tsc --noEmit",
-    "build-wasm": "cd rust-browser-compiler && wasm-pack build --target web --out-dir ../static/wasm && cd .."
+    "build-wasm": "cd rust-browser-compiler && wasm-pack build --target web --out-dir ../public/wasm && cd .."
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
@@ -26,9 +25,7 @@
     "@radix-ui/themes": "^3.2.1",
     "@react-symbols/icons": "^1.2.8",
     "@reduxjs/toolkit": "^2.3.0",
-    "gatsby": "^5.13.7",
-    "gatsby-plugin-manifest": "^5.14.0",
-    "gatsby-plugin-sitemap": "^6.16.0",
+    "date-fns": "^2.30.0",
     "gifshot": "^0.4.5",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
@@ -36,11 +33,11 @@
     "mixpanel-browser": "^2.60.0",
     "monaco-editor": "^0.52.0",
     "monaco-themes": "^0.4.4",
+    "next": "16.4.5",
     "pptxgenjs": "^3.12.0",
     "react": "^18.2.0",
     "react-confetti": "^6.4.0",
     "react-dom": "^18.2.0",
-    "react-helmet": "^6.1.0",
     "react-hook-form": "^7.54.2",
     "react-joyride": "^2.9.3",
     "react-media-recorder": "^1.7.1",
@@ -56,8 +53,8 @@
   "devDependencies": {
     "@types/loadable__component": "^5.13.9",
     "@types/mixpanel-browser": "^2.51.0",
+    "@types/node": "^22.20.0",
     "@types/react-dom": "^19.0.4",
-    "@types/react-helmet": "^6.1.11",
     "autoprefixer": "^10.4.20",
     "typescript": "^5.6.3"
   }

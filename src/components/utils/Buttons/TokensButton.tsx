@@ -34,7 +34,7 @@ export function TokensButton(props: ITokensButtonProps) {
                         const token = await getToken()
 
                         // Create a new invitation
-                        const response = await fetch(`${process.env.GATSBY_API_URL}/api/create-invitation`, {
+                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/create-invitation`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${token}`,

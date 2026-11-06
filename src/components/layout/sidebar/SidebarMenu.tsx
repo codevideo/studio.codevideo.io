@@ -24,7 +24,7 @@ import { WhitepaperButton } from '../../utils/Buttons/WhitepaperButton';
 import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { AccountButton } from '../../utils/Buttons/AccountButton';
 import { useIsDesktop } from '../../../hooks/useIsDesktop';
-import { Link } from 'gatsby';
+import Link from 'next/link';
 
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
@@ -174,7 +174,7 @@ export function SidebarMenu() {
                             {/* FAQ Button - only shown here in sidebar on mobile */}
                             {!isDesktop && <Flex direction="column" gap="2">
                                 <Heading size="4" mb="0" mt="5">FAQ</Heading>
-                                <Link to="/faq">
+                                <Link href="/faq">
                                     <Button size="1" color="mint">
                                         FAQs
                                     </Button>
@@ -184,11 +184,11 @@ export function SidebarMenu() {
                             {/* Blog Button - only shown here in sidebar on mobile */}
                             {!isDesktop && <Flex direction="column" gap="2">
                                 <Heading size="4" mb="0" mt="5">Blog</Heading>
-                                <Link to="https://codevideo.substack.com/">
+                                <a href="https://codevideo.substack.com/">
                                     <Button size="1" color="mint">
                                         Blog
                                     </Button>
-                                </Link>
+                                </a>
                             </Flex>}
 
                             {/* WhitePaper Button - only shown here in sidebar on mobile */}

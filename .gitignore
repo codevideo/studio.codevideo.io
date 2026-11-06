@@ -55,9 +55,11 @@ typings/
 .env*
 !.env.example
 
-# gatsby files
-.cache/
-public
+# next files
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
 
 # Mac files
 .DS_Store

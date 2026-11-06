@@ -8,7 +8,7 @@ export function BuyTokensButton() {
     }
 
     return (
-        <Link href={process.env.GATSBY_STRIPE_TOPUP_PAYMENT_LINK} target='_blank'>
+        <Link href={process.env.NEXT_PUBLIC_STRIPE_TOPUP_PAYMENT_LINK} target='_blank'>
             <Button style={{ cursor: 'pointer' }}
                 onClick={onClickBuyTokens} size="1" color="amber" ml="1">
                 Buy Tokens

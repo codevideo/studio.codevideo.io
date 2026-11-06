@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link } from 'gatsby';
+import Link from 'next/link';
 import {
     Box,
     Flex,
@@ -47,7 +47,7 @@ export function Header() {
                         <Box
                             className={TutorialCSSClassConstants.HEADER_SELECTOR}
                         >
-                            <Link to="/" style={{ textDecoration: 'none', color: 'black' }}>
+                            <Link href="/" style={{ textDecoration: 'none', color: 'black' }}>
                                 <Flex align="center" gap="1">
                                     <Text color="mint" weight="bold">{'/>'}</Text>
                                     <Text color="mint" weight="bold">CodeVideo™ Studio</Text>
@@ -56,12 +56,12 @@ export function Header() {
                         </Box>
                         <Flex gap="3" style={{ display: isDesktop ? 'flex' : 'none' }}>
                             <TutorialButton />
-                            <Link to="/faq">
+                            <Link href="/faq">
                                 <Button size="1" color="mint" style={{ cursor: 'pointer' }}>
                                     FAQs
                                 </Button>
                             </Link>
-                            <Link to="/contact">
+                            <Link href="/contact">
                                 <Button size="1" color="mint" style={{ cursor: 'pointer' }}>
                                     Contact
                                 </Button>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Button, Text, Link as RadixLink, Flex, Card } from '@radix-ui/themes';
 import Confetti from 'react-confetti';
-import { Link } from 'gatsby';
+import Link from 'next/link';
 import { setShowSignInOverlay, signalTokenRefresh } from '../../../store/authSlice';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import mixpanel from 'mixpanel-browser';
@@ -162,7 +162,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                         colors={['#86EAD4', '#FFC53D']} // Radix UI theme colors mint-9 & amber-9
                     />
                     <Flex direction="column" align="center" justify="center" gap="6">
-                        <Link to="/" style={{ textDecoration: 'none' }}>
+                        <Link href="/" style={{ textDecoration: 'none' }}>
                             <Button variant="solid" style={{ display: tempPassword ? 'none' : 'block' }} size="3">
                                 Start Creating
                             </Button>
@@ -179,14 +179,14 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
                         </RadixLink>.
                     </Text>
                     <Box>
-                        <Link to="/account">
+                        <Link href="/account">
                             <Button variant="solid" color="mint" size="3">
                                 Manage Account
                             </Button>
                         </Link>
                     </Box>
                     <Box>
-                        <Link to="/studio">
+                        <Link href="/">
                             <Button variant="solid" color="mint" size="3">
                                 Return to Studio
                             </Button>

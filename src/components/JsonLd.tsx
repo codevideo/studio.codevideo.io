@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Helmet } from "react-helmet"
+import Head from "next/head"
 
 export interface IJsonLdProps {
   schema: Record<string, unknown> | Record<string, unknown>[]
@@ -13,12 +13,14 @@ export function JsonLd({ schema }: IJsonLdProps) {
   const schemas = Array.isArray(schema) ? schema : [schema]
 
   return (
-    <Helmet>
+    <Head>
       {schemas.map((s, i) => (
-        <script key={i} type="application/ld+json">
-          {JSON.stringify(s)}
-        </script>
+        <script
+          key={`json-ld-${i}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(s).replace(/</g, "\\u003c") }}
+        />
       ))}
-    </Helmet>
+    </Head>
   )
 }

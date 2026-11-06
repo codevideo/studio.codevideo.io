@@ -1,5 +1,4 @@
 import { Button } from '@radix-ui/themes';
-import { Link } from 'gatsby';
 import * as React from 'react';
 
 export interface IWhitepaperButtonProps {
@@ -9,9 +8,7 @@ export interface IWhitepaperButtonProps {
 export function WhitepaperButton(props: IWhitepaperButtonProps) {
     const { style } = props;
     return (
-        <Link
-            to="/pdf/CodeVideo_Framework_White_Paper.pdf"
-        >
+        <a href="/pdf/CodeVideo_Framework_White_Paper.pdf">
             <Button
                 style={{ cursor: 'pointer', ...style }}
                 size="1"
@@ -20,6 +17,6 @@ export function WhitepaperButton(props: IWhitepaperButtonProps) {
             >
                 Read white paper
             </Button>
-        </Link>
+        </a>
     );
 }

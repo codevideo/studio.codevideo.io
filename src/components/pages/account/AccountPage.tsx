@@ -14,7 +14,7 @@ import {
 import {
   InfoCircledIcon,
 } from '@radix-ui/react-icons';
-import { Link } from 'gatsby';
+import Link from 'next/link';
 import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { TokenCosts } from '../../../constants/TokenCosts';
 import mixpanel from 'mixpanel-browser';
@@ -185,7 +185,7 @@ export const AccountPage = () => {
                 </Badge>
               )}
               {userData.subscriptionPlan !== 'No plan found' &&
-                <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK}>
+                <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_LINK}>
                   <Button size="1" variant="soft" color="red">
                     Cancel
                   </Button>
@@ -199,25 +199,25 @@ export const AccountPage = () => {
             <Text size="1" color="gray">Change Plan</Text>
             <Flex direction="column" gap="1">
               {userData.subscriptionPlan !== 'starter' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_STARTER_PAYMENT_LINK} target="_blank">
+                <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_STARTER_PAYMENT_LINK} target="_blank">
                   <Button size="1" onClick={() => handleOnClickBuy("Starter")} color="mint">Buy Starter</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">50 tokens for $10 / mo.</Text>
               </Box>}
               {userData.subscriptionPlan !== 'creator' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_CREATOR_PAYMENT_LINK} target="_blank">
+                <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_CREATOR_PAYMENT_LINK} target="_blank">
                   <Button size="1" onClick={() => handleOnClickBuy("Creator")} color="mint">Buy Creator</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">500 tokens for $49 / mo.</Text>
               </Box>}
               {userData.subscriptionPlan !== 'enterprise' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_ENTERPRISE_PAYMENT_LINK} target="_blank">
+                <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_PAYMENT_LINK} target="_blank">
                   <Button size="1" onClick={() => handleOnClickBuy("Enterprise")} color="mint">Buy Enterprise</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">10000 tokens for $499 / mo.</Text>
               </Box>}
               {userData.subscriptionPlan !== 'lifetime' && <Box>
-                <RadixLink href={process.env.GATSBY_STRIPE_LIFETIME_PAYMENT_LINK} target="_blank">
+                <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_LIFETIME_PAYMENT_LINK} target="_blank">
                   <Button size="1" onClick={() => handleOnClickBuy("Lifetime")} color="amber">Buy Lifetime</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">Lifetime usage for $2000</Text>
@@ -240,7 +240,7 @@ export const AccountPage = () => {
             <Text size="1" color="gray">Contact</Text>
             <Flex direction="column" gap="1">
               <Box>
-                <Link to="/contact">
+                <Link href="/contact">
                   <Button size="1" color="mint" ml="1" onClick={onClickSupportOrFeature}>Request Support or Feature</Button>
                 </Link>
               </Box>
@@ -252,7 +252,7 @@ export const AccountPage = () => {
           <Flex direction="column" gap="2">
             <Text size="1" color="gray">Payment Methods</Text>
             <Flex>
-              <RadixLink href={process.env.GATSBY_STRIPE_CUSTOMER_PORTAL_LINK} target="_blank">
+              <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_LINK} target="_blank">
                 <Button size="1" variant="outline" onClick={onClickManageInStripe}>
                   Manage in Stripe
                 </Button>

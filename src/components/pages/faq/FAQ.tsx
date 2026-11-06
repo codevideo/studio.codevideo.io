@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Link } from 'gatsby'
+import Link from 'next/link'
 import { Container, Heading, Text, Grid, Box, Flex, Button } from '@radix-ui/themes'
 import { setShowSignUpOverlay } from '../../../store/authSlice'
 import { useAppDispatch } from '../../../hooks/useAppDispatch'
@@ -27,7 +27,7 @@ export function FAQs(props: IFAQsProps) {
 
             <Text align="center" size="5" mb="9">
                 Everything you need to know about our subscription plans at CodeVideo. Can't find the answer you're looking for?{' '}
-                <Link to="/contact"><Button size="1" mt="1">Please contact us</Button></Link>.
+                <Link href="/contact"><Button size="1" mt="1">Please contact us</Button></Link>.
             </Text>
 
             <Grid columns={{ initial: '1', md: '3' }} gap="6" mt="9">
@@ -46,7 +46,7 @@ export function FAQs(props: IFAQsProps) {
                                 </Box>
                                 <Box>
                                     <Button size="1" asChild variant="solid" >
-                                        <a href={process.env.GATSBY_STRIPE_STARTER_MONTHLY_LINK}>
+                                        <a href={process.env.NEXT_PUBLIC_STRIPE_STARTER_MONTHLY_LINK}>
                                             Get Starter Plan ($10/month)
                                         </a>
                                     </Button>
@@ -72,7 +72,7 @@ export function FAQs(props: IFAQsProps) {
                     <Text size="3">
                         You can cancel at any time. Your subscription will remain active until the end of your current billing period.
                         Manage your subscription from your{' '}
-                        <Link to="/account"><Button size="1" mt="1">account page</Button></Link>.
+                        <Link href="/account"><Button size="1" mt="1">account page</Button></Link>.
                     </Text>
                 </Box>
 

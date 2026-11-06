@@ -12,7 +12,7 @@ interface ApiKeySummary {
 }
 
 // Manages the user's CodeVideo API keys via the codevideo-api endpoints
-// (GATSBY_CODEVIDEO_API_URL/api-keys), authenticated with the Clerk session
+// (NEXT_PUBLIC_CODEVIDEO_API_URL/api-keys), authenticated with the Clerk session
 // token — same pattern as ExportDropdown. The plaintext key is shown once.
 export const ApiKeysSection = () => {
   const { isLoaded, isSignedIn } = useUser();
@@ -25,7 +25,7 @@ export const ApiKeysSection = () => {
   const [newKey, setNewKey] = useState<string | null>(null); // plaintext, shown once
   const [copied, setCopied] = useState(false);
 
-  const apiBase = process.env.GATSBY_CODEVIDEO_API_URL;
+  const apiBase = process.env.NEXT_PUBLIC_CODEVIDEO_API_URL;
 
   const load = async () => {
     if (!(isLoaded && isSignedIn)) return;

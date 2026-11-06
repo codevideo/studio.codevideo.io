@@ -76,7 +76,7 @@ export const ExportDropdown = () => {
     }
     try {
       // console.log('exporting project:', project, 'as', exportType);
-      const response = await fetch(`${process.env.GATSBY_CODEVIDEO_API_URL}/create-video-v3`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_CODEVIDEO_API_URL}/create-video-v3`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,10 @@
 [build]
   command = "cd functions && ./build-go-functions.sh && cd .. && npm run build"
-  publish = "public"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
 [functions]
   directory = "functions"

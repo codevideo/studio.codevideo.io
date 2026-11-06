@@ -1,6 +1,6 @@
 import * as React from "react";
 import Editor, { Monaco } from "@monaco-editor/react";
-import * as monaco from "monaco-editor";
+import type * as monaco from "monaco-editor";
 import { useRef } from "react";
 import { useAppSelector } from "../../../../hooks/useAppSelector";
 import { useAppDispatch } from "../../../../hooks/useAppDispatch";

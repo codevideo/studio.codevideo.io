@@ -39,7 +39,7 @@ export const ReferralStats = () => {
                 try {
                     const token = await getToken()
                     // Fetch referral stats
-                    const response = await fetch(`${process.env.GATSBY_API_URL}/api/referral-stats`, {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/referral-stats`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
