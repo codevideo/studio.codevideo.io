@@ -17,6 +17,7 @@ import { VirtualLayerLogs } from '../footer/VirtualLayerLogs';
 import { useAppDispatch } from '../../../../../hooks/useAppDispatch';
 import { setCurrentActionIndex, setIsPlaying, setIsSoundOn } from '../../../../../store/editorSlice';
 import { SoundToggleButton } from './SoundToggleButton';
+import { DiagnosticsToggleButton } from './DiagnosticsToggleButton';
 import { useClerk } from '@clerk/clerk-react';
 import { useIsDesktop } from '../../../../../hooks/useIsDesktop';
 import { ExportDropdown } from '../../../../layout/sidebar/ExportDropdown';
@@ -37,6 +38,8 @@ export function MainStudio() {
   // can't render the monaco editor until clerk is loaded - see https://github.com/clerk/javascript/issues/1643
   const clerk = useClerk();
   const [editorMode, setEditorMode] = useState("editor");
+  // TypeScript squiggles in the preview; a view preference, so local state
+  const [isDiagnosticsVisible, setIsDiagnosticsVisible] = useState(false);
   const isDesktop = useIsDesktop();
 
   const defaultLanguage = currentProject && currentProject.project && isCourse(currentProject.project) ? currentProject.project.primaryLanguage : 'javascript';
@@ -93,6 +96,7 @@ export function MainStudio() {
           currentLessonIndex={currentLessonIndex}
           isSoundOn={isSoundOn}
           withCaptions={true}
+          isDiagnosticsVisible={isDiagnosticsVisible}
           actionFinishedCallback={goToNextAction}
           playBackCompleteCallback={() => { }}
           speakActionAudios={[]}
@@ -166,6 +170,7 @@ export function MainStudio() {
                   currentLessonIndex={currentLessonIndex}
                   isSoundOn={isSoundOn}
                   withCaptions={true}
+                  isDiagnosticsVisible={isDiagnosticsVisible}
                   actionFinishedCallback={goToNextAction}
                   playBackCompleteCallback={() => { }}
                   speakActionAudios={[]}
@@ -174,6 +179,10 @@ export function MainStudio() {
               {/* Sound Toggle Button */}
               <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 10 }}>
                 <SoundToggleButton isSoundOn={isSoundOn} setIsSoundOn={(isSoundOn) => dispatch(setIsSoundOn(isSoundOn))} />
+              </Box>
+              {/* TypeScript squiggles toggle */}
+              <Box style={{ zIndex: 50, position: 'absolute', bottom: 10, left: 56 }}>
+                <DiagnosticsToggleButton isDiagnosticsVisible={isDiagnosticsVisible} setIsDiagnosticsVisible={setIsDiagnosticsVisible} />
               </Box>
             </Box>
           </Card>
