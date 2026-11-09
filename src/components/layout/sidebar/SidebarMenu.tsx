@@ -16,7 +16,7 @@ import { ProjectRenderer } from './ProjectRenderer';
 import { SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useAppDispatch } from '../../../hooks/useAppDispatch';
 import { useAppSelector } from '../../../hooks/useAppSelector';
-import { setLocationInStudio, setIsSidebarOpen } from '../../../store/editorSlice';
+import { setLocationInStudio, setIsSidebarOpen, setIsPlaying } from '../../../store/editorSlice';
 import { firstCharacterUppercase } from '../../../utils/firstCharacterUppercase';
 import { TokensButton } from '../../utils/Buttons/TokensButton';
 import { TutorialButton } from '../../utils/Buttons/TutorialButton';
@@ -25,15 +25,21 @@ import { TokenCountBadge } from '../../utils/TokenCountBadge';
 import { AccountButton } from '../../utils/Buttons/AccountButton';
 import { useIsDesktop } from '../../../hooks/useIsDesktop';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export function SidebarMenu() {
     const { currentProject, isSidebarOpen } = useAppSelector(state => state.editor);
     const dispatch = useAppDispatch();
+    const router = useRouter();
     const isDesktop = useIsDesktop();
 
     const onCreateNewProject = () => {
+        dispatch(setIsPlaying(false));
         dispatch(setLocationInStudio('select'));
         dispatch(setIsSidebarOpen(false));
+        // The creation wizard lives on the studio route. Other views share this
+        // menu but do not render locationInStudio's creation states.
+        if (router.pathname !== '/') void router.push('/');
     }
 
     if (!currentProject) {

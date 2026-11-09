@@ -75,9 +75,9 @@ export function EditorPage() {
               dispatch(setAllowFocusInEditor(false));
           }}
         >
-          <EditorTopBar playback={playback} layout={layout} />
+          <EditorTopBar />
           <div className="cv-editor-main">
-            <EditorPreview playback={playback} />
+            <EditorPreview playback={playback} layout={layout} />
             <Inspector
               actions={actions}
               index={selectedIndex}

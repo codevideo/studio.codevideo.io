@@ -5,8 +5,11 @@ import { isCourse } from "@fullstackcraftllc/codevideo-types";
 import { useAppSelector } from "../../../../../hooks/useAppSelector";
 import { RENDER_PAUSES } from "../../../../../utils/estimateVideoDurationInSeconds";
 import { buildSpeakActionAudios } from "../../../../../utils/speech/speechAudio";
+import { TransportControls } from "../toolbar/TransportControls";
+import { Timecode } from "../toolbar/Timecode";
+import { TimelineLayout } from "../../utils/timelineLayout";
 import { Playback } from "../../hooks/usePlayback";
-export function EditorPreview({ playback }: { playback: Playback }) {
+export function EditorPreview({ playback, layout }: { playback: Playback; layout: TimelineLayout }) {
   const clerk = useClerk();
   const {
     currentProject,
@@ -24,11 +27,10 @@ export function EditorPreview({ playback }: { playback: Playback }) {
   );
   return (
     <section
-      data-editor-preview
       className="cv-preview-area"
       aria-label="IDE preview"
     >
-      <div className="cv-preview-frame">
+      <div data-editor-preview className="cv-preview-frame">
         {clerk.loaded && currentProject ? (
           <CodeVideoIDE
             theme={theme}
@@ -44,7 +46,7 @@ export function EditorPreview({ playback }: { playback: Playback }) {
                 : "javascript"
             }
             isExternalBrowserStepUrl={null}
-            isSoundOn={isSoundOn}
+            isSoundOn={isSoundOn && playback.isPlaying}
             withCaptions
             actionFinishedCallback={playback.finished}
             speakActionAudios={audios}
@@ -54,9 +56,11 @@ export function EditorPreview({ playback }: { playback: Playback }) {
           <p className="cv-preview-loading">Loading preview…</p>
         )}
       </div>
-      <span className="cv-preview-caption">
-        IDE PREVIEW <span>16:9 · 1080p</span>
-      </span>
+      <div className="cv-preview-controls">
+        <Timecode playback={playback} layout={layout} />
+        <TransportControls playback={playback} />
+        <span className="cv-preview-format">16:9 · 1080p</span>
+      </div>
     </section>
   );
 }

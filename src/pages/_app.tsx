@@ -3,6 +3,7 @@ import type { AppProps } from "next/app"
 import { Provider } from "react-redux"
 import { ClerkProvider } from "@clerk/clerk-react"
 import mixpanel from "mixpanel-browser"
+import { useMonacoCancellationHandling } from "../hooks/useMonacoCancellationHandling"
 import createStore from "../store/index"
 import "../styles/global.css"
 import "../styles/editor.css"
@@ -18,6 +19,7 @@ if (typeof window !== "undefined") {
 }
 
 export default function App({ Component, pageProps }: AppProps) {
+  useMonacoCancellationHandling()
   // App re-renders on every navigation, and the store has to outlive those:
   // it holds the editor's state.
   const [store] = React.useState(() => createStore())

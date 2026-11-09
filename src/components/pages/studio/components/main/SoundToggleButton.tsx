@@ -17,6 +17,7 @@ export function SoundToggleButton(props: ISoundToggleProps) {
     return (
         <Box>
             <IconButton
+                aria-label={isSoundOn ? "Mute" : "Unmute"}
                 className={TutorialCSSClassConstants.SOUND_TOGGLE_BUTTON}
                 onClick={() => setIsSoundOn(!isSoundOn)}
                 size="2"

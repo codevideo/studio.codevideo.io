@@ -4,18 +4,8 @@ import { useAppSelector } from "../../../../../hooks/useAppSelector";
 import { useAppDispatch } from "../../../../../hooks/useAppDispatch";
 import { toggleSidebar } from "../../../../../store/editorSlice";
 import { LessonSelect } from "./LessonSelect";
-import { TransportControls } from "./TransportControls";
-import { Timecode } from "./Timecode";
-import { Playback } from "../../hooks/usePlayback";
-import { TimelineLayout } from "../../utils/timelineLayout";
 import { EditorSettingsDialog } from "../settings/EditorSettingsDialog";
-export function EditorTopBar({
-  playback,
-  layout,
-}: {
-  playback: Playback;
-  layout: TimelineLayout;
-}) {
+export function EditorTopBar() {
   const p = useAppSelector((s) => s.editor.currentProject?.project);
   const dispatch = useAppDispatch();
   return (
@@ -35,8 +25,6 @@ export function EditorTopBar({
       </span>
       <LessonSelect />
       <div className="cv-topbar-spacer" />
-      <TransportControls playback={playback} />
-      <Timecode playback={playback} layout={layout} />
       <EditorSettingsDialog />
     </header>
   );

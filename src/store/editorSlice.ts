@@ -46,7 +46,7 @@ export const editorInitialState: EditorState = {
     isSidebarOpen: false,
     isFullScreen: false,
     isPlaying: false,
-    isSoundOn: false,
+    isSoundOn: true,
     allowFocusInEditor: true,
 };
 
