@@ -33,5 +33,17 @@ ditto "$APP" "$STAGE/$(basename "$APP")"
 ln -s /Applications "$STAGE/Applications"
 rm -f "$DMG"
 mkdir -p "$(dirname "$DMG")"
-hdiutil create -quiet -volname "CodeVideo Studio" -srcfolder "$STAGE" -fs HFS+ -format ULMO -ov "$DMG"
+# On GitHub's macOS runners hdiutil now and then fails with "Resource busy"
+# (actions/runner-images#7522), so it gets a few tries.
+for attempt in 1 2 3 4 5; do
+  if hdiutil create -quiet -volname "CodeVideo Studio" -srcfolder "$STAGE" -fs HFS+ -format ULMO -ov "$DMG"; then
+    break
+  fi
+  if [ "$attempt" -eq 5 ]; then
+    echo "hdiutil create failed 5 times" >&2
+    exit 1
+  fi
+  echo "hdiutil create failed (try $attempt of 5), trying again in 15 s" >&2
+  sleep 15
+done
 echo "Made $DMG ($(du -h "$DMG" | cut -f1))"

@@ -15,7 +15,6 @@ import {
   chmodSync,
   cpSync,
   createReadStream,
-  createWriteStream,
   existsSync,
   mkdirSync,
   readdirSync,
@@ -27,7 +26,6 @@ import {
 } from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -85,10 +83,15 @@ async function download(url, expected, name = path.basename(new URL(url).pathnam
   const file = path.join(downloads, name);
   if (!existsSync(file) || (await sha256(file)) !== expected) {
     console.log(`    downloading ${url}`);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`${url}: HTTP ${response.status}`);
+    // curl rather than fetch: Node's fetch always sends `Sec-Fetch-Mode: cors`,
+    // and code.videolan.org (x264) refuses that with HTTP 406.
     const partial = `${file}.partial`;
-    await pipeline(Readable.fromWeb(response.body), createWriteStream(partial));
+    run("curl", [
+      "--fail", "--silent", "--show-error", "--location",
+      "--proto", "=https", "--proto-redir", "=https",
+      "--retry", "3", "--connect-timeout", "30",
+      "--output", partial, url,
+    ]);
     renameSync(partial, file);
   }
   const actual = await sha256(file);
