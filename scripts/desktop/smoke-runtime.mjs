@@ -4,8 +4,9 @@
 //
 //   node scripts/desktop/smoke-runtime.mjs [--runtime src-tauri/runtime] [--keep]
 //
-// Run it with the network off to prove the app needs none (the desktop
-// workflow does on Linux; on macOS, see scripts/desktop/offline.sb).
+// Run it with the network off to prove the app needs none. The desktop
+// workflow does: on macOS in the sandbox scripts/desktop/offline.sb describes,
+// on Windows with firewall rules that block the bundled programs.
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import os from "node:os";
@@ -39,7 +40,7 @@ const lesson = [
 ];
 
 // The environment the app gives its children (src-tauri/src/runtime.rs).
-const keep = ["HOME", "USER", "LOGNAME", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL", "LC_CTYPE", "SystemRoot", "SYSTEMROOT", "WINDIR", "USERPROFILE", "LOCALAPPDATA", "APPDATA", "PROGRAMDATA", "ProgramFiles", "COMSPEC", "PATHEXT", "XDG_RUNTIME_DIR", "DISPLAY", "WAYLAND_DISPLAY"];
+const keep = ["HOME", "USER", "LOGNAME", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL", "LC_CTYPE", "SystemRoot", "SYSTEMROOT", "WINDIR", "USERPROFILE", "LOCALAPPDATA", "APPDATA", "PROGRAMDATA", "ProgramFiles", "COMSPEC", "PATHEXT", "SystemDrive", "HOMEDRIVE", "HOMEPATH", "USERNAME", "PROCESSOR_ARCHITECTURE", "NUMBER_OF_PROCESSORS", "XDG_RUNTIME_DIR", "DISPLAY", "WAYLAND_DISPLAY"];
 const systemPath = process.platform === "win32" ? (process.env.PATH ?? "").split(path.delimiter) : ["/usr/bin", "/bin", "/usr/sbin", "/sbin"];
 function cleanEnv(extra) {
   const env = Object.fromEntries(keep.filter((k) => process.env[k] !== undefined).map((k) => [k, process.env[k]]));

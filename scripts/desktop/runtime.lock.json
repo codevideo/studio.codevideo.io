@@ -22,19 +22,34 @@
     }
   },
   "chrome": {
-    "$comment": "Chrome for Testing, the version codevideo-cli's CI renders with. Google publishes no checksums; these were taken from the first download.",
+    "$comment": "Chrome for Testing, the version codevideo-cli's CI renders with. Google publishes no sha256 for these; each was taken from a download whose MD5 matched the x-goog-hash storage.googleapis.com reports for the file.",
     "version": "142.0.7415.0",
     "files": {
       "darwin-arm64": {
         "url": "https://storage.googleapis.com/chrome-for-testing-public/142.0.7415.0/mac-arm64/chrome-mac-arm64.zip",
         "sha256": "8da51a5b13efc6568d3e6e9bcb774eeebc40931e36e9bde8f49832a935049dc8",
         "executable": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+      },
+      "win32-x64": {
+        "url": "https://storage.googleapis.com/chrome-for-testing-public/142.0.7415.0/win64/chrome-win64.zip",
+        "sha256": "5f83c4b847851323f501f31525b45dd07c35d6585a9a7e50244da74f71791068",
+        "executable": "chrome-win64/chrome.exe"
       }
     }
   },
   "ffmpeg": {
-    "$comment": "Built from source by build-ffmpeg.sh (GPL: x264). Release tarball from ffmpeg.org, x264 from its stable branch, LAME 3.100.",
+    "$comment": "macOS builds it from source with build-ffmpeg.sh (GPL: x264): the release tarball from ffmpeg.org, x264 from its stable branch, LAME 3.100. Platforms under files use a pinned build instead.",
     "version": "8.1.3",
+    "files": {
+      "win32-x64": {
+        "$comment": "Gyan's essentials build (GPL v3, with libx264 and libmp3lame); the sha256 is the one GitHub lists for the release asset. Gyan has no 8.1.3 build, so Windows gets 8.1.2.",
+        "version": "8.1.2",
+        "url": "https://github.com/GyanD/codexffmpeg/releases/download/8.1.2/ffmpeg-8.1.2-essentials_build.zip",
+        "sha256": "db580001caa24ac104c8cb856cd113a87b0a443f7bdf47d8c12b1d740584a2ec",
+        "programs": ["ffmpeg-8.1.2-essentials_build/bin/ffmpeg.exe", "ffmpeg-8.1.2-essentials_build/bin/ffprobe.exe"],
+        "licenses": ["ffmpeg-8.1.2-essentials_build/LICENSE", "ffmpeg-8.1.2-essentials_build/README.txt"]
+      }
+    },
     "sources": {
       "ffmpeg": {
         "url": "https://ffmpeg.org/releases/ffmpeg-8.1.3.tar.xz",

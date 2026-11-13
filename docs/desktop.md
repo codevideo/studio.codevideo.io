@@ -8,6 +8,8 @@ The desktop app is the studio's editor (`/editor`) in a [Tauri 2](https://tauri.
 
 It works with no network and no account. Nothing is downloaded when it starts.
 
+CI builds it for macOS on Apple silicon (a DMG) and for Windows x64 (an MSI and a `setup.exe`).
+
 The web studio and the desktop app are one frontend. `NEXT_PUBLIC_CODEVIDEO_RUNTIME=desktop` selects the desktop pieces at build time (`src/runtime/`).
 
 ## Versions
@@ -46,12 +48,12 @@ Each download has a sha256, and the build refuses a file that doesn't match it.
 |---|---|---|
 | `node/` | Node | Runs the CLI's Puppeteer runner and the speech host |
 | `chrome/` | Chrome for Testing | The CLI renders in it |
-| `ffmpeg/` | `ffmpeg`, `ffprobe` | Built from source by `build-ffmpeg.sh`, with no Homebrew libraries |
+| `ffmpeg/` | `ffmpeg`, `ffprobe` | macOS: built from source by `build-ffmpeg.sh`, with no Homebrew libraries. Windows: Gyan's essentials build of 8.1.2 (there's no 8.1.3 one) |
 | `cli/` | `codevideo`, `runner/` | The Go CLI, and the runner files the npm package ships |
 | `tts/` | codevideo-tts and the Kokoro q8 model | `desktop-host.mjs` serves the app |
 | `manifest.json` | Paths and versions | The app reads it to find everything |
 
-To update a pin, change the version, URL and sha256 together, then run the script again. Google publishes no checksums for Chrome for Testing, so take its sha256 from a download you trust.
+To update a pin, change the version, URL and sha256 together, then run the script again. Google publishes no sha256 for Chrome for Testing. Before taking the sha256 of a download, check its MD5 against the `x-goog-hash` header that `curl -I` shows for the URL.
 
 ## Running it locally
 
@@ -78,7 +80,23 @@ npx tauri build --bundles app
 bash scripts/desktop/package-macos.sh "src-tauri/target/release/bundle/macos/CodeVideo Studio.app" src-tauri/runtime dist/CodeVideo-Studio.dmg
 ```
 
-The runtime isn't one of Tauri's `bundle.resources`. Tauri's resource copy turns symlinks into copies, which breaks Chrome's framework and its signature. So `package-macos.sh` adds it with `ditto` afterwards, signs the app again (ad-hoc), and makes the DMG. The DMG is about 300 MB; the installed app is about 900 MB.
+On macOS the runtime isn't one of Tauri's `bundle.resources`. Tauri's resource copy turns symlinks into copies, which breaks Chrome's framework and its signature. So `package-macos.sh` adds it with `ditto` afterwards, signs the app again (ad-hoc), and makes the DMG. The DMG is about 300 MB; the installed app is about 900 MB.
+
+### On Windows
+
+You need Node, Go, Rust with the MSVC toolchain, and the Visual Studio C++ build tools. FFmpeg is a pinned build, so there's nothing to compile for it. Run the commands from Git Bash, or adapt them for PowerShell:
+
+```bash
+npm ci
+node scripts/desktop/prepare-runtime.mjs --cli-src ../codevideo-cli --tts-src ../codevideo-api/codevideo-tts
+npx tauri build --bundles msi,nsis
+```
+
+Windows has no symlinks to break, so `tauri.windows.conf.json` makes the runtime one of Tauri's resources, and both installers contain it. Tauri downloads WiX and NSIS the first time it builds them. That file also sets:
+
+- **The installers:** `setup.exe` installs for the current user without admin rights. The MSI installs for every user on the PC, which is what IT departments deploy.
+- **WebView2:** the installers embed Microsoft's offline WebView2 installer (about 130 MB), so a PC without WebView2 can install the app with no network. Windows 10 and 11 usually have WebView2 already.
+- **The MSI upgrade code:** fixed, so a new MSI upgrades the installed one. Never change it.
 
 ## Testing
 
@@ -92,6 +110,8 @@ The runtime isn't one of Tauri's `bundle.resources`. Tauri's resource copy turns
   ```bash
   sandbox-exec -f scripts/desktop/offline.sb node scripts/desktop/smoke-runtime.mjs
   ```
+
+  Windows has no `sandbox-exec`. There, CI adds firewall rules that block each bundled program's outbound traffic, then checks that the bundled Node can't reach the internet before it runs the smoke test. The firewall doesn't filter loopback, so the CLI still reaches its local servers.
 
 ## How it fits together
 
@@ -111,11 +131,13 @@ The runtime isn't one of Tauri's `bundle.resources`. Tauri's resource copy turns
 
 ## Unsigned builds
 
-The builds are ad-hoc signed and not notarized, so macOS refuses a downloaded copy at first. After copying the app to Applications, run:
+The macOS builds are ad-hoc signed and not notarized, so macOS refuses a downloaded copy at first. After copying the app to Applications, run:
 
 ```bash
 xattr -dr com.apple.quarantine "/Applications/CodeVideo Studio.app"
 ```
+
+The Windows installers aren't signed, so SmartScreen may say "Windows protected your PC". Choose **More info**, then **Run anyway**.
 
 ### Signing, later
 
@@ -132,19 +154,20 @@ Tauri's updater has its own signing key (`TAURI_SIGNING_PRIVATE_KEY`), separate 
 
 ## Platforms
 
-macOS on Apple silicon is built and tested. Each other platform needs pins in `runtime.lock.json` and an entry in the workflow's matrix.
+CI builds macOS on Apple silicon and Windows x64, and runs the offline smoke test on both. CI never opens the app's window, so try the editor by hand on each platform before a release. Each other platform needs pins in `runtime.lock.json` and an entry in the workflow's matrix.
 
 | Platform | What's left |
 |---|---|
 | macOS x64 | Chrome's mac-x64 zip pin; cross-build FFmpeg on the arm64 runner or use an Intel runner |
-| Windows x64 | Chrome's win64 zip pin; a pinned FFmpeg build (`ffmpeg.files["win32-x64"]`, e.g. a BtbN GPL release); check the Rust-side cancel (`taskkill /T`) |
 | Linux x64 | Chrome's linux64 zip pin; build FFmpeg on an older Ubuntu (glibc); the AppImage needs GStreamer for MP3 previews in WebKitGTK (`bundle.linux.appimage.bundleMediaFramework`) |
+
+On Windows, Cancel ends the CLI and everything it started with `taskkill /T /F`, because Windows can't send another process a Ctrl-C. As on macOS, the app then deletes the render's job folder and the unfinished video.
 
 ## Licenses
 
 The app bundles third-party programs under their own licenses:
 
-- **FFmpeg with x264** is GPL. It runs as a separate program, and `manifest.json` lists its exact sources.
+- **FFmpeg with x264** is GPL. It runs as a separate program. On macOS, `manifest.json` lists its exact sources. On Windows, it's Gyan's GPL v3 build, whose `README.txt` (next to it) lists every library's version. Building that one from source too would make the GPL source offer simpler.
 - **LAME** is LGPL.
 - **Chrome for Testing:** check Google's terms for redistributing it.
 - **Node** is MIT.

@@ -108,6 +108,10 @@ function extract(archive, into) {
     run("ditto", ["-x", "-k", archive, into]);
   } else if (archive.endsWith(".zip") && !windows) {
     run("unzip", ["-q", archive, "-d", into]);
+  } else if (windows) {
+    // Windows' own tar reads zips and C:\ paths. The GNU tar that Git Bash puts
+    // first on PATH does neither.
+    run(path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe"), ["-xf", archive, "-C", into]);
   } else {
     run("tar", ["-xf", archive, "-C", into]);
   }
@@ -157,14 +161,18 @@ async function main() {
     manifest.sources.chrome = url;
   }
 
-  step(`FFmpeg ${lock.ffmpeg.version}`);
+  const prebuilt = lock.ffmpeg.files?.[platform];
+  step(`FFmpeg ${prebuilt?.version ?? lock.ffmpeg.version}`);
   {
     const ffmpegDir = path.join(out, "ffmpeg");
-    const prebuilt = lock.ffmpeg.files?.[platform];
     if (prebuilt) {
+      // A pinned build: just its programs and license files.
       const archive = await download(prebuilt.url, prebuilt.sha256);
       extract(archive, work);
-      cpSync(path.join(work, prebuilt.directory), ffmpegDir, { recursive: true });
+      mkdirSync(ffmpegDir, { recursive: true });
+      for (const file of [...prebuilt.programs, ...prebuilt.licenses]) {
+        cpSync(path.join(work, file), path.join(ffmpegDir, path.basename(file)));
+      }
       rmSync(work, { recursive: true, force: true });
     } else {
       const sources = {};
@@ -175,7 +183,7 @@ async function main() {
       const script = path.join(here, "build-ffmpeg.sh");
       const key = createHash("sha256")
         .update(platform)
-        .update(JSON.stringify(lock.ffmpeg))
+        .update(JSON.stringify({ version: lock.ffmpeg.version, sources: lock.ffmpeg.sources }))
         .update(readFileSync(script))
         .digest("hex")
         .slice(0, 16);
@@ -188,7 +196,7 @@ async function main() {
     }
     manifest.paths.ffmpeg = `ffmpeg/${exe("ffmpeg")}`;
     manifest.paths.ffprobe = `ffmpeg/${exe("ffprobe")}`;
-    manifest.versions.ffmpeg = lock.ffmpeg.version;
+    manifest.versions.ffmpeg = prebuilt?.version ?? lock.ffmpeg.version;
     manifest.sources.ffmpeg = prebuilt?.url ?? Object.values(lock.ffmpeg.sources).map((s) => s.url);
   }
 
@@ -257,6 +265,10 @@ async function main() {
       execFileSync(path.join(out, file), [flag], { encoding: "utf8" }).split("\n")[0].trim();
     console.log(`    node ${version(manifest.paths.node)}`);
     console.log(`    ${version(manifest.paths.ffmpeg, "-version")}`);
+    const encoders = execFileSync(path.join(out, manifest.paths.ffmpeg), ["-hide_banner", "-encoders"], { encoding: "utf8" });
+    for (const encoder of ["libx264", "aac", "libmp3lame"]) {
+      if (!encoders.includes(` ${encoder} `)) throw new Error(`The bundled FFmpeg has no ${encoder} encoder`);
+    }
     console.log(`    ${version(manifest.paths.cli)}`);
     for (const file of Object.values(manifest.paths)) {
       const full = path.join(out, file);

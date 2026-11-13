@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "publisher": "Full Stack Craft",
+    "resources": {
+      "runtime/": "runtime/"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "offlineInstaller",
+        "silent": true
+      },
+      "wix": {
+        "upgradeCode": "2b3c1058-f6b1-4983-b0cb-36966a9394af"
+      },
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
+  }
+}

@@ -2,7 +2,8 @@ name: Desktop
 
 # Builds CodeVideo Studio for the desktop (Tauri) with everything it runs
 # bundled: Node, Chrome for Testing, FFmpeg, the CodeVideo CLI and Kokoro
-# speech (scripts/desktop/runtime.lock.json pins them all).
+# speech (scripts/desktop/runtime.lock.json pins them all). macOS (Apple
+# silicon) gets a DMG; Windows (x64) gets an MSI and a setup.exe.
 #
 # - A version tag (v1.0.0) builds that version and drafts a GitHub release with
 #   the installers. The tag must match package.json, which is also the version
@@ -77,13 +78,20 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Other platforms follow once runtime.lock.json pins their Chrome and FFmpeg.
+          # Linux and Intel Macs follow once runtime.lock.json pins their Chrome and FFmpeg.
           - platform: macos-arm64
             runner: macos-15
+            bundles: app
+          - platform: windows-x64
+            runner: windows-2025
+            bundles: msi,nsis
     runs-on: ${{ matrix.runner }}
-    timeout-minutes: 75
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
     env:
-      # Node 24, bundled, needs macOS 13.5.
+      # Node 24, bundled, needs macOS 13.5 (Windows ignores this).
       MACOSX_DEPLOYMENT_TARGET: "13.5"
     steps:
       - uses: actions/checkout@v7
@@ -147,13 +155,38 @@ jobs:
           --cli-src .desktop-src/codevideo-cli
           --tts-src .desktop-src/codevideo-api/${{ steps.pins.outputs.tts_path }}
 
-      - name: Speak and render with the runtime, with the network off
+      - name: Speak and render with the runtime, with the network off (macOS)
+        if: runner.os == 'macOS'
         run: sandbox-exec -f scripts/desktop/offline.sb node scripts/desktop/smoke-runtime.mjs
 
-      - name: Build the app
-        run: npx tauri build --bundles app
+      # Windows has no sandbox-exec, so firewall rules block every bundled
+      # program from the network instead. The firewall doesn't filter loopback,
+      # so the CLI still reaches its own local servers.
+      - name: Speak and render with the runtime, with the network off (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $runtime = (Resolve-Path src-tauri/runtime).Path
+          $paths = (Get-Content "$runtime/manifest.json" -Raw | ConvertFrom-Json).paths
+          Set-NetFirewallProfile -All -Enabled True -DefaultOutboundAction Allow
+          foreach ($key in 'node', 'chrome', 'ffmpeg', 'ffprobe', 'cli') {
+            $program = [System.IO.Path]::GetFullPath((Join-Path $runtime $paths.$key))
+            New-NetFirewallRule -DisplayName "CodeVideo offline: $key" -Direction Outbound -Action Block -Program $program | Out-Null
+          }
+          # Check the rules work: the bundled Node must not reach the internet.
+          $node = [System.IO.Path]::GetFullPath((Join-Path $runtime $paths.node))
+          & $node -e "fetch('https://example.com').then(() => process.exit(1), () => process.exit(0))"
+          if ($LASTEXITCODE -ne 0) {
+            Write-Output "::error::The bundled Node reached the internet, so the firewall rules don't work"
+            exit 1
+          }
+          node scripts/desktop/smoke-runtime.mjs
 
-      - name: Check the app's version
+      - name: Build the app
+        run: npx tauri build --bundles ${{ matrix.bundles }}
+
+      - name: Check the app's version (macOS)
+        if: runner.os == 'macOS'
         env:
           VERSION: ${{ needs.version.outputs.version }}
         run: |
@@ -165,12 +198,39 @@ jobs:
 
       # Tauri's resource copy would break Chrome's framework symlinks, so the
       # runtime goes in afterwards (ditto), then the app is signed again.
-      - name: Add the runtime and make the disk image
+      - name: Add the runtime and make the disk image (macOS)
+        if: runner.os == 'macOS'
         run: >
           bash scripts/desktop/package-macos.sh
           "src-tauri/target/release/bundle/macos/CodeVideo Studio.app"
           src-tauri/runtime
           "dist/CodeVideo-Studio-${{ needs.version.outputs.name }}-${{ matrix.platform }}-unsigned.dmg"
+
+      # On Windows the runtime is one of Tauri's resources (tauri.windows.conf.json),
+      # since there are no symlinks to break, so both installers already hold it.
+      - name: Check the app's version and collect the installers (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+          NAME: ${{ needs.version.outputs.name }}
+        run: |
+          $release = "src-tauri/target/release"
+          $shown = (Get-Item "$release/codevideo-studio.exe").VersionInfo.ProductVersion
+          if ((($shown -split '\.')[0..2] -join '.') -ne $env:VERSION) {
+            Write-Output "::error::The app says it's version $shown, expected $env:VERSION"
+            exit 1
+          }
+          $msi = @(Get-ChildItem "$release/bundle/msi/*_$($env:VERSION)_x64_*.msi")
+          $setup = @(Get-ChildItem "$release/bundle/nsis/*_$($env:VERSION)_x64-setup.exe")
+          if ($msi.Count -ne 1 -or $setup.Count -ne 1) {
+            Write-Output "::error::Expected one MSI and one setup.exe for $env:VERSION, found: $($msi.Name) $($setup.Name)"
+            exit 1
+          }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item $msi[0].FullName "dist/CodeVideo-Studio-$($env:NAME)-${{ matrix.platform }}-unsigned.msi"
+          Copy-Item $setup[0].FullName "dist/CodeVideo-Studio-$($env:NAME)-${{ matrix.platform }}-unsigned-setup.exe"
+          Get-ChildItem dist | ForEach-Object { "{0} ({1:N0} MB)" -f $_.Name, ($_.Length / 1MB) }
 
       - uses: actions/upload-artifact@v7
         with:
@@ -198,7 +258,12 @@ jobs:
         run: |
           notes="CodeVideo Studio $VERSION for the desktop: the editor, with Kokoro speech and video renders on your computer, no account or network needed.
 
-          These builds are not signed yet. On macOS, after copying the app to Applications, run: xattr -dr com.apple.quarantine \"/Applications/CodeVideo Studio.app\""
+          - macOS (Apple silicon, macOS 13.5 or later): the .dmg
+          - Windows (x64): the -setup.exe installs for your user, without admin rights. The .msi installs for every user on the PC, for IT departments.
+
+          These builds are not signed yet:
+          - macOS: after copying the app to Applications, run: xattr -dr com.apple.quarantine \"/Applications/CodeVideo Studio.app\"
+          - Windows: if SmartScreen says \"Windows protected your PC\", choose More info, then Run anyway."
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" dist/* --clobber --repo "$GITHUB_REPOSITORY"
           else
