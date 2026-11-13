@@ -112,7 +112,9 @@ Windows has no symlinks to break, so `tauri.windows.conf.json` makes the runtime
   ```
 
   Windows has no `sandbox-exec`. There, CI adds firewall rules that block each bundled program's outbound traffic, then checks that the bundled Node can't reach the internet before it runs the smoke test. The firewall doesn't filter loopback, so the CLI still reaches its local servers.
-- The `windows-installers` job installs what users download on a fresh Windows machine: first `setup.exe`, then the MSI. It runs the smoke test from each install folder, opens the installed app, and keeps a screenshot of it as the `windows-screenshot-<version>` artifact. A render writes nothing into the runtime folder, so the MSI's read-only install in Program Files works.
+- The `windows-installers` job installs what users download, each installer on its own fresh Windows machine. It runs the smoke test from the install folder, opens the installed app, and keeps a screenshot of it as the `windows-screenshot-<version>-<installer>` artifact. A render writes nothing into the runtime folder, so the MSI's read-only install in Program Files works.
+
+  Each installer reuses the folder of an earlier install by the other one: Tauri keeps it in `HKCU\Software\Full Stack Craft\CodeVideo Studio`. So an MSI run after `setup.exe` installs into the user's `AppData\Local\CodeVideo Studio`, not Program Files.
 
 ## How it fits together
 

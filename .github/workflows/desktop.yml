@@ -239,11 +239,17 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-  # Installs what users download on a fresh Windows machine, then speaks and
-  # renders from each install folder. The MSI's is in Program Files, which has a
-  # space in it and isn't writable by normal users.
+  # Installs what users download on a fresh Windows machine, one installer per
+  # machine: each looks for the other's earlier install (Tauri keeps the folder
+  # in HKCU\Software\<publisher>\<product>) and would reuse its folder. Then it
+  # speaks and renders from the install folder. The MSI's is in Program Files,
+  # which has a space in it and isn't writable by normal users.
   windows-installers:
     needs: [version, build]
+    strategy:
+      fail-fast: false
+      matrix:
+        installer: [setup, msi]
     runs-on: windows-2025
     timeout-minutes: 30
     steps:
@@ -256,47 +262,42 @@ jobs:
           name: codevideo-studio-${{ needs.version.outputs.name }}-windows-x64
           path: dist
 
-      - name: Install with setup.exe, then speak and render from the install
+      - name: Install with the ${{ matrix.installer }} installer
         shell: pwsh
+        env:
+          INSTALLER: ${{ matrix.installer }}
         run: |
-          $setup = (Get-ChildItem dist/*-setup.exe)[0].FullName
-          $p = Start-Process $setup -ArgumentList '/S' -Wait -PassThru
+          if ($env:INSTALLER -eq 'msi') {
+            $file = (Get-ChildItem dist/*.msi)[0].FullName
+            $p = Start-Process msiexec.exe -ArgumentList "/i `"$file`" /qn /norestart /l*v `"$env:RUNNER_TEMP\install.log`"" -Wait -PassThru
+            $dir = "$env:ProgramFiles\CodeVideo Studio"
+          } else {
+            $file = (Get-ChildItem dist/*-setup.exe)[0].FullName
+            $p = Start-Process $file -ArgumentList '/S' -Wait -PassThru
+            $dir = "$env:LOCALAPPDATA\CodeVideo Studio"
+          }
           if ($p.ExitCode -ne 0) {
-            Write-Output "::error::setup.exe /S exited with $($p.ExitCode)"
+            if (Test-Path "$env:RUNNER_TEMP\install.log") { Get-Content "$env:RUNNER_TEMP\install.log" -Tail 40 }
+            Write-Output "::error::$(Split-Path $file -Leaf) exited with $($p.ExitCode)"
             exit 1
           }
-          $dir = @("$env:LOCALAPPDATA\CodeVideo Studio", "$env:LOCALAPPDATA\Programs\CodeVideo Studio") |
-            Where-Object { Test-Path "$_\runtime\manifest.json" } | Select-Object -First 1
-          if (-not $dir) {
-            Write-Output "::error::Can't find the runtime setup.exe installed"
-            exit 1
-          }
-          Write-Output "setup.exe installed into $dir"
-          node scripts/desktop/smoke-runtime.mjs --runtime "$dir\runtime"
-
-      - name: Install the MSI, then speak and render from the install
-        shell: pwsh
-        run: |
-          $msi = (Get-ChildItem dist/*.msi)[0].FullName
-          $p = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /qn /norestart /l*v `"$env:RUNNER_TEMP\msi.log`"" -Wait -PassThru
-          if ($p.ExitCode -ne 0) {
-            Get-Content "$env:RUNNER_TEMP\msi.log" -Tail 40
-            Write-Output "::error::msiexec exited with $($p.ExitCode)"
-            exit 1
-          }
-          $dir = "$env:ProgramFiles\CodeVideo Studio"
           if (-not (Test-Path "$dir\runtime\manifest.json")) {
-            Write-Output "::error::The MSI didn't put the runtime in $dir"
+            Write-Output "::error::$(Split-Path $file -Leaf) didn't put the runtime in $dir"
             exit 1
           }
-          node scripts/desktop/smoke-runtime.mjs --runtime "$dir\runtime"
+          Write-Output "Installed into $dir"
+          "INSTALL_DIR=$dir" >> $env:GITHUB_ENV
+
+      - name: Speak and render from the install
+        shell: pwsh
+        run: node scripts/desktop/smoke-runtime.mjs --runtime "$env:INSTALL_DIR\runtime"
 
       # CI can't click through the app, but a screenshot shows whether the
       # editor comes up in WebView2.
       - name: Open the installed app and take a screenshot
         shell: pwsh
         run: |
-          $dir = "$env:ProgramFiles\CodeVideo Studio"
+          $dir = $env:INSTALL_DIR
           $exe = Get-ChildItem $dir -Filter *.exe | Where-Object { $_.Name -notmatch 'uninstall' } | Select-Object -First 1
           $app = Start-Process $exe.FullName -PassThru
           Start-Sleep -Seconds 25
@@ -319,7 +320,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: windows-screenshot-${{ needs.version.outputs.name }}
+          name: windows-screenshot-${{ needs.version.outputs.name }}-${{ matrix.installer }}
           path: screenshots/
           if-no-files-found: ignore
           retention-days: 7
