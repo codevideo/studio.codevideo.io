@@ -239,9 +239,94 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
+  # Installs what users download on a fresh Windows machine, then speaks and
+  # renders from each install folder. The MSI's is in Program Files, which has a
+  # space in it and isn't writable by normal users.
+  windows-installers:
+    needs: [version, build]
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v8
+        with:
+          name: codevideo-studio-${{ needs.version.outputs.name }}-windows-x64
+          path: dist
+
+      - name: Install with setup.exe, then speak and render from the install
+        shell: pwsh
+        run: |
+          $setup = (Get-ChildItem dist/*-setup.exe)[0].FullName
+          $p = Start-Process $setup -ArgumentList '/S' -Wait -PassThru
+          if ($p.ExitCode -ne 0) {
+            Write-Output "::error::setup.exe /S exited with $($p.ExitCode)"
+            exit 1
+          }
+          $dir = @("$env:LOCALAPPDATA\CodeVideo Studio", "$env:LOCALAPPDATA\Programs\CodeVideo Studio") |
+            Where-Object { Test-Path "$_\runtime\manifest.json" } | Select-Object -First 1
+          if (-not $dir) {
+            Write-Output "::error::Can't find the runtime setup.exe installed"
+            exit 1
+          }
+          Write-Output "setup.exe installed into $dir"
+          node scripts/desktop/smoke-runtime.mjs --runtime "$dir\runtime"
+
+      - name: Install the MSI, then speak and render from the install
+        shell: pwsh
+        run: |
+          $msi = (Get-ChildItem dist/*.msi)[0].FullName
+          $p = Start-Process msiexec.exe -ArgumentList "/i `"$msi`" /qn /norestart /l*v `"$env:RUNNER_TEMP\msi.log`"" -Wait -PassThru
+          if ($p.ExitCode -ne 0) {
+            Get-Content "$env:RUNNER_TEMP\msi.log" -Tail 40
+            Write-Output "::error::msiexec exited with $($p.ExitCode)"
+            exit 1
+          }
+          $dir = "$env:ProgramFiles\CodeVideo Studio"
+          if (-not (Test-Path "$dir\runtime\manifest.json")) {
+            Write-Output "::error::The MSI didn't put the runtime in $dir"
+            exit 1
+          }
+          node scripts/desktop/smoke-runtime.mjs --runtime "$dir\runtime"
+
+      # CI can't click through the app, but a screenshot shows whether the
+      # editor comes up in WebView2.
+      - name: Open the installed app and take a screenshot
+        shell: pwsh
+        run: |
+          $dir = "$env:ProgramFiles\CodeVideo Studio"
+          $exe = Get-ChildItem $dir -Filter *.exe | Where-Object { $_.Name -notmatch 'uninstall' } | Select-Object -First 1
+          $app = Start-Process $exe.FullName -PassThru
+          Start-Sleep -Seconds 25
+          if ($app.HasExited) {
+            Write-Output "::error::$($exe.Name) exited right away with $($app.ExitCode)"
+            exit 1
+          }
+          try {
+            Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+            $bounds = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bitmap = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height
+            [System.Drawing.Graphics]::FromImage($bitmap).CopyFromScreen($bounds.Location, [System.Drawing.Point]::Empty, $bounds.Size)
+            New-Item -ItemType Directory -Force screenshots | Out-Null
+            $bitmap.Save("$PWD\screenshots\windows-app.png", [System.Drawing.Imaging.ImageFormat]::Png)
+          } catch {
+            Write-Output "::warning::No screenshot: $_"
+          }
+          Stop-Process -Id $app.Id
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: windows-screenshot-${{ needs.version.outputs.name }}
+          path: screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
+
   release:
     if: github.ref_type == 'tag'
-    needs: [version, build]
+    needs: [version, build, windows-installers]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -250,6 +335,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: dist
+          pattern: codevideo-studio-*
           merge-multiple: true
       - name: Draft the release
         env:
