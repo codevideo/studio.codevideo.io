@@ -64,7 +64,7 @@
   "cli": {
     "$comment": "codevideo-cli at this commit: the CLI with --audio-items and the render page that loads Monaco and Fira Code locally.",
     "repository": "codevideo/codevideo-cli",
-    "commit": "TODO-push-the-desktop-cli-changes"
+    "commit": "2c7ebe4e6a93c051fef12b38a523e295021e9d22"
   },
   "tts": {
     "$comment": "codevideo-tts, the canonical copy inside codevideo-api.",
