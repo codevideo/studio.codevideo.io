@@ -7,6 +7,8 @@ export interface ISpeechTake {
   speed: number;
   durationMs: number;
   created: string;
+  /** Desktop only: the take's file, which the CLI renders with. */
+  path?: string;
 }
 export interface SpeechLine {
   activeAssetId: string;

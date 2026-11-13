@@ -9,6 +9,7 @@ import {
 } from "../../../../../utils/persistence/speechPersistence";
 import { kokoroVoices } from "../../../../../utils/speech/kokoroVoices";
 import { addToast } from "../../../../../store/toastSlice";
+import { IS_DESKTOP } from "../../../../../runtime/environment";
 const sample = "Welcome to CodeVideo. Let’s build something together.";
 export function SpeechSettings() {
   const { settings, generateTake, takeFor, pending } = useSpeechTakes();
@@ -45,22 +46,25 @@ export function SpeechSettings() {
   };
   return (
     <div className="cv-speech-settings">
-      <label className="cv-field-label">
-        Provider
-        <select
-          value={settings.provider}
-          onChange={(e) =>
-            dispatch(
-              setSpeechSettings({
-                provider: e.target.value as "kokoro" | "elevenlabs",
-              }),
-            )
-          }
-        >
-          <option value="kokoro">Kokoro (default)</option>
-          <option value="elevenlabs">ElevenLabs (your key)</option>
-        </select>
-      </label>
+      {/* Desktop speaks with the bundled Kokoro voices only. */}
+      {!IS_DESKTOP && (
+        <label className="cv-field-label">
+          Provider
+          <select
+            value={settings.provider}
+            onChange={(e) =>
+              dispatch(
+                setSpeechSettings({
+                  provider: e.target.value as "kokoro" | "elevenlabs",
+                }),
+              )
+            }
+          >
+            <option value="kokoro">Kokoro (default)</option>
+            <option value="elevenlabs">ElevenLabs (your key)</option>
+          </select>
+        </label>
+      )}
       {settings.provider === "kokoro" ? (
         <>
           <label className="cv-field-label">

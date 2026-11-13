@@ -82,3 +82,14 @@ rust-browser-compiler/target
 
 # any binary 'main' files from our go functions
 functions/*/main
+
+# Copied from node_modules by scripts/copy-monaco.mjs
+public/monaco/
+
+# Desktop app (src-tauri): Rust build output and the bundled runtimes
+src-tauri/target/
+src-tauri/runtime/
+
+# Desktop installers made locally (scripts/desktop/package-macos.sh)
+/dist/
+src-tauri/gen/schemas/

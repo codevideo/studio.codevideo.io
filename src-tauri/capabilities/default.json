@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "The editor window. File access goes through the app's own commands (native Open and Save dialogs), not the filesystem plugin.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}

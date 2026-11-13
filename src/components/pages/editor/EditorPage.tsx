@@ -15,6 +15,8 @@ import { EditorTopBar } from "./components/toolbar/EditorTopBar";
 import { EditorPreview } from "./components/preview/EditorPreview";
 import { Inspector } from "./components/inspector/Inspector";
 import { Timeline } from "./components/timeline/Timeline";
+import { IS_DESKTOP } from "../../../runtime/environment";
+import { useDesktopProject } from "./hooks/useDesktopProject";
 export function EditorPage() {
   const dispatch = useAppDispatch();
   const {
@@ -56,7 +58,7 @@ export function EditorPage() {
       <div className="cv-desktop-notice">
         <h1>A little more room to create</h1>
         <p>The timeline editor needs a screen at least 1024 pixels wide.</p>
-        <Link href="/">Open the studio</Link>
+        {!IS_DESKTOP && <Link href="/">Open the studio</Link>}
       </div>
       {currentProject ? (
         <main
@@ -102,9 +104,24 @@ export function EditorPage() {
         <div className="cv-empty-state">
           <h1>Open a project to start editing</h1>
           <p>Your actions will appear here as video and audio clips.</p>
-          <Link href="/">Open the studio →</Link>
+          {IS_DESKTOP ? (
+            <DesktopEmptyState />
+          ) : (
+            <Link href="/">Open the studio →</Link>
+          )}
         </div>
       )}
     </>
+  );
+}
+
+/** The web editor opens projects from the studio; the desktop app opens files. */
+function DesktopEmptyState() {
+  const { newProject, open } = useDesktopProject();
+  return (
+    <p className="cv-empty-actions">
+      <button onClick={open}>Open a project…</button>{" "}
+      <button onClick={newProject}>New lesson</button>
+    </p>
   );
 }

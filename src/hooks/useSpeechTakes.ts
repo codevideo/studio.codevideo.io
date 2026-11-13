@@ -1,4 +1,3 @@
-import { useAuth } from "@clerk/clerk-react";
 import { useStore } from "react-redux";
 import { IAction } from "@fullstackcraftllc/codevideo-types";
 import { useAppDispatch } from "./useAppDispatch";
@@ -17,12 +16,15 @@ import {
 import { getElevenLabsKey } from "../utils/persistence/speechPersistence";
 import { textToSpeech, measureAudioDuration } from "../utils/api/textToSpeech";
 import { addToast } from "../store/toastSlice";
+import { useAuthToken } from "../runtime/auth";
+import { IS_DESKTOP } from "../runtime/environment";
+import { audioUrl, speak } from "../runtime/desktop";
 const inFlight = new Map<string, Promise<void>>();
 export function useSpeechTakes() {
   const state = useAppSelector((s) => s.speech);
   const store = useStore<RootState>();
   const dispatch = useAppDispatch();
-  const { getToken } = useAuth();
+  const getToken = useAuthToken();
   async function generateTake(
     text: string,
     overrides: Partial<SpeechSettings> = {},
@@ -34,6 +36,32 @@ export function useSpeechTakes() {
         if (!text.trim() || text.length > 1000)
           throw new Error("Speech needs 1–1000 characters.");
         const settings = { ...store.getState().speech.settings, ...overrides };
+        if (IS_DESKTOP) {
+          // The bundled Kokoro service writes the take to the app's cache.
+          const spoken = await speak(
+            text,
+            settings.kokoroVoice,
+            settings.kokoroSpeed,
+          );
+          const mp3Url = audioUrl(spoken.path);
+          const durationMs = await measureAudioDuration(mp3Url);
+          dispatch(
+            addSpeechTake({
+              text,
+              take: {
+                mp3Url,
+                assetId: spoken.assetId,
+                provider: "kokoro",
+                voiceId: spoken.voice,
+                speed: spoken.speed,
+                path: spoken.path,
+                durationMs,
+                created: new Date().toISOString(),
+              },
+            }),
+          );
+          return;
+        }
         const token = await getToken();
         if (!token) throw new Error("Sign in to generate speech.");
         const key =

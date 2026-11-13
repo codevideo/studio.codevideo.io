@@ -1,0 +1,206 @@
+name: Desktop
+
+# Builds CodeVideo Studio for the desktop (Tauri) with everything it runs
+# bundled: Node, Chrome for Testing, FFmpeg, the CodeVideo CLI and Kokoro
+# speech (scripts/desktop/runtime.lock.json pins them all).
+#
+# - A version tag (v1.0.0) builds that version and drafts a GitHub release with
+#   the installers. The tag must match package.json, which is also the version
+#   the web studio's footer shows, so web and desktop always agree.
+# - A manual run builds any branch; its files are named <version>-dev.<commit>.
+#
+# This workflow is separate from Netlify's deploy of the web studio: a desktop
+# failure never blocks the website.
+#
+# Builds are unsigned for now (ad-hoc signed on macOS). See docs/desktop.md for
+# opening them and for adding signing.
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_type == 'branch' }}
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      name: ${{ steps.version.outputs.name }}
+    steps:
+      - uses: actions/checkout@v7
+      - id: version
+        name: Check the version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          cargo=$(sed -n 's/^version = "\(.*\)"$/\1/p' src-tauri/Cargo.toml | head -1)
+          if [ "$cargo" != "$version" ]; then
+            echo "::error file=src-tauri/Cargo.toml::Cargo.toml has version $cargo, package.json has $version. Keep them equal."
+            exit 1
+          fi
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            if [ "$GITHUB_REF_NAME" != "v$version" ]; then
+              echo "::error::The tag $GITHUB_REF_NAME doesn't match package.json's version $version. Tag v$version, or bump package.json first."
+              exit 1
+            fi
+            name=$version
+          else
+            name=$version-dev.${GITHUB_SHA::7}
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "Building CodeVideo Studio $name"
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run type-check
+      - run: npm test
+
+  build:
+    needs: [version, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Other platforms follow once runtime.lock.json pins their Chrome and FFmpeg.
+          - platform: macos-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    env:
+      # Node 24, bundled, needs macOS 13.5.
+      MACOSX_DEPLOYMENT_TARGET: "13.5"
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read the pinned sources
+        id: pins
+        run: |
+          node -e '
+            const lock = require("./scripts/desktop/runtime.lock.json");
+            const out = require("fs").createWriteStream(process.env.GITHUB_OUTPUT, { flags: "a" });
+            for (const [key, value] of Object.entries({
+              cli_repository: lock.cli.repository, cli_commit: lock.cli.commit,
+              tts_repository: lock.tts.repository, tts_commit: lock.tts.commit, tts_path: lock.tts.path,
+            })) out.write(`${key}=${value}\n`);
+          '
+
+      - name: Check out codevideo-cli at its pinned commit
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.pins.outputs.cli_repository }}
+          ref: ${{ steps.pins.outputs.cli_commit }}
+          path: .desktop-src/codevideo-cli
+          persist-credentials: false
+
+      - name: Check out codevideo-tts at its pinned commit
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ steps.pins.outputs.tts_repository }}
+          ref: ${{ steps.pins.outputs.tts_commit }}
+          path: .desktop-src/codevideo-api
+          sparse-checkout: ${{ steps.pins.outputs.tts_path }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: .desktop-src/codevideo-cli/go.mod
+          cache: false
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      # Downloads and the FFmpeg build (several minutes), until a pin changes.
+      - uses: actions/cache@v6
+        with:
+          path: ~/.cache/codevideo-desktop
+          key: desktop-runtime-${{ matrix.platform }}-${{ hashFiles('scripts/desktop/runtime.lock.json', 'scripts/desktop/build-ffmpeg.sh') }}
+
+      - run: npm ci
+
+      - name: Assemble the bundled runtime
+        run: >
+          node scripts/desktop/prepare-runtime.mjs
+          --cli-src .desktop-src/codevideo-cli
+          --tts-src .desktop-src/codevideo-api/${{ steps.pins.outputs.tts_path }}
+
+      - name: Speak and render with the runtime, with the network off
+        run: sandbox-exec -f scripts/desktop/offline.sb node scripts/desktop/smoke-runtime.mjs
+
+      - name: Build the app
+        run: npx tauri build --bundles app
+
+      - name: Check the app's version
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          shown=$(plutil -extract CFBundleShortVersionString raw "src-tauri/target/release/bundle/macos/CodeVideo Studio.app/Contents/Info.plist")
+          if [ "$shown" != "$VERSION" ]; then
+            echo "::error::The app says it's version $shown, expected $VERSION"
+            exit 1
+          fi
+
+      # Tauri's resource copy would break Chrome's framework symlinks, so the
+      # runtime goes in afterwards (ditto), then the app is signed again.
+      - name: Add the runtime and make the disk image
+        run: >
+          bash scripts/desktop/package-macos.sh
+          "src-tauri/target/release/bundle/macos/CodeVideo Studio.app"
+          src-tauri/runtime
+          "dist/CodeVideo-Studio-${{ needs.version.outputs.name }}-${{ matrix.platform }}-unsigned.dmg"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: codevideo-studio-${{ needs.version.outputs.name }}-${{ matrix.platform }}
+          path: dist/*
+          retention-days: 30
+          if-no-files-found: error
+
+  release:
+    if: github.ref_type == 'tag'
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Draft the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          notes="CodeVideo Studio $VERSION for the desktop: the editor, with Kokoro speech and video renders on your computer, no account or network needed.
+
+          These builds are not signed yet. On macOS, after copying the app to Applications, run: xattr -dr com.apple.quarantine \"/Applications/CodeVideo Studio.app\""
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --draft --title "CodeVideo Studio $VERSION" --notes "$notes" --repo "$GITHUB_REPOSITORY"
+          fi

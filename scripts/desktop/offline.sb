@@ -1,0 +1,9 @@
+;; macOS sandbox profile with no network except this machine (localhost),
+;; for checking that the desktop runtime works offline:
+;;   sandbox-exec -f scripts/desktop/offline.sb node scripts/desktop/smoke-runtime.mjs
+;; The CLI's render page, Chrome's DevTools connection and the recorder all
+;; talk over localhost; anything else is refused.
+(version 1)
+(allow default)
+(deny network-outbound (remote ip "*:*"))
+(allow network-outbound (remote ip "localhost:*"))

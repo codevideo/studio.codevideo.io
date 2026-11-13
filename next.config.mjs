@@ -1,3 +1,9 @@
+import { readFileSync } from "node:fs";
+
+// The version shown in the footer and by the desktop app. A desktop release's
+// tag must match it (v1.0.0 for 1.0.0); its workflow checks that.
+const { version } = JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf8"));
+
 // A static export, deployed by Netlify from out/. Stripe links and API URLs are
 // inlined at build time, so a missing one would only show up as a dead button in
 // production. Fail the Netlify build instead.
@@ -22,6 +28,7 @@ const nextConfig = {
   output: "export",
   trailingSlash: true,
   reactStrictMode: false,
+  env: { NEXT_PUBLIC_APP_VERSION: version },
 };
 
 export default nextConfig;

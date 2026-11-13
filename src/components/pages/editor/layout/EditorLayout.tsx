@@ -7,6 +7,7 @@ import { Modal } from "../../../layout/modal/Modal";
 import { SignUpOverlay } from "../../../layout/auth/SignUpOverlay";
 import { SignInOverlay } from "../../../layout/auth/SignInOverlay";
 import { ToastContainer } from "../../../layout/toast/ToastContainer";
+import { IS_DESKTOP } from "../../../../runtime/environment";
 export function EditorLayout({ children }: PropsWithChildren) {
   const { theme } = useAppSelector((s) => s.theme);
   useStudioBootstrap();
@@ -18,10 +19,11 @@ export function EditorLayout({ children }: PropsWithChildren) {
       radius="large"
     >
       <div className="cv-editor-shell">{children}</div>
-      <SidebarMenu />
+      {/* The web studio's project sidebar and sign-in need an account; desktop has neither. */}
+      {!IS_DESKTOP && <SidebarMenu />}
       <Modal />
-      <SignUpOverlay />
-      <SignInOverlay />
+      {!IS_DESKTOP && <SignUpOverlay />}
+      {!IS_DESKTOP && <SignInOverlay />}
       <ToastContainer />
     </Theme>
   );

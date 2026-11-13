@@ -5,18 +5,24 @@ import { useAppDispatch } from "../../../../../hooks/useAppDispatch";
 import { toggleSidebar } from "../../../../../store/editorSlice";
 import { LessonSelect } from "./LessonSelect";
 import { EditorSettingsDialog } from "../settings/EditorSettingsDialog";
+import { DesktopProjectMenu } from "../desktop/DesktopProjectMenu";
+import { IS_DESKTOP } from "../../../../../runtime/environment";
 export function EditorTopBar() {
   const p = useAppSelector((s) => s.editor.currentProject?.project);
   const dispatch = useAppDispatch();
   return (
     <header className="cv-topbar">
-      <IconButton
-        variant="ghost"
-        aria-label="Projects"
-        onClick={() => dispatch(toggleSidebar())}
-      >
-        <HamburgerMenuIcon />
-      </IconButton>
+      {IS_DESKTOP ? (
+        <DesktopProjectMenu />
+      ) : (
+        <IconButton
+          variant="ghost"
+          aria-label="Projects"
+          onClick={() => dispatch(toggleSidebar())}
+        >
+          <HamburgerMenuIcon />
+        </IconButton>
+      )}
       <span className="cv-brand">
         CodeVideo <span>EDITOR</span>
       </span>

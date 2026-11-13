@@ -1,4 +1,5 @@
 import { initialSpeechState, SpeechState } from "../../store/speechSlice";
+import { IS_DESKTOP } from "../../runtime/environment";
 export const SPEECH_KEY = "CODEVIDEO_SPEECH";
 export const ELEVENLABS_KEY = "CODEVIDEO_ELEVENLABS_KEY";
 export function loadSpeech(): Pick<SpeechState, "takesByText" | "settings"> {
@@ -16,7 +17,9 @@ export function loadSpeech(): Pick<SpeechState, "takesByText" | "settings"> {
           (t: any) =>
             typeof t.assetId === "string" &&
             typeof t.mp3Url === "string" &&
-            /^https?:/.test(t.mp3Url) &&
+            (/^https?:/.test(t.mp3Url) ||
+              // Desktop takes are files the webview reads through Tauri's asset protocol.
+              (IS_DESKTOP && /^asset:/.test(t.mp3Url))) &&
             Number.isFinite(t.durationMs) &&
             t.durationMs > 0 &&
             ["kokoro", "elevenlabs"].includes(t.provider),
@@ -36,7 +39,9 @@ export function loadSpeech(): Pick<SpeechState, "takesByText" | "settings"> {
     return {
       takesByText,
       settings: {
-        provider: s.provider === "elevenlabs" ? "elevenlabs" : "kokoro",
+        // The desktop app speaks with Kokoro only.
+        provider:
+          s.provider === "elevenlabs" && !IS_DESKTOP ? "elevenlabs" : "kokoro",
         kokoroVoice:
           typeof s.kokoroVoice === "string" ? s.kokoroVoice : "af_heart",
         kokoroSpeed: Number.isFinite(s.kokoroSpeed)

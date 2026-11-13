@@ -1,0 +1,75 @@
+{
+  "$comment": "Everything the desktop app bundles, pinned. prepare-runtime.mjs downloads each file once, checks its sha256, and refuses anything that doesn't match. To update a pin, change the version, URL and sha256 together. The codevideo-cli and codevideo-tts sources are pinned by commit and checked out by the desktop workflow.",
+  "node": {
+    "version": "24.22.3",
+    "files": {
+      "darwin-arm64": {
+        "url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-darwin-arm64.tar.gz",
+        "sha256": "ff6e17d4874b76d272212b908cc020d6e815fba5a6c7eaaa06add725840307fd"
+      },
+      "darwin-x64": {
+        "url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-darwin-x64.tar.gz",
+        "sha256": "977614af0504c81045e7fd85596dbca0e5f951b96681516dadafedcca8c447f7"
+      },
+      "linux-x64": {
+        "url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-linux-x64.tar.gz",
+        "sha256": "061ec3e3062115705b56b51fa9cc330ab50d34b6969387d4e4b1a50c6809acc2"
+      },
+      "win32-x64": {
+        "url": "https://nodejs.org/dist/v24.22.3/node-v24.22.3-win-x64.zip",
+        "sha256": "e612af99f626ab415ea225af6bce5c971feb448cb5cae250bb1c3fa50c5f7d9f"
+      }
+    }
+  },
+  "chrome": {
+    "$comment": "Chrome for Testing, the version codevideo-cli's CI renders with. Google publishes no checksums; these were taken from the first download.",
+    "version": "142.0.7415.0",
+    "files": {
+      "darwin-arm64": {
+        "url": "https://storage.googleapis.com/chrome-for-testing-public/142.0.7415.0/mac-arm64/chrome-mac-arm64.zip",
+        "sha256": "8da51a5b13efc6568d3e6e9bcb774eeebc40931e36e9bde8f49832a935049dc8",
+        "executable": "chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing"
+      }
+    }
+  },
+  "ffmpeg": {
+    "$comment": "Built from source by build-ffmpeg.sh (GPL: x264). Release tarball from ffmpeg.org, x264 from its stable branch, LAME 3.100.",
+    "version": "8.1.3",
+    "sources": {
+      "ffmpeg": {
+        "url": "https://ffmpeg.org/releases/ffmpeg-8.1.3.tar.xz",
+        "sha256": "7138d28c96d9d3e3af4ee3d8cad72741f8ffb40da90c1112235dea3ecd3178a3"
+      },
+      "x264": {
+        "url": "https://code.videolan.org/videolan/x264/-/archive/b35605ace3ddf7c1a5d67a2eb553f034aef41d55/x264-b35605ace3ddf7c1a5d67a2eb553f034aef41d55.tar.bz2",
+        "sha256": "6eeb82934e69fd51e043bd8c5b0d152839638d1ce7aa4eea65a3fedcf83ff224"
+      },
+      "lame": {
+        "url": "https://downloads.sourceforge.net/project/lame/lame/3.100/lame-3.100.tar.gz",
+        "sha256": "ddfe36cab873794038ae2c1210557ad34857a4b6bdc515785d1da9e175b1da1e"
+      }
+    }
+  },
+  "kokoro": {
+    "$comment": "The q8 model, the one codevideo-tts loads by default (KOKORO_DTYPE=q8). The voices ship inside the kokoro-js package.",
+    "repository": "onnx-community/Kokoro-82M-v1.0-ONNX",
+    "revision": "1939ad2a8e416c0acfeecc08a694d14ef25f2231",
+    "files": {
+      "config.json": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "tokenizer.json": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "tokenizer_config.json": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "onnx/model_quantized.onnx": "fbae9257e1e05ffc727e951ef9b9c98418e6d79f1c9b6b13bd59f5c9028a1478"
+    }
+  },
+  "cli": {
+    "$comment": "codevideo-cli at this commit: the CLI with --audio-items and the render page that loads Monaco and Fira Code locally.",
+    "repository": "codevideo/codevideo-cli",
+    "commit": "TODO-push-the-desktop-cli-changes"
+  },
+  "tts": {
+    "$comment": "codevideo-tts, the canonical copy inside codevideo-api.",
+    "repository": "codevideo/codevideo-api",
+    "commit": "9964feb8e4236e64f3250ca33d576a85e193e70a",
+    "path": "codevideo-tts"
+  }
+}

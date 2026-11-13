@@ -1,16 +1,16 @@
 import { useMemo } from "react";
-import { useClerk } from "@clerk/clerk-react";
 import { CodeVideoIDE } from "@fullstackcraftllc/codevideo-ide-react";
 import { isCourse } from "@fullstackcraftllc/codevideo-types";
 import { useAppSelector } from "../../../../../hooks/useAppSelector";
 import { RENDER_PAUSES } from "../../../../../utils/estimateVideoDurationInSeconds";
 import { buildSpeakActionAudios } from "../../../../../utils/speech/speechAudio";
+import { useAuthReady } from "../../../../../runtime/auth";
 import { TransportControls } from "../toolbar/TransportControls";
 import { Timecode } from "../toolbar/Timecode";
 import { TimelineLayout } from "../../utils/timelineLayout";
 import { Playback } from "../../hooks/usePlayback";
 export function EditorPreview({ playback, layout }: { playback: Playback; layout: TimelineLayout }) {
-  const clerk = useClerk();
+  const authReady = useAuthReady();
   const {
     currentProject,
     currentActions,
@@ -31,7 +31,7 @@ export function EditorPreview({ playback, layout }: { playback: Playback; layout
       aria-label="IDE preview"
     >
       <div data-editor-preview className="cv-preview-frame">
-        {clerk.loaded && currentProject ? (
+        {authReady && currentProject ? (
           <CodeVideoIDE
             theme={theme}
             project={currentProject.project}

@@ -5,14 +5,19 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
+    "prebuild": "node scripts/copy-monaco.mjs",
     "build": "next build",
+    "predev": "node scripts/copy-monaco.mjs",
     "dev": "next dev -p 8001",
     "start": "next dev -p 8001",
     "serve": "npx --yes serve out -l 9000",
     "clean": "rm -rf .next out",
     "test": "vitest run",
     "type-check": "tsc --noEmit",
-    "build-wasm": "cd rust-browser-compiler && wasm-pack build --target web --out-dir ../public/wasm && cd .."
+    "build-wasm": "cd rust-browser-compiler && wasm-pack build --target web --out-dir ../public/wasm && cd ..",
+    "build:desktop": "node scripts/desktop/next.mjs build",
+    "dev:desktop": "node scripts/desktop/next.mjs dev",
+    "tauri": "tauri"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.24.1",
@@ -30,6 +35,7 @@
     "@radix-ui/themes": "^3.2.1",
     "@react-symbols/icons": "^1.2.8",
     "@reduxjs/toolkit": "^2.3.0",
+    "@tauri-apps/api": "2.12.4",
     "date-fns": "^2.30.0",
     "gifshot": "^0.4.5",
     "html-to-image": "^1.11.13",
@@ -56,6 +62,7 @@
     "url": "https://github.com/codevideo/studio/issues"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "2.12.4",
     "@types/loadable__component": "^5.13.9",
     "@types/mixpanel-browser": "^2.51.0",
     "@types/node": "^22.20.0",
