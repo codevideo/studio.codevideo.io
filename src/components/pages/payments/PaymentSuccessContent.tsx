@@ -95,7 +95,7 @@ export const PaymentSuccessContent = (props: IPaymentSuccessContentProps) => {
             case 'creator':
                 return 'Creator subscription';
             case 'enterprise':
-                return 'Enterprise subscription';
+                return 'Scale subscription';
             case 'topup':
                 return 'token top up';
             case 'lifetime':

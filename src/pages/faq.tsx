@@ -55,7 +55,7 @@ const faqPageSchema = {
       name: "What are tokens and how do they work?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Tokens are our currency for creating exports. Each token allows you to create professional educational content. Plans include: Starter ($10/month for 50 tokens), Creator ($49/month for 500 tokens), Enterprise ($499/month for 10,000 tokens), Pay-as-you-go ($2 for 10 tokens), and Lifetime ($2,000 one-time payment).",
+        text: "Tokens are our currency for creating exports. Each token allows you to create professional educational content. Plans include: Starter ($10/month for 50 tokens), Creator ($49/month for 500 tokens), Scale ($499/month for 10,000 tokens), Pay-as-you-go ($2 for 10 tokens), and Lifetime ($2,000 one-time payment).",
       },
     },
     {
@@ -71,7 +71,7 @@ const faqPageSchema = {
       name: "Can I share tokens with my team?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes! The enterprise plan is designed for team collaboration and sharing your account tokens with team members. Get in touch with us if you're looking for custom team solutions, integrations, or connectors.",
+        text: "Yes! The Scale plan is designed for team collaboration and sharing your account tokens with team members. Get in touch with us if you're looking for custom team solutions, integrations, or connectors.",
       },
     },
     {

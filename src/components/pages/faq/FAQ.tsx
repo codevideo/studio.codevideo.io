@@ -106,7 +106,7 @@ export function FAQs(props: IFAQsProps) {
                         <Flex direction="column" gap="1" mt="3">
                             <Text>• Starter: $10/month for 50 tokens</Text>
                             <Text>• Creator: $49/month for 500 tokens</Text>
-                            <Text>• Enterprise: $499/month for 10,000 tokens</Text>
+                            <Text>• Scale: $499/month for 10,000 tokens</Text>
                             <Text>• Pay-as-you-go: $2 for 10 tokens</Text>
                             <Text>• Lifetime: $2,000 one-time payment</Text>
                         </Flex>
@@ -127,7 +127,7 @@ export function FAQs(props: IFAQsProps) {
                         Can I share tokens with my team?
                     </Heading>
                     <Text size="3">
-                        Yes! The enterprise plan is designed for team collaboration and sharing your account tokens with
+                        Yes! The Scale plan is designed for team collaboration and sharing your account tokens with
                         team members. Get in touch with us if you're looking for custom team solutions, integrations, or connectors.
                     </Text>
                 </Box>

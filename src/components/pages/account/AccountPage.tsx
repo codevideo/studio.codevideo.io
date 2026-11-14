@@ -175,7 +175,7 @@ export const AccountPage = () => {
           <Flex direction="column" gap="2">
             <Text size="1" color="gray">Plan</Text>
             <Flex align="center" gap="2" wrap="wrap">
-              <Text color="mint" size="1" weight="bold">{userData.subscriptionPlan}</Text>
+              <Text color="mint" size="1" weight="bold">{userData.subscriptionPlan === 'enterprise' ? 'Scale' : userData.subscriptionPlan}</Text>
               {userData.subscriptionPlan === 'lifetime' && (
                 <Badge size="1" color="mint" variant="soft">Unlimited Tokens; You're a Legend!</Badge>
               )}
@@ -212,7 +212,7 @@ export const AccountPage = () => {
               </Box>}
               {userData.subscriptionPlan !== 'enterprise' && <Box>
                 <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_ENTERPRISE_PAYMENT_LINK} target="_blank">
-                  <Button size="1" onClick={() => handleOnClickBuy("Enterprise")} color="mint">Buy Enterprise</Button>
+                  <Button size="1" onClick={() => handleOnClickBuy("Enterprise")} color="mint">Buy Scale</Button>
                 </RadixLink>
                 <Text size="1" color="gray" ml="1">10000 tokens for $499 / mo.</Text>
               </Box>}
