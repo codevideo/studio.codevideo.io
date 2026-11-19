@@ -31,6 +31,18 @@ var TokenCosts = map[string]int{
 	"mp4":              10,
 }
 
+// clerkUsers is the part of the Clerk user API this function uses.
+type clerkUsers interface {
+	Get(ctx context.Context, id string) (*clerk.User, error)
+	UpdateMetadata(ctx context.Context, id string, params *user.UpdateMetadataParams) (*clerk.User, error)
+}
+
+var newClerkUsers = func(secretKey string) clerkUsers {
+	config := &clerk.ClientConfig{}
+	config.Key = &secretKey
+	return user.NewClient(config)
+}
+
 type DecrementRequest struct {
 	ClerkUserToken string `json:"clerkUserToken"`
 	ExportType     string `json:"exportType"`
@@ -100,9 +112,6 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 	if apiKey == "" {
 		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Server Error"}, nil
 	}
-	config := &clerk.ClientConfig{}
-	config.Key = &apiKey
-	client := user.NewClient(config)
 
 	// get the clerkUserId (sub) from the JWT token
 	clerkUserId := extractSubFromJWT(decReq.ClerkUserToken)
@@ -110,29 +119,33 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Invalid clerkUserToken"}, nil
 	}
 
+	return chargeExport(context.Background(), newClerkUsers(apiKey), clerkUserId, decrementAmount), nil
+}
+
+// chargeExport takes an export's cost from the user's token balance. Lifetime
+// plans set unlimited in public metadata and are never charged.
+func chargeExport(ctx context.Context, users clerkUsers, clerkUserId string, decrementAmount int) events.APIGatewayProxyResponse {
 	// Fetch the clerkUser so we can get the current token balance.
-	clerkUser, err := client.Get(context.Background(), clerkUserId)
+	clerkUser, err := users.Get(ctx, clerkUserId)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
-		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error fetching user"}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error fetching user"}
 	}
 
-	// Extract current tokens (assumes tokens are stored as a number).
-	currentTokens := 0
+	var meta map[string]interface{}
 	if clerkUser.PublicMetadata != nil {
-		var meta map[string]interface{}
-		if err := json.Unmarshal(clerkUser.PublicMetadata, &meta); err == nil {
-			switch v := meta["tokens"].(type) {
-			case float64:
-				currentTokens = int(v)
-			case string:
-				currentTokens, _ = strconv.Atoi(v)
-			}
-		}
+		_ = json.Unmarshal(clerkUser.PublicMetadata, &meta)
+	}
+	currentTokens := tokensFromMetadata(meta)
+
+	if unlimited, _ := meta["unlimited"].(bool); unlimited {
+		log.Printf("Unlimited plan; export not charged")
+		response, _ := json.Marshal(map[string]interface{}{"newTokens": currentTokens, "unlimited": true})
+		return events.APIGatewayProxyResponse{StatusCode: 200, Body: string(response)}
 	}
 
 	if currentTokens < decrementAmount {
-		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Insufficient tokens"}, nil
+		return events.APIGatewayProxyResponse{StatusCode: 400, Body: "Insufficient tokens"}
 	}
 
 	newTokens := currentTokens - decrementAmount
@@ -141,14 +154,28 @@ func handler(req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse,
 		PublicMetadata: (*json.RawMessage)(&metadata),
 	}
 
-	if _, err := client.UpdateMetadata(context.Background(), clerkUserId, &params); err != nil {
-		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error updating metadata"}, nil
+	if _, err := users.UpdateMetadata(ctx, clerkUserId, &params); err != nil {
+		return events.APIGatewayProxyResponse{StatusCode: 500, Body: "Error updating metadata"}
 	}
 
 	log.Printf("Successfully decremented tokens from %d to %d", currentTokens, newTokens)
 
 	response, _ := json.Marshal(map[string]interface{}{"newTokens": newTokens})
-	return events.APIGatewayProxyResponse{StatusCode: 200, Body: string(response)}, nil
+	return events.APIGatewayProxyResponse{StatusCode: 200, Body: string(response)}
+}
+
+// tokensFromMetadata reads the balance, which is stored as a number (or,
+// in older accounts, as text).
+func tokensFromMetadata(meta map[string]interface{}) int {
+	switch v := meta["tokens"].(type) {
+	case float64:
+		return int(v)
+	case string:
+		tokens, _ := strconv.Atoi(v)
+		return tokens
+	default:
+		return 0
+	}
 }
 
 func main() {

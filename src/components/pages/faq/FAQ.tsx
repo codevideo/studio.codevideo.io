@@ -108,7 +108,7 @@ export function FAQs(props: IFAQsProps) {
                             <Text>• Creator: $49/month for 500 tokens</Text>
                             <Text>• Scale: $499/month for 10,000 tokens</Text>
                             <Text>• Pay-as-you-go: $2 for 10 tokens</Text>
-                            <Text>• Lifetime: $2,000 one-time payment</Text>
+                            <Text>• Lifetime: $499 one-time payment</Text>
                         </Flex>
                     </Text>
                 </Box>

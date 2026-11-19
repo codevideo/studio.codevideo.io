@@ -204,8 +204,11 @@ export const ExportDropdown = ({ portalTarget }: { portalTarget?: HTMLElement | 
       return;
     }
 
+    // lifetime plans set publicMetadata.unlimited and never spend tokens
+    const unlimitedTokens = user?.publicMetadata.unlimited === true;
+
     // if they have no tokens, show toast
-    if (user?.publicMetadata.tokens as number < TokenCosts[exportType]) {
+    if (!unlimitedTokens && (user?.publicMetadata.tokens as number) < TokenCosts[exportType]) {
       dispatch(addToast(`Not enough tokens for a ${exportType} export. Please purchase more tokens.`));
       return;
     }
@@ -298,6 +301,13 @@ export const ExportDropdown = ({ portalTarget }: { portalTarget?: HTMLElement | 
 
     mixpanel.track(`Export Type ${exportType.toUpperCase()} Completed Studio`);
     setExportComplete(true);
+
+    if (unlimitedTokens) {
+      dispatch(addToast('Your export has completed successfully.'));
+      setIsExporting(false);
+      warnAboutInvalidActions(project);
+      return;
+    }
 
     // the user already has the file at this point, so a failed charge must not read as a failed export
     try {

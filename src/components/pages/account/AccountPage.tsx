@@ -220,7 +220,7 @@ export const AccountPage = () => {
                 <RadixLink href={process.env.NEXT_PUBLIC_STRIPE_LIFETIME_PAYMENT_LINK} target="_blank">
                   <Button size="1" onClick={() => handleOnClickBuy("Lifetime")} color="amber">Buy Lifetime</Button>
                 </RadixLink>
-                <Text size="1" color="gray" ml="1">Lifetime usage for $2000</Text>
+                <Text size="1" color="gray" ml="1">Lifetime usage for $499</Text>
               </Box>}
             </Flex>
           </Flex>
